@@ -1,4 +1,4 @@
-const { pool } = require('./server/database');
+const { pool } = require('./database');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -20,7 +20,7 @@ async function setup() {
 
         // 2. Migrations klasörünü oku ve SQL'leri çalıştır
         console.log('2. Tablolar oluşturuluyor...');
-        const migrationsDir = path.join(__dirname, 'server/database/migrations');
+        const migrationsDir = path.join(__dirname, 'database/migrations');
         const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
 
         for (const file of files) {
