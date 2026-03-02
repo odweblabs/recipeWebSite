@@ -42,21 +42,33 @@ app.use('/api/friends', friendsRoutes);
 // Health check endpoint with DB status
 app.get('/api/health', async (req, res) => {
     let dbStatus = isDbConnected ? 'connected' : 'disconnected';
+    const dbUrlSet = !!process.env.DATABASE_URL;
+    let tablesStatus = 'unknown';
 
-    // Attempt a simple query to verify live connection
+    // Attempt a simple query to verify live connection and check tables
     try {
         const { pool } = require('./database');
-        await pool.query('SELECT 1');
+        const dbResult = await pool.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
         dbStatus = 'connected';
+        const tableNames = dbResult.rows.map(r => r.table_name);
+        if (tableNames.includes('recipes')) {
+            tablesStatus = 'tables_exist';
+        } else {
+            tablesStatus = 'no_tables_found';
+        }
     } catch (err) {
         dbStatus = 'error: ' + err.message;
+        tablesStatus = 'error';
     }
 
     res.status(200).json({
         status: 'ok',
         database: dbStatus,
+        databaseUrlSet: dbUrlSet,
+        tables: tablesStatus,
         timestamp: new Date().toISOString(),
-        env: process.env.NODE_ENV
+        env: process.env.NODE_ENV,
+        isVercel: !!process.env.VERCEL
     });
 });
 
