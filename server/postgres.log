@@ -1,0 +1,65 @@
+2026-03-01 23:31:43.707 +03 [7715] LOG:  starting PostgreSQL 14.22 (Homebrew) on aarch64-apple-darwin25.2.0, compiled by Apple clang version 17.0.0 (clang-1700.6.3.2), 64-bit
+2026-03-01 23:31:43.708 +03 [7715] LOG:  listening on IPv6 address "::1", port 5432
+2026-03-01 23:31:43.708 +03 [7715] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-03-01 23:31:43.708 +03 [7715] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2026-03-01 23:31:43.710 +03 [7759] LOG:  database system was shut down at 2026-03-01 23:31:27 +03
+2026-03-01 23:31:43.713 +03 [7715] LOG:  database system is ready to accept connections
+2026-03-01 23:50:34.112 +03 [21282] FATAL:  role "postgres" does not exist
+2026-03-01 23:51:51.040 +03 [21420] FATAL:  role "your_system_user" does not exist
+2026-03-02 00:24:47.256 +03 [27320] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:24:47.256 +03 [27320] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:24:47.256 +03 [27320] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:25:17.255 +03 [27353] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:25:17.255 +03 [27353] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:25:17.255 +03 [27353] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:25:47.270 +03 [27451] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:25:47.270 +03 [27451] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:25:47.270 +03 [27451] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:26:17.251 +03 [27484] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:26:17.251 +03 [27484] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:26:17.251 +03 [27484] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:26:19.092 +03 [28259] ERROR:  syntax error at or near "," at character 65
+2026-03-02 00:26:19.092 +03 [28259] STATEMENT:  INSERT INTO users (username, password, full_name, role) VALUES (, , , ) ON CONFLICT (username) DO NOTHING
+2026-03-02 00:26:24.165 +03 [28348] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:26:24.165 +03 [28348] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:26:24.165 +03 [28348] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:26:24.174 +03 [28347] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:26:24.174 +03 [28347] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:26:24.174 +03 [28347] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:26:54.158 +03 [28374] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:26:54.158 +03 [28374] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:26:54.158 +03 [28374] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:27:09.149 +03 [28382] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:27:09.149 +03 [28382] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:27:09.149 +03 [28382] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:27:09.150 +03 [28380] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:27:09.150 +03 [28380] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:27:09.150 +03 [28380] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:27:39.212 +03 [28412] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:27:39.212 +03 [28412] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:27:39.212 +03 [28412] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 00:28:05.657 +03 [29507] ERROR:  syntax error at end of input at character 38
+2026-03-02 00:28:05.657 +03 [29507] STATEMENT:  SELECT * FROM users WHERE username = 
+2026-03-02 00:28:09.244 +03 [29595] ERROR:  insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_fkey"
+2026-03-02 00:28:09.244 +03 [29595] DETAIL:  Key (user_id)=(1) is not present in table "users".
+2026-03-02 00:28:09.244 +03 [29595] STATEMENT:  INSERT INTO user_activity (user_id, total_seconds, last_heartbeat, last_active) VALUES ($1, 0, $2, $3)
+2026-03-02 02:36:05.015 +03 [7715] LOG:  received SIGHUP, reloading configuration files
+2026-03-02 03:12:11.963 +03 [42543] ERROR:  column "servings" of relation "recipes" does not exist at character 115
+2026-03-02 03:12:11.963 +03 [42543] STATEMENT:  
+	            INSERT INTO recipes (title, description, ingredients, instructions, category_id, user_id, image_url, servings, prep_time, cook_time)
+	            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
+	        
+2026-03-02 03:14:21.220 +03 [42968] ERROR:  column "servings" of relation "recipes" does not exist at character 115
+2026-03-02 03:14:21.220 +03 [42968] STATEMENT:  
+	            INSERT INTO recipes (title, description, ingredients, instructions, category_id, user_id, image_url, servings, prep_time, cook_time)
+	            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
+	        
+2026-03-02 03:16:37.862 +03 [43027] ERROR:  column "servings" of relation "recipes" does not exist at character 115
+2026-03-02 03:16:37.862 +03 [43027] STATEMENT:  
+	            INSERT INTO recipes (title, description, ingredients, instructions, category_id, user_id, image_url, servings, prep_time, cook_time)
+	            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
+	        
+2026-03-02 04:44:19.547 +03 [7715] LOG:  received smart shutdown request
+2026-03-02 04:44:19.552 +03 [7715] LOG:  background worker "logical replication launcher" (PID 7772) exited with exit code 1
+2026-03-02 04:44:19.554 +03 [7763] LOG:  shutting down
+2026-03-02 04:44:19.581 +03 [7715] LOG:  database system is shut down
