@@ -14,8 +14,11 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Initialize DB
-initDb();
+// Initialize DB and track health
+let isDbConnected = false;
+initDb().then(connected => {
+    isDbConnected = connected;
+});
 
 // Create uploads folder if not exists
 const uploadDir = path.join(__dirname, 'uploads');
@@ -36,17 +39,31 @@ app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/friends', friendsRoutes);
 
+// Health check endpoint with DB status
+app.get('/api/health', async (req, res) => {
+    let dbStatus = isDbConnected ? 'connected' : 'disconnected';
+
+    // Attempt a simple query to verify live connection
+    try {
+        const { pool } = require('./database');
+        await pool.query('SELECT 1');
+        dbStatus = 'connected';
+    } catch (err) {
+        dbStatus = 'error: ' + err.message;
+    }
+
+    res.status(200).json({
+        status: 'ok',
+        database: dbStatus,
+        timestamp: new Date().toISOString(),
+        env: process.env.NODE_ENV
+    });
+});
 
 // Routes Placeholder
 app.get('/', (req, res) => {
     res.send('Recipe API is running...');
 });
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
 // Error handling middleware should be added after all routes
 app.use(errorHandler);
 

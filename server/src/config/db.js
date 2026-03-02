@@ -16,9 +16,10 @@ const initDb = async () => {
         const client = await pool.connect();
         console.log('Successfully connected to PostgreSQL database (Centralized).');
         client.release();
+        return true;
     } catch (err) {
-        console.error('Failed to connect to the database:', err.message);
-        process.exit(1);
+        console.error('Database connection error:', err.message);
+        return false;
     }
 };
 
