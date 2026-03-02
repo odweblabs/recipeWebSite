@@ -18,7 +18,7 @@ import Lists from './pages/Lists';
 import PlaceholderPage from './pages/placeholders/PlaceholderPage';
 
 // Layouts
-import MainLayout from './components/layout/MainLayout';
+import MainLayout from './components/Layout/MainLayout';
 import MobileTabBar from './components/MobileTabBar';
 import ScrollToTop from './components/ScrollToTop';
 import Heartbeat from './components/Heartbeat';
