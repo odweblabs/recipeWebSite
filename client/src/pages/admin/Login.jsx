@@ -1,3 +1,4 @@
+import API_BASE from '../../utils/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
@@ -31,7 +32,7 @@ const Login = () => {
             let res;
 
             if (isLogin) {
-                res = await axios.post(`http://localhost:5050/api/auth${endpoint}`, { username, password });
+                res = await axios.post(`${API_BASE}/api/auth${endpoint}`, { username, password });
             } else {
                 const formData = new FormData();
                 formData.append('username', username);
@@ -40,7 +41,7 @@ const Login = () => {
                 if (profileImage) {
                     formData.append('profile_image', profileImage);
                 }
-                res = await axios.post(`http://localhost:5050/api/auth${endpoint}`, formData, {
+                res = await axios.post(`${API_BASE}/api/auth${endpoint}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             }

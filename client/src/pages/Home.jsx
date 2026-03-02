@@ -1,3 +1,4 @@
+import API_BASE from '../utils/api';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -37,10 +38,10 @@ const Home = () => {
         const fetchData = async () => {
             try {
                 const [recipesRes, categoriesRes, statsRes, chefsRes] = await Promise.all([
-                    axios.get('http://localhost:5050/api/recipes/latest?limit=12'),
-                    axios.get('http://localhost:5050/api/categories'),
-                    axios.get('http://localhost:5050/api/recipes/public-stats'),
-                    axios.get('http://localhost:5050/api/auth/top-chefs')
+                    axios.get(`${API_BASE}/api/recipes/latest?limit=12`),
+                    axios.get(`${API_BASE}/api/categories`),
+                    axios.get(`${API_BASE}/api/recipes/public-stats`),
+                    axios.get(`${API_BASE}/api/auth/top-chefs`)
                 ]);
                 setRecipes(recipesRes.data);
                 setCategories(categoriesRes.data);
@@ -238,7 +239,7 @@ const Home = () => {
                                 <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full p-2 bg-white shadow-2xl z-10 transition-transform duration-300 ease-out group-hover/card:scale-105">
                                     <div className="w-full h-full rounded-full overflow-hidden relative">
                                         {recipe.image_url ? (
-                                            <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `http://localhost:5050${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover transition-transform duration-500 group-hover/card:rotate-3" />
+                                            <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover transition-transform duration-500 group-hover/card:rotate-3" />
                                         ) : (
                                             <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
                                                 <Utensils className="w-10 h-10 text-chefie-yellow/20" />
@@ -366,7 +367,7 @@ const Home = () => {
                             <div className="relative mb-6">
                                 <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden">
                                     {chef.profile_image ? (
-                                        <img src={chef.profile_image.startsWith('http') ? chef.profile_image : `http://localhost:5050${chef.profile_image}`} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        <img src={chef.profile_image.startsWith('http') ? chef.profile_image : `${API_BASE}${chef.profile_image}`} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-3xl text-chefie-dark">{(chef.full_name || chef.username).charAt(0)}</div>
                                     )}
@@ -465,7 +466,7 @@ const Home = () => {
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
                                     {comment.profile_image ? (
-                                        <img src={comment.profile_image.startsWith('http') ? comment.profile_image : `http://localhost:5050${comment.profile_image}`} className="w-full h-full object-cover" />
+                                        <img src={comment.profile_image.startsWith('http') ? comment.profile_image : `${API_BASE}${comment.profile_image}`} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-bold text-chefie-dark text-xs">{(comment.full_name || comment.username).charAt(0)}</div>
                                     )}

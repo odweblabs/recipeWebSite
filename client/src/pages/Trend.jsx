@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Clock, Users, ArrowRight, ChevronRight, Utensils, TrendingUp, Flame, Heart, MessageSquare, Award, Crown, Zap } from 'lucide-react';
 
-const apiBase = 'http://localhost:5050';
+import API_BASE from '../utils/api';
+const apiBase = API_BASE;
 
 const Trend = () => {
     const navigate = useNavigate();

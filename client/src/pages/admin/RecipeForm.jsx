@@ -1,3 +1,4 @@
+import API_BASE from '../../utils/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams, Link } from 'react-router-dom';
@@ -48,14 +49,14 @@ const RecipeForm = () => {
         }
 
         // Fetch categories
-        axios.get('http://localhost:5050/api/categories')
+        axios.get(`${API_BASE}/api/categories`)
             .then(res => setCategories(res.data))
             .catch(err => console.error(err));
 
         // If ID exists, we are editing
         if (id) {
             setIsEditing(true);
-            axios.get(`http://localhost:5050/api/recipes/${id}`)
+            axios.get(`${API_BASE}/api/recipes/${id}`)
                 .then(res => {
                     const recipe = res.data;
                     setFormData({
@@ -69,7 +70,7 @@ const RecipeForm = () => {
                         cook_time: recipe.cook_time || ''
                     });
                     if (recipe.image_url) {
-                        setPreviewImage(recipe.image_url.startsWith('/images/') ? recipe.image_url : `http://localhost:5050${recipe.image_url}`);
+                        setPreviewImage(recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`);
                     }
                 })
                 .catch(err => {
@@ -118,14 +119,14 @@ const RecipeForm = () => {
 
         try {
             if (isEditing) {
-                await axios.put(`http://localhost:5050/api/recipes/${id}`, data, {
+                await axios.put(`${API_BASE}/api/recipes/${id}`, data, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${token}`
                     }
                 });
             } else {
-                await axios.post('http://localhost:5050/api/recipes', data, {
+                await axios.post(`${API_BASE}/api/recipes`, data, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${token}`

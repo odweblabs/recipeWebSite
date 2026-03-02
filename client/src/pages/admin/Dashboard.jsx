@@ -1,3 +1,4 @@
+import API_BASE from '../../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
@@ -98,7 +99,7 @@ const Dashboard = () => {
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('http://localhost:5050/api/auth/users', {
+            const res = await axios.get(`${API_BASE}/api/auth/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(res.data);
@@ -109,7 +110,7 @@ const Dashboard = () => {
 
     const fetchActivity = async () => {
         try {
-            const res = await axios.get('http://localhost:5050/api/auth/activity', {
+            const res = await axios.get(`${API_BASE}/api/auth/activity`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUserActivity(res.data);
@@ -120,7 +121,7 @@ const Dashboard = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get('http://localhost:5050/api/categories');
+            const res = await axios.get(`${API_BASE}/api/categories`);
             setCategories(res.data);
         } catch (err) {
             console.error('Error fetching categories:', err);
@@ -129,7 +130,7 @@ const Dashboard = () => {
 
     const fetchTotalCount = async () => {
         try {
-            const res = await axios.get('http://localhost:5050/api/recipes/count');
+            const res = await axios.get(`${API_BASE}/api/recipes/count`);
             setTotalCount(res.data.count);
         } catch (err) {
             console.error('Error fetching count:', err);
@@ -138,7 +139,7 @@ const Dashboard = () => {
 
     const fetchStats = async () => {
         try {
-            const res = await axios.get('http://localhost:5050/api/recipes/stats', {
+            const res = await axios.get(`${API_BASE}/api/recipes/stats`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setStats(res.data);
@@ -151,8 +152,8 @@ const Dashboard = () => {
         try {
             const currentOffset = isLoadMore ? offset + LIMIT : 0;
             const endpoint = searchTerm
-                ? `http://localhost:5050/api/recipes?title=${searchTerm}&limit=${LIMIT}&offset=${currentOffset}`
-                : `http://localhost:5050/api/recipes?limit=${LIMIT}&offset=${currentOffset}${selectedCategory ? `&category_id=${selectedCategory}` : ''}`;
+                ? `${API_BASE}/api/recipes?title=${searchTerm}&limit=${LIMIT}&offset=${currentOffset}`
+                : `${API_BASE}/api/recipes?limit=${LIMIT}&offset=${currentOffset}${selectedCategory ? `&category_id=${selectedCategory}` : ''}`;
 
             const res = await axios.get(endpoint);
 
@@ -179,7 +180,7 @@ const Dashboard = () => {
 
     const fetchFavorites = async () => {
         try {
-            const res = await axios.get('http://localhost:5050/api/favorites', {
+            const res = await axios.get(`${API_BASE}/api/favorites`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setFavorites(res.data);
@@ -191,7 +192,7 @@ const Dashboard = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Bu tarifi silmek istediğinize emin misiniz?')) {
             try {
-                await axios.delete(`http://localhost:5050/api/recipes/${id}`);
+                await axios.delete(`${API_BASE}/api/recipes/${id}`);
                 fetchRecipes();
                 fetchFavorites();
                 fetchTotalCount();
@@ -204,7 +205,7 @@ const Dashboard = () => {
     const handleRemoveFavorite = async (recipeId) => {
         if (window.confirm('Bu tarifi favorilerinizden kaldırmak istediğinize emin misiniz?')) {
             try {
-                await axios.delete(`http://localhost:5050/api/favorites/${recipeId}`, {
+                await axios.delete(`${API_BASE}/api/favorites/${recipeId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 fetchFavorites();
@@ -217,7 +218,7 @@ const Dashboard = () => {
     const handleDeleteUser = async (userId) => {
         if (window.confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
             try {
-                await axios.delete(`http://localhost:5050/api/auth/users/${userId}`, {
+                await axios.delete(`${API_BASE}/api/auth/users/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 fetchUsers();
@@ -236,7 +237,7 @@ const Dashboard = () => {
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:5050/api/auth/users/${editingUser.id}`, editFormData, {
+            await axios.put(`${API_BASE}/api/auth/users/${editingUser.id}`, editFormData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEditingUser(null);
@@ -256,14 +257,14 @@ const Dashboard = () => {
                 formData.append('profile_image', profileData.profileImage);
             }
 
-            await axios.put('http://localhost:5050/api/auth/profile', formData, {
+            await axios.put(`${API_BASE}/api/auth/profile`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
                 }
             });
 
-            const userRes = await axios.get('http://localhost:5050/api/auth/me', {
+            const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             sessionStorage.setItem('user', JSON.stringify(userRes.data));
@@ -290,7 +291,7 @@ const Dashboard = () => {
         setPasswordMessage({ type: '', text: '' });
 
         try {
-            await axios.put('http://localhost:5050/api/auth/password', {
+            await axios.put(`${API_BASE}/api/auth/password`, {
                 current_password: currentPassword,
                 new_password: newPassword
             }, {
@@ -330,7 +331,7 @@ const Dashboard = () => {
                                 <div className="flex items-center gap-4">
                                     <Link to={`/profile/${u.id}`}>
                                         {u.profile_image ? (
-                                            <img src={u.profile_image.startsWith('http') ? u.profile_image : `http://localhost:5050${u.profile_image}`} alt={u.full_name} className="w-10 h-10 rounded-full object-cover border border-gray-200 hover:border-[#10B981] transition-colors" />
+                                            <img src={u.profile_image.startsWith('http') ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name} className="w-10 h-10 rounded-full object-cover border border-gray-200 hover:border-[#10B981] transition-colors" />
                                         ) : (
                                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200 hover:border-[#10B981] transition-colors uppercase font-bold text-lg">
                                                 {(u.full_name || u.username).charAt(0)}
@@ -404,7 +405,7 @@ const Dashboard = () => {
                                             <Link key={r.id} to={`/recipes/${r.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                                                 <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
                                                     {r.image_url ? (
-                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `http://localhost:5050${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
+                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-gray-300"><ChefHat className="w-5 h-5" /></div>
                                                     )}
@@ -430,7 +431,7 @@ const Dashboard = () => {
                                         {stats?.recentUsers?.length > 0 ? stats.recentUsers.map((u) => (
                                             <Link key={u.id} to={`/profile/${u.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                                                 {u.profile_image ? (
-                                                    <img src={u.profile_image.startsWith('http') ? u.profile_image : `http://localhost:5050${u.profile_image}`} alt={u.full_name || u.username} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                                                    <img src={u.profile_image.startsWith('http') ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name || u.username} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200 uppercase font-bold text-sm">
                                                         {(u.full_name || u.username || '?').charAt(0)}
@@ -458,7 +459,7 @@ const Dashboard = () => {
                                             <Link key={c.id} to={`/recipes/${c.recipe_id}`} className="block p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                                                 <div className="flex items-center gap-2 mb-1.5">
                                                     {c.profile_image ? (
-                                                        <img src={c.profile_image.startsWith('http') ? c.profile_image : `http://localhost:5050${c.profile_image}`} alt={c.username} className="w-6 h-6 rounded-full object-cover border border-gray-200" />
+                                                        <img src={c.profile_image.startsWith('http') ? c.profile_image : `${API_BASE}${c.profile_image}`} alt={c.username} className="w-6 h-6 rounded-full object-cover border border-gray-200" />
                                                     ) : (
                                                         <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-[10px] font-bold uppercase">{(c.full_name || c.username || '?').charAt(0)}</div>
                                                     )}
@@ -486,7 +487,7 @@ const Dashboard = () => {
                                                 <div className="w-8 h-8 rounded-lg bg-yellow-50 border border-yellow-100 flex items-center justify-center text-yellow-600 font-black text-sm flex-shrink-0">#{i + 1}</div>
                                                 <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
                                                     {r.image_url ? (
-                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `http://localhost:5050${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
+                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-gray-300"><ChefHat className="w-4 h-4" /></div>
                                                     )}
@@ -573,7 +574,7 @@ const Dashboard = () => {
                                         return (
                                             <div key={a.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
                                                 {a.profile_image ? (
-                                                    <img src={a.profile_image.startsWith('http') ? a.profile_image : `http://localhost:5050${a.profile_image}`} alt={a.username} className="w-9 h-9 rounded-full object-cover border border-gray-200" />
+                                                    <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} alt={a.username} className="w-9 h-9 rounded-full object-cover border border-gray-200" />
                                                 ) : (
                                                     <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs uppercase">{(a.full_name || a.username || '?').charAt(0)}</div>
                                                 )}
@@ -746,7 +747,7 @@ const Dashboard = () => {
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                                     {recipe.image_url ? (
-                                        <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `http://localhost:5050${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover" />
+                                        <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-400"><ImageIcon className="w-5 h-5" /></div>
                                     )}
@@ -860,7 +861,7 @@ const Dashboard = () => {
 
                     <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
                         {user.profile_image ? (
-                            <img src={user.profile_image.startsWith('http') ? user.profile_image : `http://localhost:5050${user.profile_image}`} alt={user.full_name} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
+                            <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt={user.full_name} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
                         ) : (
                             <div className="w-10 h-10 rounded-full bg-[#10B981] text-white flex items-center justify-center font-bold border-2 border-white shadow-sm">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
                         )}

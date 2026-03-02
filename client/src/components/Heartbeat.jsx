@@ -1,3 +1,4 @@
+import API_BASE from '../utils/api';
 import { useEffect } from 'react';
 import axios from 'axios';
 
@@ -7,7 +8,7 @@ const Heartbeat = () => {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             if (!token) return;
 
-            axios.post('http://localhost:5050/api/auth/heartbeat', {}, {
+            axios.post(`${API_BASE}/api/auth/heartbeat`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             }).catch(() => { });
         };

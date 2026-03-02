@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Shuffle, Clock, Star, Utensils, Users, ArrowRight, Flame, Salad, X, Filter, Sparkles, RefreshCw, MessageSquare } from 'lucide-react';
 
-const apiBase = 'http://localhost:5050';
+import API_BASE from '../utils/api';
+const apiBase = API_BASE;
 
 const WhatToCook = () => {
     const navigate = useNavigate();

@@ -1,3 +1,4 @@
+import API_BASE from '../../utils/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Trash2, Plus } from 'lucide-react';
@@ -13,7 +14,7 @@ const CategoryList = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get('http://localhost:5050/api/categories');
+            const res = await axios.get(`${API_BASE}/api/categories`);
             setCategories(res.data);
         } catch (err) {
             console.error(err);
@@ -24,7 +25,7 @@ const CategoryList = () => {
         e.preventDefault();
         if (!newCat) return;
         try {
-            await axios.post('http://localhost:5050/api/categories', { name: newCat });
+            await axios.post(`${API_BASE}/api/categories`, { name: newCat });
             setNewCat('');
             fetchCategories();
         } catch (err) {
@@ -35,7 +36,7 @@ const CategoryList = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Bu kategoriyi silmek istediğinize emin misiniz?')) {
             try {
-                await axios.delete(`http://localhost:5050/api/categories/${id}`);
+                await axios.delete(`${API_BASE}/api/categories/${id}`);
                 fetchCategories();
             } catch (err) {
                 alert('Silinemedi.');

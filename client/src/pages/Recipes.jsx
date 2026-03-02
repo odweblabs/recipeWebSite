@@ -1,3 +1,4 @@
+import API_BASE from '../utils/api';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -23,7 +24,7 @@ const Recipes = () => {
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const catRes = await axios.get('http://localhost:5050/api/categories');
+                const catRes = await axios.get(`${API_BASE}/api/categories`);
                 setCategories(catRes.data);
 
                 if (hash) {
@@ -41,7 +42,7 @@ const Recipes = () => {
         const fetchRecipes = async () => {
             setLoading(true);
             try {
-                let url = `http://localhost:5050/api/recipes?limit=100`;
+                let url = `${API_BASE}/api/recipes?limit=100`;
                 if (selectedCategory) url += `&category_id=${selectedCategory}`;
                 if (searchQuery) url += `&title=${searchQuery}`;
 
@@ -210,7 +211,7 @@ const Recipes = () => {
                                 <div className="relative h-64 overflow-hidden">
                                     {recipe.image_url ? (
                                         <img
-                                            src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `http://localhost:5050${recipe.image_url}`}
+                                            src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`}
                                             alt={recipe.title}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         />
@@ -253,7 +254,7 @@ const Recipes = () => {
                                     <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 rounded-2xl">
                                         {recipe.chef_image ? (
                                             <img
-                                                src={recipe.chef_image.startsWith('http') ? recipe.chef_image : `http://localhost:5050${recipe.chef_image}`}
+                                                src={recipe.chef_image.startsWith('http') ? recipe.chef_image : `${API_BASE}${recipe.chef_image}`}
                                                 alt={recipe.chef_name}
                                                 className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                                             />

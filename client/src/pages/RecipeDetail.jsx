@@ -1,3 +1,4 @@
+import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -22,7 +23,7 @@ const RecipeDetail = () => {
 
     const fetchComments = async () => {
         try {
-            const res = await axios.get(`http://localhost:5050/api/recipes/${id}/comments`);
+            const res = await axios.get(`${API_BASE}/api/recipes/${id}/comments`);
             setComments(res.data);
         } catch (err) {
             console.error('Error fetching comments:', err);
@@ -32,13 +33,13 @@ const RecipeDetail = () => {
     useEffect(() => {
         const fetchRecipe = async () => {
             try {
-                const res = await axios.get(`http://localhost:5050/api/recipes/${id}`);
+                const res = await axios.get(`${API_BASE}/api/recipes/${id}`);
                 setRecipe(res.data);
                 fetchComments();
 
                 if (token) {
                     try {
-                        const favRes = await axios.get(`http://localhost:5050/api/favorites/check/${id}`, {
+                        const favRes = await axios.get(`${API_BASE}/api/favorites/check/${id}`, {
                             headers: { Authorization: `Bearer ${token}` }
                         });
                         setIsFavorited(favRes.data.isFavorited);
@@ -48,7 +49,7 @@ const RecipeDetail = () => {
                 }
 
                 if (res.data.category_id) {
-                    const catRes = await axios.get('http://localhost:5050/api/categories');
+                    const catRes = await axios.get(`${API_BASE}/api/categories`);
                     const cat = catRes.data.find(c => c.id === res.data.category_id);
                     if (cat) setCategoryName(cat.name);
                 }
@@ -71,7 +72,7 @@ const RecipeDetail = () => {
         }
 
         try {
-            const res = await axios.post(`http://localhost:5050/api/favorites/toggle/${id}`, {}, {
+            const res = await axios.post(`${API_BASE}/api/favorites/toggle/${id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setIsFavorited(res.data.isFavorited);
@@ -89,11 +90,11 @@ const RecipeDetail = () => {
         }
 
         try {
-            await axios.post(`http://localhost:5050/api/recipes/${id}/rate`, { score }, {
+            await axios.post(`${API_BASE}/api/recipes/${id}/rate`, { score }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             // Refresh recipe to show updated average
-            const res = await axios.get(`http://localhost:5050/api/recipes/${id}`);
+            const res = await axios.get(`${API_BASE}/api/recipes/${id}`);
             setRecipe(res.data);
         } catch (err) {
             alert('Puan verilirken hata oluştu.');
@@ -112,13 +113,13 @@ const RecipeDetail = () => {
 
         setIsSubmittingComment(true);
         try {
-            await axios.post(`http://localhost:5050/api/recipes/${id}/comment`, { content: newComment }, {
+            await axios.post(`${API_BASE}/api/recipes/${id}/comment`, { content: newComment }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNewComment('');
             fetchComments();
             // Refresh recipe to update comment count
-            const res = await axios.get(`http://localhost:5050/api/recipes/${id}`);
+            const res = await axios.get(`${API_BASE}/api/recipes/${id}`);
             setRecipe(res.data);
         } catch (err) {
             alert('Yorum eklenirken hata oluştu.');
@@ -235,7 +236,7 @@ const RecipeDetail = () => {
                 <div className="w-full h-[300px] md:h-[450px] relative print:h-[250px] print:mb-4">
                     {recipe.image_url ? (
                         <img
-                            src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `http://localhost:5050${recipe.image_url}`}
+                            src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`}
                             alt={recipe.title}
                             className="w-full h-full object-cover print:rounded-2xl"
                         />
@@ -316,7 +317,7 @@ const RecipeDetail = () => {
                             <div className="flex-shrink-0">
                                 {recipe.chef_image ? (
                                     <img
-                                        src={recipe.chef_image.startsWith('http') ? recipe.chef_image : `http://localhost:5050${recipe.chef_image}`}
+                                        src={recipe.chef_image.startsWith('http') ? recipe.chef_image : `${API_BASE}${recipe.chef_image}`}
                                         alt={recipe.chef_name}
                                         className="w-16 h-16 rounded-full object-cover border-2 border-chefie-yellow"
                                     />
@@ -450,7 +451,7 @@ const RecipeDetail = () => {
                                                 <Link to={`/profile/${comment.user_id}`}>
                                                     {comment.profile_image ? (
                                                         <img
-                                                            src={comment.profile_image.startsWith('http') ? comment.profile_image : `http://localhost:5050${comment.profile_image}`}
+                                                            src={comment.profile_image.startsWith('http') ? comment.profile_image : `${API_BASE}${comment.profile_image}`}
                                                             alt={comment.full_name}
                                                             className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm hover:border-chefie-green transition-colors"
                                                         />

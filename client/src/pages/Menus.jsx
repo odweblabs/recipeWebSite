@@ -21,7 +21,8 @@ function saveMenus(nextMenus) {
   localStorage.setItem(MENUS_STORAGE_KEY, JSON.stringify(nextMenus));
 }
 
-const apiBase = 'http://localhost:5050';
+import API_BASE from '../utils/api';
+const apiBase = API_BASE;
 
 const Menus = () => {
   const navigate = useNavigate();

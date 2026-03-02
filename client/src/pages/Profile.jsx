@@ -1,3 +1,4 @@
+import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -35,7 +36,7 @@ const Profile = () => {
     const fetchRecipes = async (isLoadMore = false) => {
         try {
             const currentOffset = isLoadMore ? offset + LIMIT : 0;
-            const res = await axios.get(`http://localhost:5050/api/recipes/users/${id}/recipes?limit=${LIMIT}&offset=${currentOffset}`);
+            const res = await axios.get(`${API_BASE}/api/recipes/users/${id}/recipes?limit=${LIMIT}&offset=${currentOffset}`);
 
             if (isLoadMore) {
                 setRecipes(prev => [...prev, ...res.data]);
@@ -54,7 +55,7 @@ const Profile = () => {
     const fetchFriendStatus = async () => {
         if (!isLoggedIn || isOwner) return;
         try {
-            const res = await axios.get(`http://localhost:5050/api/friends/status/${id}`, {
+            const res = await axios.get(`${API_BASE}/api/friends/status/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setFriendStatus(res.data);
@@ -66,7 +67,7 @@ const Profile = () => {
     // Fetch friends list for this profile
     const fetchFriends = async () => {
         try {
-            const res = await axios.get(`http://localhost:5050/api/friends/${id}`);
+            const res = await axios.get(`${API_BASE}/api/friends/${id}`);
             setFriends(res.data);
         } catch (err) {
             console.error('Error fetching friends:', err);
@@ -77,7 +78,7 @@ const Profile = () => {
     const fetchPendingRequests = async () => {
         if (!isOwner || !token) return;
         try {
-            const res = await axios.get(`http://localhost:5050/api/friends/requests/pending`, {
+            const res = await axios.get(`${API_BASE}/api/friends/requests/pending`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPendingRequests(res.data);
@@ -90,12 +91,12 @@ const Profile = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const profileRes = await axios.get(`http://localhost:5050/api/auth/users/${id}/profile`);
+                const profileRes = await axios.get(`${API_BASE}/api/auth/users/${id}/profile`);
                 setProfile(profileRes.data);
 
                 await fetchRecipes();
 
-                const commentsRes = await axios.get(`http://localhost:5050/api/recipes/users/${id}/comments`);
+                const commentsRes = await axios.get(`${API_BASE}/api/recipes/users/${id}/comments`);
                 setComments(commentsRes.data);
 
                 // Load menus from localStorage only for profile owner
@@ -133,7 +134,7 @@ const Profile = () => {
     const sendFriendRequest = async () => {
         setFriendActionLoading(true);
         try {
-            await axios.post(`http://localhost:5050/api/friends/request/${id}`, {}, {
+            await axios.post(`${API_BASE}/api/friends/request/${id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             await fetchFriendStatus();
@@ -147,7 +148,7 @@ const Profile = () => {
     const cancelFriendRequest = async () => {
         setFriendActionLoading(true);
         try {
-            await axios.delete(`http://localhost:5050/api/friends/cancel/${id}`, {
+            await axios.delete(`${API_BASE}/api/friends/cancel/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setFriendStatus({ status: 'none' });
@@ -162,7 +163,7 @@ const Profile = () => {
         if (!window.confirm('Bu arkadaşlığı kaldırmak istediğinize emin misiniz?')) return;
         setFriendActionLoading(true);
         try {
-            await axios.delete(`http://localhost:5050/api/friends/remove/${id}`, {
+            await axios.delete(`${API_BASE}/api/friends/remove/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setFriendStatus({ status: 'none' });
@@ -176,7 +177,7 @@ const Profile = () => {
 
     const acceptRequest = async (friendshipId) => {
         try {
-            await axios.put(`http://localhost:5050/api/friends/accept/${friendshipId}`, {}, {
+            await axios.put(`${API_BASE}/api/friends/accept/${friendshipId}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPendingRequests(prev => prev.filter(r => r.friendship_id !== friendshipId));
@@ -188,7 +189,7 @@ const Profile = () => {
 
     const rejectRequest = async (friendshipId) => {
         try {
-            await axios.delete(`http://localhost:5050/api/friends/reject/${friendshipId}`, {
+            await axios.delete(`${API_BASE}/api/friends/reject/${friendshipId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPendingRequests(prev => prev.filter(r => r.friendship_id !== friendshipId));
@@ -202,7 +203,7 @@ const Profile = () => {
         if (!friendStatus.friendship_id) return;
         setFriendActionLoading(true);
         try {
-            await axios.put(`http://localhost:5050/api/friends/accept/${friendStatus.friendship_id}`, {}, {
+            await axios.put(`${API_BASE}/api/friends/accept/${friendStatus.friendship_id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setFriendStatus({ status: 'accepted', friendship_id: friendStatus.friendship_id });
@@ -218,7 +219,7 @@ const Profile = () => {
         if (!friendStatus.friendship_id) return;
         setFriendActionLoading(true);
         try {
-            await axios.delete(`http://localhost:5050/api/friends/reject/${friendStatus.friendship_id}`, {
+            await axios.delete(`${API_BASE}/api/friends/reject/${friendStatus.friendship_id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setFriendStatus({ status: 'none' });
@@ -232,7 +233,7 @@ const Profile = () => {
     const handleDeleteComment = async (commentId) => {
         if (!window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
         try {
-            await axios.delete(`http://localhost:5050/api/recipes/comments/${commentId}`, {
+            await axios.delete(`${API_BASE}/api/recipes/comments/${commentId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setComments(comments.filter(c => c.id !== commentId));
@@ -253,7 +254,7 @@ const Profile = () => {
 
     const saveComment = async (commentId) => {
         try {
-            await axios.put(`http://localhost:5050/api/recipes/comments/${commentId}`, { content: editContent }, {
+            await axios.put(`${API_BASE}/api/recipes/comments/${commentId}`, { content: editContent }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setComments(comments.map(c => c.id === commentId ? { ...c, content: editContent } : c));
@@ -329,7 +330,7 @@ const Profile = () => {
                     <div className="relative">
                         {profile.profile_image ? (
                             <img
-                                src={profile.profile_image.startsWith('http') ? profile.profile_image : `http://localhost:5050${profile.profile_image}`}
+                                src={profile.profile_image.startsWith('http') ? profile.profile_image : `${API_BASE}${profile.profile_image}`}
                                 alt={profile.full_name}
                                 className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-md mx-auto md:mx-0"
                             />
@@ -387,7 +388,7 @@ const Profile = () => {
                                     <Link to={`/profile/${request.id}`} className="pending-request-user">
                                         {request.profile_image ? (
                                             <img
-                                                src={request.profile_image.startsWith('http') ? request.profile_image : `http://localhost:5050${request.profile_image}`}
+                                                src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`}
                                                 alt={request.full_name || request.username}
                                                 className="pending-request-avatar"
                                             />
@@ -449,7 +450,7 @@ const Profile = () => {
                                         <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all overflow-hidden flex flex-col h-full">
                                             <div className="h-48 overflow-hidden relative">
                                                 {recipe.image_url ? (
-                                                    <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `http://localhost:5050${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                    <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                                 ) : (
                                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300"><ChefHat className="w-12 h-12" /></div>
                                                 )}
@@ -515,7 +516,7 @@ const Profile = () => {
                                                             {(menu.recipes || []).slice(0, 3).map(r => (
                                                                 <div key={r.id} className="w-9 h-9 rounded-full border-2 border-white overflow-hidden bg-gray-100">
                                                                     {r.image_url && (
-                                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `http://localhost:5050${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
+                                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
                                                                     )}
                                                                 </div>
                                                             ))}
@@ -547,7 +548,7 @@ const Profile = () => {
                                     <Link key={friend.id} to={`/profile/${friend.id}`} className="friend-card">
                                         {friend.profile_image ? (
                                             <img
-                                                src={friend.profile_image.startsWith('http') ? friend.profile_image : `http://localhost:5050${friend.profile_image}`}
+                                                src={friend.profile_image.startsWith('http') ? friend.profile_image : `${API_BASE}${friend.profile_image}`}
                                                 alt={friend.full_name || friend.username}
                                                 className="friend-card-avatar"
                                             />

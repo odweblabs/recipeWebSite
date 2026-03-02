@@ -50,9 +50,13 @@ app.get('/health', (req, res) => {
 // Error handling middleware should be added after all routes
 app.use(errorHandler);
 
-const server = app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Vercel serverless function olarak çalıştığında listen gerekmez
+let server;
+if (!process.env.VERCEL) {
+    server = app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 // Graceful shutdown
 const shutdown = () => {
@@ -75,3 +79,6 @@ const shutdown = () => {
 
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
+
+// Vercel serverless export
+module.exports = app;
