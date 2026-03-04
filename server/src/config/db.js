@@ -31,7 +31,10 @@ const pool = new Pool({
     connectionString: connectionString,
     ssl: process.env.NODE_ENV === 'production' || process.env.VERCEL
         ? { rejectUnauthorized: false }
-        : false
+        : false,
+    max: 1, // Serverless için tek bağlantı
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
 });
 
 // Database connection check on startup
