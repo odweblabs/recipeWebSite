@@ -331,7 +331,7 @@ const Profile = () => {
     if (!profile) return <div className="min-h-screen flex items-center justify-center bg-[#FFFBF2]">Kullanıcı bulunamadı.</div>;
 
     return (
-        <div className="min-h-screen bg-[#FFFBF2] pt-24 pb-12 px-4">
+        <div className="min-h-screen bg-[#FFFBF2] pt-4 md:pt-24 pb-12 px-4">
             <style>{friendStyles}</style>
             <div className="max-w-5xl mx-auto">
                 {/* Profile Header */}
@@ -379,7 +379,7 @@ const Profile = () => {
                         </div>
                         <p className="text-gray-500 font-medium mb-6">@{profile.username}</p>
 
-                        <div className="grid grid-cols-2 min-[480px]:grid-cols-3 gap-3 md:flex md:flex-wrap md:items-center md:justify-start md:gap-6 text-[10px] md:text-sm text-gray-600 bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
+                        <div className="grid grid-cols-2 min-[480px]:grid-cols-3 gap-3 md:flex md:flex-wrap md:items-center md:justify-start md:gap-6 text-[11px] md:text-sm text-gray-600 bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
                             <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
                                 <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#10B981]" />
                                 <span className="truncate">Katılım: {new Date(profile.created_at).toLocaleDateString('tr-TR')}</span>
@@ -454,19 +454,19 @@ const Profile = () => {
                     <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar scroll-smooth bg-gray-50/20">
                         <button
                             onClick={() => setActiveTab('recipes')}
-                            className={`flex-1 min-w-[120px] py-4 text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'recipes' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
+                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'recipes' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
                         >
                             Tarifler ({recipes.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('friends')}
-                            className={`flex-1 min-w-[120px] py-4 text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'friends' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
+                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'friends' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
                         >
                             Takip ({friends.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('comments')}
-                            className={`flex-1 min-w-[120px] py-4 text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'comments' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
+                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'comments' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
                         >
                             Yorumlar ({comments.length})
                         </button>

@@ -234,17 +234,11 @@ const RecipeDetail = () => {
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden print:shadow-none print:border-none print:rounded-none">
                 {/* Hero Image */}
                 <div className="w-full h-[300px] md:h-[450px] relative print:h-[250px] print:mb-4">
-                    {recipe.image_url ? (
-                        <img
-                            src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`}
-                            alt={recipe.title}
-                            className="w-full h-full object-cover print:rounded-2xl"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center print:rounded-2xl">
-                            <ChefHat className="w-20 h-20 text-gray-400" />
-                        </div>
-                    )}
+                    <img
+                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover print:rounded-2xl"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent print:hidden"></div>
                     <div className="absolute bottom-0 left-0 p-6 md:p-10 text-white print:relative print:text-black print:p-0 print:mt-4">
                         <div className="flex flex-wrap items-center gap-3 mb-4">

@@ -24,6 +24,7 @@ const RecipeForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
 
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
@@ -154,7 +155,7 @@ const RecipeForm = () => {
                         <Bell className="w-6 h-6" />
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                     </button>
-                    <Link to="/profile/me">
+                    <Link to={user?.id ? `/profile/${user.id}` : '#'}>
                         {user.profile_image ? (
                             <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
                         ) : (
@@ -238,7 +239,7 @@ const RecipeForm = () => {
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                         </button>
 
-                        <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
+                        <Link to={user?.id ? `/profile/${user.id}` : '#'} className="flex items-center gap-3 pl-6 border-l border-gray-200 hover:opacity-80 transition-opacity">
                             {user.profile_image ? (
                                 <img
                                     src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`}
@@ -246,11 +247,15 @@ const RecipeForm = () => {
                                     className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                                 />
                             ) : (
-                                <div className="w-10 h-10 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold border-2 border-white shadow-sm">
+                                <div className="w-10 h-10 rounded-full bg-[#10B981] text-white flex items-center justify-center font-bold border-2 border-white shadow-sm">
                                     {(user.full_name || user.username || 'A').charAt(0).toUpperCase()}
                                 </div>
                             )}
-                        </div>
+                            <div className="hidden md:block text-right">
+                                <div className="text-sm font-bold text-gray-800">{user.full_name || user.username}</div>
+                                <div className="text-xs text-gray-500 uppercase">{user.role || 'User'}</div>
+                            </div>
+                        </Link>
                     </div>
                 </header>
 

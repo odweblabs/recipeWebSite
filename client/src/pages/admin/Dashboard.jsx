@@ -812,7 +812,7 @@ const Dashboard = () => {
                         <Bell className="w-6 h-6" />
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                     </button>
-                    <Link to="/profile/me">
+                    <Link to={user?.id ? `/profile/${user.id}` : '#'}>
                         {user.profile_image ? (
                             <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
                         ) : (
@@ -883,7 +883,7 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    <div className="hidden md:flex items-center gap-3 pl-6 border-l border-gray-200">
+                    <Link to={user?.id ? `/profile/${user.id}` : '#'} className="hidden md:flex items-center gap-3 pl-6 border-l border-gray-200 hover:opacity-80 transition-opacity">
                         {user.profile_image ? (
                             <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt={user.full_name} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
                         ) : (
@@ -893,7 +893,7 @@ const Dashboard = () => {
                             <div className="text-sm font-bold text-gray-800">{user.full_name || user.username}</div>
                             <div className="text-xs text-gray-500 uppercase">{user.role || 'User'}</div>
                         </div>
-                    </div>
+                    </Link>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
