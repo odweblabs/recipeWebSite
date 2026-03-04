@@ -56,6 +56,8 @@ const MobileTabBar = () => {
         return true;
     };
 
+    if (location.pathname === '/admin/login') return null;
+
     return (
         <motion.div
             initial={{ y: 0 }}

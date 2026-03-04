@@ -80,7 +80,7 @@ const Login = () => {
     return (
         <div className="min-h-screen w-full bg-[#FFFBF2] flex items-center justify-center p-4 relative">
             {/* Anasayfa Butonu */}
-            <Link to="/" className="absolute top-4 left-4 md:top-8 md:left-8 flex items-center gap-2 text-[#10B981] hover:text-[#059669] transition-colors font-medium bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg z-50">
+            <Link to="/" className="absolute top-8 left-4 md:top-8 md:left-8 flex items-center gap-2 text-[#10B981] hover:text-[#059669] transition-colors font-medium bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg z-50">
                 <Home size={20} />
                 <span>Anasayfa</span>
             </Link>
@@ -90,8 +90,8 @@ const Login = () => {
                 {/* Sol Taraf - Form */}
                 <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative z-10">
                     <div className="mb-8">
-                        <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-8 block">
-                            <img src="/bitarif_logo_1.png" alt="Logo" className="w-12 h-12" />
+                        <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-12 block mt-12 md:mt-0">
+                            <img src="/bitarif_logo_1.png" alt="Logo" className="w-16 h-16" />
                         </Link>
 
                         <h1 className="text-4xl md:text-5xl font-serif text-[#1F2937] mb-3">
@@ -189,7 +189,7 @@ const Login = () => {
                         </button>
                     </form>
 
-                    <div className="mt-8 text-center text-sm text-gray-500">
+                    <div className="mt-8 text-center text-sm text-gray-500 pb-12">
                         {isLogin ? 'Hesabınız yok mu?' : 'Zaten hesabınız var mı?'}
                         <span
                             onClick={toggleMode}

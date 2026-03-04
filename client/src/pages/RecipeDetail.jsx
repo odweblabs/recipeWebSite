@@ -313,23 +313,50 @@ const RecipeDetail = () => {
                         </div>
 
                         {/* Chef Info */}
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 flex items-center gap-4 print:hidden">
-                            <div className="flex-shrink-0">
-                                {recipe.chef_image ? (
-                                    <img
-                                        src={recipe.chef_image.startsWith('http') ? recipe.chef_image : `${API_BASE}${recipe.chef_image}`}
-                                        alt={recipe.chef_name}
-                                        className="w-16 h-16 rounded-full object-cover border-2 border-chefie-yellow"
-                                    />
-                                ) : (
-                                    <div className="w-16 h-16 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xl border-2 border-chefie-yellow">
-                                        {(recipe.chef_name || recipe.chef_username || 'A').charAt(0).toUpperCase()}
-                                    </div>
-                                )}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-col gap-6 print:hidden">
+                            <div className="flex items-center gap-4">
+                                <div className="flex-shrink-0">
+                                    {recipe.chef_image ? (
+                                        <img
+                                            src={recipe.chef_image.startsWith('http') ? recipe.chef_image : `${API_BASE}${recipe.chef_image}`}
+                                            alt={recipe.chef_name}
+                                            className="w-16 h-16 rounded-full object-cover border-2 border-chefie-yellow"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-16 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xl border-2 border-chefie-yellow">
+                                            {(recipe.chef_name || recipe.chef_username || 'A').charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Tarifin Şefi</div>
+                                    <div className="font-bold text-gray-900 text-lg">{recipe.chef_name || recipe.chef_username}</div>
+                                </div>
                             </div>
-                            <div>
-                                <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Tarifin Şefi</div>
-                                <div className="font-bold text-gray-900 text-lg">{recipe.chef_name || recipe.chef_username}</div>
+
+                            <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-50">
+                                <button
+                                    onClick={handleToggleFavorite}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all font-bold text-sm ${isFavorited ? 'text-red-500 bg-red-50 shadow-sm border border-red-100' : 'text-gray-600 bg-gray-50 hover:bg-white border border-transparent hover:border-gray-200'}`}
+                                >
+                                    <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+                                    {isFavorited ? 'Favorilerde' : 'Favoriye Ekle'}
+                                </button>
+                                <div className="flex gap-2 w-full">
+                                    <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-600 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition-all font-bold text-sm">
+                                        <Share2 className="w-4 h-4" /> Paylaş
+                                    </button>
+                                    <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-600 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition-all font-bold text-sm">
+                                        <Printer className="w-4 h-4" /> Yazdır
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={toggleScreenAwake}
+                                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl transition-all font-bold text-sm ${isScreenAwake ? 'text-chefie-yellow bg-yellow-50 border border-yellow-100 shadow-sm' : 'text-gray-600 bg-gray-50 hover:bg-white border border-transparent hover:border-gray-200'}`}
+                                >
+                                    <Smartphone className="w-5 h-5" />
+                                    {isScreenAwake ? 'EKRAN AÇIK TUTULUYOR' : 'EKRANI AÇIK TUT (PİŞİRİRKEN)'}
+                                </button>
                             </div>
                         </div>
 
@@ -360,29 +387,6 @@ const RecipeDetail = () => {
                                 <ChefHat className="text-chefie-green" />
                                 Hazırlanışı
                             </h2>
-                            <div className="flex gap-2 print:hidden">
-                                <button
-                                    onClick={handleToggleFavorite}
-                                    className={`p-2 rounded-lg transition-colors ${isFavorited ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
-                                    title={isFavorited ? "Favorilerden Çıkar" : "Favorilere Ekle"}
-                                >
-                                    <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
-                                </button>
-                                <button onClick={handleShare} className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" title="Paylaş">
-                                    <Share2 className="w-5 h-5" />
-                                </button>
-                                <button onClick={handlePrint} className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" title="Yazdır">
-                                    <Printer className="w-5 h-5" />
-                                </button>
-                                <button
-                                    onClick={toggleScreenAwake}
-                                    className={`p-2 rounded-lg transition-colors flex items-center gap-1 ${isScreenAwake ? 'text-chefie-yellow bg-yellow-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
-                                    title={isScreenAwake ? "Ekran Açık Tutuluyor" : "Ekranı Açık Tut"}
-                                >
-                                    <Smartphone className="w-5 h-5" />
-                                    {isScreenAwake && <span className="text-[10px] font-bold uppercase tracking-widest">Açık</span>}
-                                </button>
-                            </div>
                         </div>
 
                         <div className="space-y-8 print:space-y-4 mb-16">

@@ -2,7 +2,7 @@ import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2 } from 'lucide-react';
+import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut } from 'lucide-react';
 
 const Profile = () => {
     const { id } = useParams();
@@ -87,6 +87,15 @@ const Profile = () => {
         }
     };
 
+    const handleLogout = () => {
+        if (!window.confirm('Çıkış yapmak istediğinize emin misiniz?')) return;
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        navigate('/');
+        window.location.reload(); // Refresh to clear all states
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -160,7 +169,7 @@ const Profile = () => {
     };
 
     const removeFriend = async () => {
-        if (!window.confirm('Bu arkadaşlığı kaldırmak istediğinize emin misiniz?')) return;
+        if (!window.confirm('Takibi bırakmak istediğinize emin misiniz?')) return;
         setFriendActionLoading(true);
         try {
             await axios.delete(`${API_BASE}/api/friends/remove/${id}`, {
@@ -281,7 +290,7 @@ const Profile = () => {
             return (
                 <button onClick={removeFriend} className="friend-btn friend-btn--accepted">
                     <UserCheck className="w-4 h-4" />
-                    <span>Arkadaşsınız</span>
+                    <span>Takip Ediyorsun</span>
                 </button>
             );
         }
@@ -313,7 +322,7 @@ const Profile = () => {
         return (
             <button onClick={sendFriendRequest} className="friend-btn friend-btn--add">
                 <UserPlus className="w-4 h-4" />
-                <span>Arkadaş Ekle</span>
+                <span>Takip Et</span>
             </button>
         );
     };
@@ -342,33 +351,55 @@ const Profile = () => {
                     </div>
 
                     <div className="flex-1 w-full">
-                        <div className="flex flex-col md:flex-row items-center md:items-start gap-3 mb-2">
-                            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{profile.full_name || 'İsimsiz Şef'}</h1>
-                            {renderFriendButton()}
+                        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 mb-2">
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{profile.full_name || 'İsimsiz Şef'}</h1>
+                                {isOwner && (
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex md:hidden items-center justify-center p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors border border-red-100"
+                                        title="Çıkış Yap"
+                                    >
+                                        <LogOut className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {renderFriendButton()}
+                                {isOwner && (
+                                    <button
+                                        onClick={handleLogout}
+                                        className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-gray-100 hover:border-red-100 font-bold text-xs"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        <span>Çıkış</span>
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         <p className="text-gray-500 font-medium mb-6">@{profile.username}</p>
 
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-xs md:text-sm text-gray-600 bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
-                            <div className="flex items-center gap-1.5">
-                                <Calendar className="w-4 h-4 text-[#10B981]" />
-                                <span>Katılım: {new Date(profile.created_at).toLocaleDateString('tr-TR')}</span>
+                        <div className="grid grid-cols-2 min-[480px]:grid-cols-3 gap-3 md:flex md:flex-wrap md:items-center md:justify-start md:gap-6 text-[10px] md:text-sm text-gray-600 bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
+                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                                <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#10B981]" />
+                                <span className="truncate">Katılım: {new Date(profile.created_at).toLocaleDateString('tr-TR')}</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <ChefHat className="w-4 h-4 text-orange-500" />
+                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                                <ChefHat className="w-3.5 h-3.5 md:w-4 md:h-4 text-orange-500" />
                                 <span>{recipes.length} Tarif</span>
                             </div>
                             {isOwner && (
-                                <div className="flex items-center gap-1.5">
-                                    <ChefHat className="w-4 h-4 text-yellow-500" />
+                                <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                                    <ChefHat className="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-500" />
                                     <span>{menus.length} Menü</span>
                                 </div>
                             )}
-                            <div className="flex items-center gap-1.5">
-                                <Users className="w-4 h-4 text-purple-500" />
-                                <span>{friends.length} Arkadaş</span>
+                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                                <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
+                                <span>{friends.length} Takip</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <MessageSquare className="w-4 h-4 text-blue-500" />
+                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                                <MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" />
                                 <span>{comments.length} Yorum</span>
                             </div>
                         </div>
@@ -380,7 +411,7 @@ const Profile = () => {
                     <div className="pending-requests-card mb-8">
                         <div className="pending-requests-header">
                             <UserPlus className="w-5 h-5 text-orange-500" />
-                            <h2>Bekleyen Arkadaşlık İstekleri ({pendingRequests.length})</h2>
+                            <h2>Bekleyen Takip İstekleri ({pendingRequests.length})</h2>
                         </div>
                         <div className="pending-requests-list">
                             {pendingRequests.map(request => (
@@ -420,22 +451,22 @@ const Profile = () => {
 
                 {/* Content Tabs */}
                 <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden min-h-[500px]">
-                    <div className="flex border-b border-gray-100">
+                    <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar scroll-smooth bg-gray-50/20">
                         <button
                             onClick={() => setActiveTab('recipes')}
-                            className={`flex-1 py-4 text-xs md:text-sm font-bold uppercase tracking-wider transition-colors ${activeTab === 'recipes' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-green-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
+                            className={`flex-1 min-w-[120px] py-4 text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'recipes' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
                         >
                             Tarifler ({recipes.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('friends')}
-                            className={`flex-1 py-4 text-xs md:text-sm font-bold uppercase tracking-wider transition-colors ${activeTab === 'friends' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-green-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
+                            className={`flex-1 min-w-[120px] py-4 text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'friends' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
                         >
-                            Arkadaşlar ({friends.length})
+                            Takip ({friends.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('comments')}
-                            className={`flex-1 py-4 text-xs md:text-sm font-bold uppercase tracking-wider transition-colors ${activeTab === 'comments' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-green-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
+                            className={`flex-1 min-w-[120px] py-4 text-[10px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'comments' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
                         >
                             Yorumlar ({comments.length})
                         </button>
@@ -545,7 +576,7 @@ const Profile = () => {
                         {activeTab === 'friends' && (
                             <div className="friends-grid">
                                 {friends.length > 0 ? friends.map(friend => (
-                                    <Link key={friend.id} to={`/profile/${friend.id}`} className="friend-card">
+                                    <Link key={friend.id} to={`/profile/${friend.id}`} className="friend-card group">
                                         {friend.profile_image ? (
                                             <img
                                                 src={friend.profile_image.startsWith('http') ? friend.profile_image : `${API_BASE}${friend.profile_image}`}
@@ -557,11 +588,15 @@ const Profile = () => {
                                                 {(friend.full_name || friend.username).charAt(0).toUpperCase()}
                                             </div>
                                         )}
-                                        <div className="friend-card-info">
-                                            <div className="friend-card-name">{friend.full_name || friend.username}</div>
-                                            <div className="friend-card-username">@{friend.username}</div>
+                                        <div className="friend-card-info flex-1 min-w-0">
+                                            <div className="friend-card-name group-hover:text-[#10B981] transition-colors truncate">{friend.full_name || friend.username}</div>
+                                            <div className="friend-card-username truncate">@{friend.username}</div>
+                                            <div className="friend-card-since mt-1 flex md:hidden items-center gap-1.5 text-[10px] text-gray-400">
+                                                <Calendar className="w-3 h-3 text-[#10B981]" />
+                                                {new Date(friend.friends_since).toLocaleDateString('tr-TR')}
+                                            </div>
                                         </div>
-                                        <div className="friend-card-since">
+                                        <div className="friend-card-since hidden md:flex items-center gap-1.5 text-[11px] text-gray-300">
                                             <Calendar className="w-3 h-3" />
                                             {new Date(friend.friends_since).toLocaleDateString('tr-TR')}
                                         </div>
@@ -569,7 +604,7 @@ const Profile = () => {
                                 )) : (
                                     <div className="col-span-full py-12 text-center text-gray-400">
                                         <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                        Henüz arkadaş eklenmemiş.
+                                        Henüz kimse takip edilmemiş.
                                     </div>
                                 )}
                             </div>

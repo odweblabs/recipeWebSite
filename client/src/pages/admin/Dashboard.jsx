@@ -514,34 +514,34 @@ const Dashboard = () => {
                                 <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
                                     <LayoutDashboard className="w-4 h-4 text-gray-400" /> Genel Toplam
                                 </h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
-                                        <div className="text-2xl font-black text-blue-600">{stats?.counts?.recipes || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mt-1">Tarif</div>
+                                <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center flex flex-col justify-center min-h-[90px]">
+                                        <div className="text-xl sm:text-2xl font-black text-blue-600 truncate px-1">{stats?.counts?.recipes || 0}</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mt-1 break-words">Tarif</div>
                                     </div>
-                                    <div className="bg-green-50 p-4 rounded-xl border border-green-100 text-center">
-                                        <div className="text-2xl font-black text-green-600">{stats?.counts?.users || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-green-400 mt-1">Kullanıcı</div>
+                                    <div className="bg-green-50 p-4 rounded-xl border border-green-100 text-center flex flex-col justify-center min-h-[90px]">
+                                        <div className="text-xl sm:text-2xl font-black text-green-600 truncate px-1">{stats?.counts?.users || 0}</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-green-400 mt-1 break-words">Üye</div>
                                     </div>
-                                    <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 text-center">
-                                        <div className="text-2xl font-black text-orange-600">{stats?.counts?.categories || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-orange-400 mt-1">Kategori</div>
+                                    <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 text-center flex flex-col justify-center min-h-[90px]">
+                                        <div className="text-xl sm:text-2xl font-black text-orange-600 truncate px-1">{stats?.counts?.categories || 0}</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-orange-400 mt-1 break-words">Kategori</div>
                                     </div>
-                                    <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 text-center">
-                                        <div className="text-2xl font-black text-purple-600">{stats?.counts?.comments || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mt-1">Yorum</div>
+                                    <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 text-center flex flex-col justify-center min-h-[90px]">
+                                        <div className="text-xl sm:text-2xl font-black text-purple-600 truncate px-1">{stats?.counts?.comments || 0}</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mt-1 break-words">Yorum</div>
                                     </div>
-                                    <div className="bg-rose-50 p-4 rounded-xl border border-rose-100 text-center">
-                                        <div className="text-2xl font-black text-rose-600">{stats?.counts?.favorites || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-rose-400 mt-1">Favori</div>
+                                    <div className="bg-rose-50 p-4 rounded-xl border border-rose-100 text-center flex flex-col justify-center min-h-[90px]">
+                                        <div className="text-xl sm:text-2xl font-black text-rose-600 truncate px-1">{stats?.counts?.favorites || 0}</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-rose-400 mt-1 break-words">Favori</div>
                                     </div>
-                                    <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 text-center">
-                                        <div className="text-2xl font-black text-yellow-600">{stats?.counts?.ratings || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 mt-1">Puan</div>
+                                    <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 text-center flex flex-col justify-center min-h-[90px]">
+                                        <div className="text-xl sm:text-2xl font-black text-yellow-600 truncate px-1">{stats?.counts?.ratings || 0}</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 mt-1 break-words">Puan</div>
                                     </div>
-                                    <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-center">
-                                        <div className="text-2xl font-black text-indigo-600">{stats?.counts?.friendships || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mt-1">Arkadaşlık</div>
+                                    <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-center flex flex-col justify-center min-h-[90px]">
+                                        <div className="text-xl sm:text-2xl font-black text-indigo-600 truncate px-1">{stats?.counts?.friendships || 0}</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mt-1 break-words">Takip</div>
                                     </div>
                                 </div>
                             </div>
@@ -573,23 +573,25 @@ const Dashboard = () => {
                                         const isOnline = lastActive && (Date.now() - lastActive.getTime()) < 2 * 60 * 1000;
 
                                         return (
-                                            <div key={a.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                                                {a.profile_image ? (
-                                                    <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} alt={a.username} className="w-9 h-9 rounded-full object-cover border border-gray-200" />
-                                                ) : (
-                                                    <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs uppercase">{(a.full_name || a.username || '?').charAt(0)}</div>
-                                                )}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-bold text-gray-800">{a.full_name || a.username}</span>
-                                                        {isOnline && <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />}
-                                                        {a.role === 'admin' && <span className="text-[9px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full uppercase">Admin</span>}
+                                            <div key={a.user_id} className="flex flex-col min-[420px]:flex-row min-[420px]:items-center gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all border border-transparent hover:border-gray-200">
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    {a.profile_image ? (
+                                                        <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} alt={a.username} className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm" />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-sm uppercase border border-gray-200">{(a.full_name || a.username || '?').charAt(0)}</div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex flex-wrap items-center gap-1.5">
+                                                            <span className="text-sm font-bold text-gray-800 truncate">{a.full_name || a.username}</span>
+                                                            {isOnline && <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0 animate-pulse" />}
+                                                            {a.role === 'admin' && <span className="text-[8px] font-black bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md uppercase border border-amber-200 shadow-sm leading-none">Admin</span>}
+                                                        </div>
+                                                        <div className="text-[10px] text-gray-400 truncate">@{a.username}</div>
                                                     </div>
-                                                    <div className="text-[10px] text-gray-400">@{a.username}</div>
                                                 </div>
-                                                <div className="text-right flex-shrink-0">
-                                                    <div className="text-sm font-black text-cyan-600">{timeStr}</div>
-                                                    <div className="text-[10px] text-gray-400">{isOnline ? 'Şu an çevrimiçi' : lastActive ? lastActive.toLocaleDateString('tr-TR') : ''}</div>
+                                                <div className="text-left min-[420px]:text-right flex-shrink-0 pl-[52px] min-[420px]:pl-0 border-l-2 min-[420px]:border-l-0 border-cyan-100 min-[420px]:border-transparent">
+                                                    <div className="text-sm font-black text-cyan-600 leading-tight">{timeStr}</div>
+                                                    <div className="text-[10px] font-medium text-gray-400 mt-0.5">{isOnline ? 'Şu an aktif' : lastActive ? lastActive.toLocaleDateString('tr-TR') : ''}</div>
                                                 </div>
                                             </div>
                                         );
@@ -804,14 +806,26 @@ const Dashboard = () => {
             <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
                 <Link to="/" className="flex items-center gap-2">
                     <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
-                    <span className="text-xl font-bold text-gray-800">Tarifo</span>
                 </Link>
-                <button
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="p-2 text-gray-600 bg-gray-50 rounded-xl"
-                >
-                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button className="relative p-2 text-gray-400">
+                        <Bell className="w-6 h-6" />
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    </button>
+                    <Link to="/profile/me">
+                        {user.profile_image ? (
+                            <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border border-gray-100">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
+                        )}
+                    </Link>
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="p-2 text-gray-600 bg-gray-50 rounded-xl ml-1"
+                    >
+                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
+                </div>
             </div>
 
             {/* Overlay */}
@@ -869,7 +883,7 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
+                    <div className="hidden md:flex items-center gap-3 pl-6 border-l border-gray-200">
                         {user.profile_image ? (
                             <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt={user.full_name} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
                         ) : (

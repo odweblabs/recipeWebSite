@@ -91,9 +91,9 @@ const Home = () => {
                 </motion.div>
 
                 <div className="flex items-center gap-4">
-                    <button className="p-4 bg-white border border-gray-50 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all">
+                    <Link to="/admin/dashboard?tab=settings" className="p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all flex items-center justify-center">
                         <Sliders className="h-5 w-5" />
-                    </button>
+                    </Link>
                     <Link to="/admin/recipes/new" className="px-8 py-4 bg-chefie-dark text-white font-black text-sm rounded-2xl shadow-xl shadow-gray-200 hover:bg-chefie-yellow hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
                         TARİF PAYLAŞ <ArrowUpRight className="h-4 w-4" />
                     </Link>
@@ -114,8 +114,8 @@ const Home = () => {
                     className="absolute bottom-10 left-[10%] w-32 h-32 bg-white/5 blur-3xl rounded-full"
                 ></motion.div>
 
-                <div className="absolute top-0 right-0 w-1/2 h-full opacity-30 pointer-events-none">
-                    <div className="absolute inset-0 bg-gradient-to-l from-chefie-dark to-transparent z-10"></div>
+                <div className="absolute top-0 right-0 w-full md:w-1/2 h-full opacity-40 md:opacity-30 pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-chefie-dark via-chefie-dark/80 md:via-transparent to-chefie-dark/90 md:to-transparent z-10"></div>
                     <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=1000" alt="Kitchen" className="w-full h-full object-cover" />
                 </div>
 
@@ -217,7 +217,7 @@ const Home = () => {
 
                 <div
                     ref={scrollContainerRef}
-                    className="flex gap-8 overflow-x-auto pb-12 -mx-4 px-4 scroll-smooth scrollbar-hide snap-x pt-32"
+                    className="flex gap-8 overflow-x-auto pb-12 -mx-4 px-12 md:px-4 md:mx-0 scroll-smooth scrollbar-hide snap-x snap-mandatory pt-32"
                 >
                     {loading ? (
                         <div className="w-full flex gap-8">
@@ -233,18 +233,16 @@ const Home = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.1 }}
                                 onClick={() => navigate(`/recipes/${recipe.id}`)}
-                                className="min-w-[260px] md:min-w-[270px] lg:min-w-[280px] snap-start bg-white rounded-[2.5rem] shadow-xl shadow-gray-100/50 hover:shadow-2xl hover:shadow-chefie-yellow/10 transition-transform duration-300 relative group/card border border-gray-50 cursor-pointer text-center"
+                                className="min-w-[280px] sm:min-w-[300px] md:min-w-[270px] lg:min-w-[280px] snap-center md:snap-start bg-white rounded-[2.5rem] shadow-xl shadow-gray-100/50 hover:shadow-2xl hover:shadow-chefie-yellow/10 transition-transform duration-300 relative group/card border border-gray-50 cursor-pointer text-center"
                             >
                                 {/* Circular Floating Image */}
                                 <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full p-2 bg-white shadow-2xl z-10 transition-transform duration-300 ease-out group-hover/card:scale-105">
                                     <div className="w-full h-full rounded-full overflow-hidden relative">
-                                        {recipe.image_url ? (
-                                            <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover transition-transform duration-500 group-hover/card:rotate-3" />
-                                        ) : (
-                                            <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                                                <Utensils className="w-10 h-10 text-chefie-yellow/20" />
-                                            </div>
-                                        )}
+                                        <img
+                                            src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                            alt={recipe.title}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover/card:rotate-3"
+                                        />
                                     </div>
                                 </div>
 
@@ -335,8 +333,8 @@ const Home = () => {
 
             {/* Haftanın Şefleri Section */}
             <section className="bg-white rounded-[4rem] p-10 md:p-20 shadow-2xl shadow-gray-100 border border-gray-50 overflow-hidden relative">
-                <div className="absolute top-1/2 -translate-y-1/2 right-0 md:right-10 opacity-[0.05] pointer-events-none">
-                    <ChefHat size={400} className="text-chefie-dark" />
+                <div className="absolute top-1/2 -translate-y-1/2 -right-32 md:right-10 opacity-[0.05] md:opacity-[0.05] pointer-events-none">
+                    <ChefHat size={600} className="text-chefie-dark" />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-end justify-between mb-16 relative z-10">
@@ -353,7 +351,7 @@ const Home = () => {
 
                 <div
                     ref={chefsScrollRef}
-                    className="flex gap-10 overflow-x-auto scrollbar-hide pb-4 snap-x relative z-10 -mx-4 px-4"
+                    className="flex justify-center md:justify-start gap-10 overflow-x-auto scrollbar-hide pb-4 snap-x relative z-10 -mx-4 px-4"
                 >
                     {topChefs.length > 0 ? topChefs.map((chef, idx) => (
                         <motion.div
@@ -393,7 +391,7 @@ const Home = () => {
                     <h2 className="text-3xl font-black text-chefie-dark flex items-center gap-3">
                         Mutfak Sırları <Play className="w-5 h-5 text-chefie-yellow fill-current" />
                     </h2>
-                    <Link to="/blog" className="px-6 py-3 bg-white border border-gray-100 text-gray-400 font-bold text-xs rounded-xl hover:text-chefie-yellow hover:border-chefie-yellow transition-all shadow-sm">TÜMÜNÜ OKU</Link>
+                    <Link to="/blog" className="text-gray-400 font-bold text-xs uppercase hover:text-chefie-yellow transition-colors">TÜMÜNÜ OKU</Link>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">

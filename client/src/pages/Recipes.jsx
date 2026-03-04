@@ -209,17 +209,11 @@ const Recipes = () => {
                                 className="bg-white rounded-[2.5rem] shadow-lg shadow-gray-200/30 hover:shadow-2xl hover:shadow-chefie-yellow/10 transition-transform duration-300 transform hover:-translate-y-2 border border-gray-50 overflow-hidden flex flex-col group relative cursor-pointer"
                             >
                                 <div className="relative h-64 overflow-hidden">
-                                    {recipe.image_url ? (
-                                        <img
-                                            src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`}
-                                            alt={recipe.title}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                                            <Utensils className="w-12 h-12 text-chefie-yellow/30" />
-                                        </div>
-                                    )}
+                                    <img
+                                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                        alt={recipe.title}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
 
                                     <div className="absolute top-5 left-5">
                                         <div className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-widest text-chefie-dark shadow-xl shadow-black/5">

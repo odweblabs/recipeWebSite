@@ -148,14 +148,26 @@ const RecipeForm = () => {
             <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
                 <Link to="/" className="flex items-center gap-2">
                     <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
-                    <span className="text-xl font-bold text-gray-800">Tarifo</span>
                 </Link>
-                <button
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="p-2 text-gray-600 bg-gray-50 rounded-xl"
-                >
-                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button className="relative p-2 text-gray-400">
+                        <Bell className="w-6 h-6" />
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    </button>
+                    <Link to="/profile/me">
+                        {user.profile_image ? (
+                            <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border border-gray-100">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
+                        )}
+                    </Link>
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="p-2 text-gray-600 bg-gray-50 rounded-xl ml-1"
+                    >
+                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
+                </div>
             </div>
 
             {/* Overlay */}
@@ -220,18 +232,24 @@ const RecipeForm = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="hidden md:flex items-center gap-6">
                         <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
                             <Bell className="w-6 h-6" />
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                         </button>
 
                         <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
-                            <img
-                                src="https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png?resize=800x600&vertical=center"
-                                alt="Admin"
-                                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
-                            />
+                            {user.profile_image ? (
+                                <img
+                                    src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`}
+                                    alt={user.full_name}
+                                    className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                                />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold border-2 border-white shadow-sm">
+                                    {(user.full_name || user.username || 'A').charAt(0).toUpperCase()}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>
