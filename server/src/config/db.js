@@ -17,9 +17,13 @@ if (connectionString && connectionString.startsWith('psql')) {
         const port = portMatch ? portMatch[1] : '5432';
         const db = dbMatch[1];
         const user = userMatch[1];
-        // Note: Password usually isn't in psql command strings for security, 
-        // but Supabase psql strings often have user.password as the username part
-        connectionString = `postgresql://${user}@${host}:${port}/${db}`;
+        const password = process.env.DB_PASSWORD;
+        if (password) {
+            connectionString = `postgresql://${user}:${password}@${host}:${port}/${db}`;
+        } else {
+            // Fallback if password isn't set separately
+            connectionString = `postgresql://${user}@${host}:${port}/${db}`;
+        }
     }
 }
 
