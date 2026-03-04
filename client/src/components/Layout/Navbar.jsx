@@ -14,7 +14,7 @@ const Navbar = () => {
                             <img
                                 src="/bitarif_logo_1.png"
                                 alt="Bitarif Logo"
-                                className="h-32 w-auto group-hover:scale-105 transition-transform duration-300"
+                                className="h-20 w-auto group-hover:scale-105 transition-transform duration-300"
                             />
                         </Link>
                     </div>
@@ -39,7 +39,7 @@ const Navbar = () => {
             </div>
 
             {isOpen && (
-                <div className="md:hidden bg-white border-t border-gray-50 shadow-lg absolute w-full top-28 left-0 z-40 max-h-[80vh] overflow-y-auto pb-8">
+                <div className="md:hidden bg-white border-t border-gray-50 shadow-lg absolute w-full top-[112px] left-0 z-40 max-h-[80vh] overflow-y-auto pb-8">
                     <div className="px-4 pt-4 pb-12 space-y-1">
                         <Link to="/" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-gray-50 rounded-2xl font-black text-xs tracking-wide">ANA SAYFA</Link>
                         <Link to="/recipes" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-gray-50 rounded-2xl font-black text-xs tracking-wide">TARİFLER</Link>

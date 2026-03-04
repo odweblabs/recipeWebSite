@@ -380,7 +380,7 @@ const RecipeDetail = () => {
                                     title={isScreenAwake ? "Ekran Açık Tutuluyor" : "Ekranı Açık Tut"}
                                 >
                                     <Smartphone className="w-5 h-5" />
-                                    {isScreenAwake && <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">Açık</span>}
+                                    {isScreenAwake && <span className="text-[10px] font-bold uppercase tracking-widest">Açık</span>}
                                 </button>
                             </div>
                         </div>

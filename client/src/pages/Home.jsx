@@ -365,12 +365,8 @@ const Home = () => {
                             onClick={() => navigate(`/profile/${chef.id}`)}
                         >
                             <div className="relative mb-6">
-                                <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden">
-                                    {chef.profile_image ? (
-                                        <img src={chef.profile_image.startsWith('http') ? chef.profile_image : `${API_BASE}${chef.profile_image}`} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                    ) : (
-                                        <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-3xl text-chefie-dark">{(chef.full_name || chef.username).charAt(0)}</div>
-                                    )}
+                                <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-chefie-cream flex items-center justify-center">
+                                    <ChefHat className="w-16 h-16 text-chefie-yellow group-hover:scale-110 transition-transform duration-500" />
                                 </div>
                                 <div className="absolute -bottom-2 -right-2 bg-chefie-yellow text-white w-10 h-10 rounded-full border-4 border-white flex items-center justify-center font-black text-xs shadow-lg">#{idx + 1}</div>
                             </div>
