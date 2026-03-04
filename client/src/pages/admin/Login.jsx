@@ -90,9 +90,8 @@ const Login = () => {
                 {/* Sol Taraf - Form */}
                 <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative z-10">
                     <div className="mb-8">
-                        <Link to="/" className="text-[#10B981] font-bold text-xl mb-8 flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
-                            <img src="/bitarif_logo_1.png" alt="Logo" className="w-8 h-8" />
-                            Tarifo
+                        <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-8 block">
+                            <img src="/bitarif_logo_1.png" alt="Logo" className="w-12 h-12" />
                         </Link>
 
                         <h1 className="text-4xl md:text-5xl font-serif text-[#1F2937] mb-3">
@@ -220,7 +219,7 @@ const Login = () => {
                         <div className="relative w-full max-w-md aspect-square">
                             {/* Ana Görsel */}
                             <img
-                                src="/src/assets/login-chef.png"
+                                src="/login-chef.png"
                                 alt="Chef Illustration"
                                 className="w-full h-full object-contain drop-shadow-2xl transform hover:scale-105 transition-transform duration-500"
                             />
