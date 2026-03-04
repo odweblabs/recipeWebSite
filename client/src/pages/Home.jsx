@@ -335,8 +335,8 @@ const Home = () => {
 
             {/* Haftanın Şefleri Section */}
             <section className="bg-white rounded-[4rem] p-10 md:p-20 shadow-2xl shadow-gray-100 border border-gray-50 overflow-hidden relative">
-                <div className="absolute top-1/2 -translate-y-1/2 right-10 md:right-20 opacity-[0.40] pointer-events-none">
-                    <img src="/images/faint-chef-hat.jpg" alt="Chef Illustration" className="w-[30rem] h-[30rem] object-contain mix-blend-darken" />
+                <div className="absolute top-1/2 -translate-y-1/2 right-0 md:right-10 opacity-[0.05] pointer-events-none">
+                    <ChefHat size={400} className="text-chefie-dark" />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-end justify-between mb-16 relative z-10">
@@ -365,8 +365,12 @@ const Home = () => {
                             onClick={() => navigate(`/profile/${chef.id}`)}
                         >
                             <div className="relative mb-6">
-                                <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-chefie-cream flex items-center justify-center">
-                                    <ChefHat className="w-16 h-16 text-chefie-yellow group-hover:scale-110 transition-transform duration-500" />
+                                <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden">
+                                    {chef.profile_image ? (
+                                        <img src={chef.profile_image.startsWith('http') ? chef.profile_image : `${API_BASE}${chef.profile_image}`} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    ) : (
+                                        <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-3xl text-chefie-dark">{(chef.full_name || chef.username).charAt(0)}</div>
+                                    )}
                                 </div>
                                 <div className="absolute -bottom-2 -right-2 bg-chefie-yellow text-white w-10 h-10 rounded-full border-4 border-white flex items-center justify-center font-black text-xs shadow-lg">#{idx + 1}</div>
                             </div>

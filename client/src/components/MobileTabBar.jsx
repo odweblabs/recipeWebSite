@@ -61,8 +61,8 @@ const MobileTabBar = () => {
             initial={{ y: 0 }}
             animate={{ y: isVisible ? 0 : 150 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className="fixed bottom-0 left-0 w-full z-[70] md:hidden pointer-events-none pb-2"
-            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
+            className="fixed bottom-0 left-0 w-full z-[70] md:hidden pointer-events-none pb-0"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.25rem)' }}
         >
             <div className="mx-4 relative pointer-events-auto">
                 {/* The floating center button */}
