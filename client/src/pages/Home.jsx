@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Sliders, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare } from 'lucide-react';
+import { Search, Sliders, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare, Soup, Beef, Cake, Croissant, Coffee, Flame, Trophy } from 'lucide-react';
 import { blogPosts } from '../data/blogData';
 
 const Home = () => {
@@ -25,6 +25,17 @@ const Home = () => {
             const scrollAmount = direction === 'left' ? -300 : 300;
             current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         }
+    };
+
+    const getCategoryIcon = (name, className) => {
+        const n = name.toLowerCase();
+        if (n.includes('çorba')) return <Soup className={className} />;
+        if (n.includes('et')) return <Beef className={className} />;
+        if (n.includes('tatlı')) return <Cake className={className} />;
+        if (n.includes('hamur')) return <Croissant className={className} />;
+        if (n.includes('içecek')) return <Coffee className={className} />;
+        if (n.includes('aperatif')) return <Flame className={className} />;
+        return <Utensils className={className} />;
     };
 
     const scroll = (direction) => {
@@ -202,11 +213,11 @@ const Home = () => {
 
             {/* Haftanın Yıldızları Section */}
             <section className="relative group">
-                <div className="flex items-center justify-between mb-12">
-                    <h2 className="text-3xl font-black text-chefie-dark flex items-center gap-3">
-                        Haftanın Yıldızları <Utensils className="text-chefie-yellow" />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+                    <h2 className="text-3xl font-black text-chefie-dark flex items-center gap-4">
+                        Haftanın Yıldızları <Trophy className="text-chefie-yellow w-8 h-8" />
                     </h2>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 justify-end sm:justify-start">
                         <button
                             onClick={() => scroll('left')}
                             className="p-3 bg-white border border-gray-50 rounded-2xl text-gray-400 hover:text-chefie-dark hover:bg-chefie-cream transition-all shadow-xl shadow-gray-100"
@@ -328,7 +339,7 @@ const Home = () => {
                                 className={`flex flex-col items-center p-8 rounded-[2.5rem] ${bgColors[idx % 6]} hover:scale-105 transition-all duration-300 border border-transparent hover:border-white shadow-xl shadow-transparent hover:shadow-gray-100 group`}
                             >
                                 <div className={`w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform`}>
-                                    <Utensils className={`w-8 h-8 ${iconColors[idx % 6]}`} />
+                                    {getCategoryIcon(cat.name, `w-8 h-8 ${iconColors[idx % 6]}`)}
                                 </div>
                                 <span className={`text-sm font-black text-center ${textColors[idx % 6]}`}>{cat.name}</span>
                                 <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-tighter">İncele</span>
