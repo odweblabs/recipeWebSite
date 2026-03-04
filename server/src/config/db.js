@@ -3,8 +3,28 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const { Pool } = require('pg');
 
+let connectionString = process.env.DATABASE_URL;
+
+// If DATABASE_URL is in 'psql -h ...' format, convert it to URI
+if (connectionString && connectionString.startsWith('psql')) {
+    const hostMatch = connectionString.match(/-h\s+([^\s]+)/);
+    const portMatch = connectionString.match(/-p\s+(\d+)/);
+    const dbMatch = connectionString.match(/-d\s+([^\s]+)/);
+    const userMatch = connectionString.match(/-U\s+([^\s]+)/);
+
+    if (hostMatch && userMatch && dbMatch) {
+        const host = hostMatch[1];
+        const port = portMatch ? portMatch[1] : '5432';
+        const db = dbMatch[1];
+        const user = userMatch[1];
+        // Note: Password usually isn't in psql command strings for security, 
+        // but Supabase psql strings often have user.password as the username part
+        connectionString = `postgresql://${user}@${host}:${port}/${db}`;
+    }
+}
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: connectionString,
     ssl: process.env.NODE_ENV === 'production' || process.env.VERCEL
         ? { rejectUnauthorized: false }
         : false
