@@ -495,28 +495,80 @@ const Home = () => {
 
             {/* Featured Banner - Chef's Recommendation */}
             {recommendation && (
-                <section className="bg-chefie-yellow rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden shadow-xl shadow-yellow-100/50">
+                <section className="bg-chefie-yellow rounded-[4rem] p-10 md:p-20 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden shadow-2xl shadow-yellow-100/50 border border-white">
                     <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-                    <div className="relative z-10 max-w-lg space-y-6 text-center md:text-left">
-                        <span className="px-4 py-1.5 bg-chefie-dark text-white rounded-full text-[10px] font-black tracking-widest uppercase">GÜNÜN ÖZELİ</span>
-                        <h2 className="text-4xl md:text-6xl font-black text-chefie-dark leading-tight">Şefin Tavsiyesi: {recommendation.title}</h2>
-                        <p className="text-chefie-dark/70 text-lg font-medium leading-relaxed">
-                            {recommendation.description || 'Haftanın en çok beğenilen tarifi ile akşam yemeğinizi bir ziyafete dönüştürün.'}
-                        </p>
-                        <Link to={`/recipes/${recommendation.id}`} className="inline-flex items-center gap-2 px-10 py-5 bg-chefie-dark text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-gray-900/10">
-                            TARİFİ İNCELE <ArrowUpRight className="w-5 h-5" />
-                        </Link>
+                    <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div className="relative z-10 max-w-xl space-y-8 text-center md:text-left order-2 md:order-1">
+                        <div className="inline-flex items-center gap-3">
+                            <span className="px-4 py-1.5 bg-chefie-dark text-white rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg">GÜNÜN ÖZELİ</span>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/30 backdrop-blur-md rounded-full border border-white/40">
+                                <Star className="w-3.5 h-3.5 text-chefie-dark fill-current" />
+                                <span className="text-[10px] font-black text-chefie-dark">{Number(recommendation.avg_rating || 0).toFixed(1)} Puan</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <h2 className="text-4xl md:text-6xl font-black text-chefie-dark leading-[1.1]">
+                                <span className="text-chefie-dark/40 block text-2xl md:text-3xl mb-2">Şefin Tavsiyesi:</span>
+                                {recommendation.title}
+                            </h2>
+                            <p className="text-chefie-dark/70 text-lg md:text-xl font-medium leading-relaxed max-w-lg">
+                                {recommendation.description || 'Haftanın en çok beğenilen tarifi ile akşam yemeğinizi bir ziyafete dönüştürün.'}
+                            </p>
+                        </div>
+
+                        {/* Recipe Specs */}
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <div className="flex items-center gap-2 px-5 py-3 bg-white shadow-xl shadow-yellow-200/50 rounded-2xl">
+                                <Clock className="w-5 h-5 text-chefie-yellow" />
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">HAZIRLIK</span>
+                                    <span className="text-sm font-black text-chefie-dark">{recommendation.cook_time || recommendation.prep_time || 30} dk</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 px-5 py-3 bg-white shadow-xl shadow-yellow-200/50 rounded-2xl">
+                                <Users className="w-5 h-5 text-chefie-yellow" />
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">PORSİYON</span>
+                                    <span className="text-sm font-black text-chefie-dark">{recommendation.servings || 4} Kişilik</span>
+                                </div>
+                            </div>
+                            {recommendation.chef_name && (
+                                <div className="flex items-center gap-3 pl-2">
+                                    <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden shadow-lg bg-white">
+                                        {recommendation.chef_image ? (
+                                            <img src={recommendation.chef_image.startsWith('http') ? recommendation.chef_image : `${API_BASE}${recommendation.chef_image}`} alt={recommendation.chef_name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-chefie-dark text-sm">{(recommendation.chef_name || recommendation.chef_username).charAt(0)}</div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-[10px] font-black text-chefie-dark/50 uppercase leading-none">HAZIRLAYAN</span>
+                                        <span className="text-xs font-black text-chefie-dark">{recommendation.chef_name}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="pt-4">
+                            <Link to={`/recipes/${recommendation.id}`} className="inline-flex items-center gap-3 px-10 py-5 bg-chefie-dark text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-gray-900/10 group">
+                                TARİFİ İNCELE <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                            </Link>
+                        </div>
                     </div>
-                    <div className="flex-1 w-full flex justify-center md:justify-end">
+
+                    <div className="flex-1 w-full flex justify-center md:justify-end order-1 md:order-2">
                         <motion.div
                             whileHover={{ rotate: 8, scale: 1.05 }}
-                            className="w-64 h-64 md:w-80 md:h-80 rounded-[3rem] overflow-hidden border-8 border-white/30 shadow-2xl rotate-3"
+                            className="w-72 h-72 md:w-[450px] md:h-[450px] rounded-[4rem] overflow-hidden border-[12px] border-white shadow-2xl relative"
                         >
                             <img
                                 src={recommendation.image_url ? (recommendation.image_url.startsWith('/images/') ? recommendation.image_url : `${API_BASE}${recommendation.image_url}`) : '/default-recipe.png'}
                                 alt={recommendation.title}
                                 className="w-full h-full object-cover"
                             />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
                         </motion.div>
                     </div>
                 </section>
