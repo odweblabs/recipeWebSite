@@ -148,7 +148,7 @@ const RecipeForm = () => {
             <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
                 <Link to="/" className="flex items-center gap-2">
                     <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
-                    <span className="text-xl font-bold text-gray-800">Bi Tarif</span>
+                    <span className="text-xl font-bold text-gray-800">Tarifo</span>
                 </Link>
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

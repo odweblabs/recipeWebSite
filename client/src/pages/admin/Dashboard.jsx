@@ -70,6 +70,7 @@ const Dashboard = () => {
     const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
     const [showCurrentPw, setShowCurrentPw] = useState(false);
     const [showNewPw, setShowNewPw] = useState(false);
+    const [showConfirmPw, setShowConfirmPw] = useState(false);
 
     useEffect(() => {
         if (!token) {
@@ -703,13 +704,22 @@ const Dashboard = () => {
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Yeni Şifre Tekrar</label>
-                                            <input
-                                                type="password"
-                                                value={confirmPassword}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                placeholder="Yeni şifrenizi tekrar girin"
-                                                className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none"
-                                            />
+                                            <div className="relative">
+                                                <input
+                                                    type={showConfirmPw ? 'text' : 'password'}
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    placeholder="Yeni şifrenizi tekrar girin"
+                                                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none pr-12"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowConfirmPw(prev => !prev); }}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                                >
+                                                    {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
                                             {confirmPassword && confirmPassword !== newPassword && (
                                                 <p className="mt-1.5 text-xs text-red-500 font-medium">Şifreler eşleşmiyor.</p>
                                             )}
@@ -794,7 +804,7 @@ const Dashboard = () => {
             <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
                 <Link to="/" className="flex items-center gap-2">
                     <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
-                    <span className="text-xl font-bold text-gray-800">Bi Tarif</span>
+                    <span className="text-xl font-bold text-gray-800">Tarifo</span>
                 </Link>
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

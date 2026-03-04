@@ -6,15 +6,11 @@ const path = require('path');
 const { authenticateToken, adminOnly } = require('../middleware/auth');
 
 // Configure Multer for image upload
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
-const upload = multer({ storage });
 
 // Admin Statistics
 router.get('/stats', adminOnly, async (req, res) => {
@@ -320,7 +316,12 @@ router.get('/:id/comments', async (req, res) => {
 router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
     try {
         const { title, description, ingredients, instructions, category_id, servings, prep_time, cook_time } = req.body;
-        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+        let imageUrl = null;
+
+        if (req.file) {
+            const base64Image = req.file.buffer.toString('base64');
+            imageUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+        }
         const finalCategoryId = category_id && category_id !== '' ? category_id : null;
         const finalServings = servings && servings !== '' ? parseInt(servings) : null;
         const userId = req.user.id;
@@ -360,8 +361,9 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
         let paramIndex = 9;
 
         if (req.file) {
+            const base64Image = req.file.buffer.toString('base64');
             sql += `, image_url = $${paramIndex++}`;
-            params.push(`/uploads/${req.file.filename}`);
+            params.push(`data:${req.file.mimetype};base64,${base64Image}`);
         }
 
         sql += ` WHERE id = $${paramIndex++}`;

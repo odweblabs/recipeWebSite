@@ -2,13 +2,14 @@ import API_BASE from '../../utils/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { Home, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
     const location = useLocation();
     const [isLogin, setIsLogin] = useState(!location.state?.isRegister);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [fullName, setFullName] = useState('');
     const [profileImage, setProfileImage] = useState(null);
     const [error, setError] = useState('');
@@ -91,7 +92,7 @@ const Login = () => {
                     <div className="mb-8">
                         <Link to="/" className="text-[#10B981] font-bold text-xl mb-8 flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
                             <img src="/bitarif_logo_1.png" alt="Logo" className="w-8 h-8" />
-                            Bi Tarif
+                            Tarifo
                         </Link>
 
                         <h1 className="text-4xl md:text-5xl font-serif text-[#1F2937] mb-3">
@@ -158,14 +159,21 @@ const Login = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
                             <div className="relative">
                                 <input
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700"
+                                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700 pr-12"
                                     required
                                     autoComplete="current-password"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
                             </div>
                         </div>
 

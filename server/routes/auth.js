@@ -10,15 +10,11 @@ const { authenticateToken, adminOnly } = require('../middleware/auth');
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey';
 
 // Configure Multer for profile image upload
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, 'profile-' + Date.now() + path.extname(file.originalname));
-    },
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
-const upload = multer({ storage });
 
 // Login Route
 router.post('/login', async (req, res) => {
@@ -61,7 +57,12 @@ router.post('/login', async (req, res) => {
 // Register Route
 router.post('/register', upload.single('profile_image'), async (req, res) => {
     const { username, password, full_name } = req.body;
-    const profile_image = req.file ? `/uploads/${req.file.filename}` : null;
+    let profile_image = null;
+
+    if (req.file) {
+        const base64Image = req.file.buffer.toString('base64');
+        profile_image = `data:${req.file.mimetype};base64,${base64Image}`;
+    }
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     try {
@@ -93,7 +94,12 @@ router.get('/me', authenticateToken, async (req, res) => {
 // Update profile
 router.put('/profile', authenticateToken, upload.single('profile_image'), async (req, res) => {
     const { full_name } = req.body;
-    const profile_image = req.file ? `/uploads/${req.file.filename}` : req.body.profile_image;
+    let profile_image = req.body.profile_image;
+
+    if (req.file) {
+        const base64Image = req.file.buffer.toString('base64');
+        profile_image = `data:${req.file.mimetype};base64,${base64Image}`;
+    }
     try {
         await executeQuery('UPDATE users SET full_name = $1, profile_image = $2 WHERE id = $3', [full_name, profile_image, req.user.id]);
         res.json({ message: 'Profil güncellendi' });

@@ -10,7 +10,7 @@ const Footer = () => {
                     <div className="col-span-1 md:col-span-2">
                         <Link to="/" className="flex items-center space-x-2 mb-4"> {/* Wrapped logo and text in Link */}
                             <ChefHat className="h-8 w-8 text-orange-500" />
-                            <span className="text-xl font-bold">Bi Tarif</span> {/* Changed LezzetDünyası to Bi Tarif */}
+                            <span className="text-xl font-bold">Tarifo</span> {/* Changed Bi Tarif to Tarifo */}
                         </Link>
                         <p className="text-gray-500 text-sm leading-relaxed"> {/* Updated classes and content */}
                             En lezzetli yemek tarifleri, mutfak sırları ve daha fazlası. Sofralarınızı şenlendirmek için buradayız.
@@ -40,7 +40,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-gray-100 mt-12 pt-8 text-center text-sm text-gray-400"> {/* Updated classes */}
-                    <p>&copy; {new Date().getFullYear()} Bi Tarif. Tüm hakları saklıdır.</p> {/* Changed LezzetDünyası to Bi Tarif */}
+                    <p>&copy; {new Date().getFullYear()} Tarifo. Tüm hakları saklıdır.</p> {/* Changed Bi Tarif to Tarifo */}
                 </div>
             </div>
         </footer>
