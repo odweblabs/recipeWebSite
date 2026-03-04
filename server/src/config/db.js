@@ -28,13 +28,13 @@ if (connectionString && connectionString.startsWith('psql')) {
 }
 
 const pool = new Pool({
-    connectionString: connectionString,
+    connectionString: connectionString.replace('5432', '6543'),
     ssl: process.env.NODE_ENV === 'production' || process.env.VERCEL
         ? { rejectUnauthorized: false }
         : false,
-    max: 10, // Paralel sorguları karşılamak için artırıldı
+    max: 1, // Transaction mode + 1 connection is very efficient for serverless/small servers
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000,
 });
 
 // Database connection check on startup

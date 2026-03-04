@@ -39,18 +39,22 @@ const Home = () => {
         const fetchData = async () => {
             try {
                 const [recipesRes, categoriesRes, statsRes, chefsRes, recommendationRes] = await Promise.all([
-                    axios.get(`${API_BASE}/api/recipes/latest?limit=12`),
-                    axios.get(`${API_BASE}/api/categories`),
-                    axios.get(`${API_BASE}/api/recipes/public-stats`),
-                    axios.get(`${API_BASE}/api/auth/top-chefs`),
-                    axios.get(`${API_BASE}/api/recipes/recommendation`)
+                    axios.get(`${API_BASE}/api/recipes/latest?limit=12`).catch(e => ({ data: [] })),
+                    axios.get(`${API_BASE}/api/categories`).catch(e => ({ data: [] })),
+                    axios.get(`${API_BASE}/api/recipes/public-stats`).catch(e => ({ data: null })),
+                    axios.get(`${API_BASE}/api/auth/top-chefs`).catch(e => ({ data: [] })),
+                    axios.get(`${API_BASE}/api/recipes/recommendation`).catch(e => ({ data: null }))
                 ]);
-                setRecipes(recipesRes.data);
-                setCategories(categoriesRes.data);
+
+                setRecipes(recipesRes.data || []);
+                setCategories(categoriesRes.data || []);
                 setPublicStats(statsRes.data);
-                setTopChefs(chefsRes.data);
+                setTopChefs(chefsRes.data || []);
                 setRecommendation(recommendationRes.data);
-                setTotalRecipes(statsRes.data.counts.recipes);
+
+                if (statsRes.data?.counts?.recipes) {
+                    setTotalRecipes(statsRes.data.counts.recipes);
+                }
             } catch (err) {
                 console.error('Error fetching data:', err);
             } finally {
