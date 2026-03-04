@@ -38,7 +38,7 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [recipesRes, categoriesRes, statsRes, chefsRes] = await Promise.all([
+                const [recipesRes, categoriesRes, statsRes, chefsRes, recommendationRes] = await Promise.all([
                     axios.get(`${API_BASE}/api/recipes/latest?limit=12`),
                     axios.get(`${API_BASE}/api/categories`),
                     axios.get(`${API_BASE}/api/recipes/public-stats`),

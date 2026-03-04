@@ -32,7 +32,7 @@ const pool = new Pool({
     ssl: process.env.NODE_ENV === 'production' || process.env.VERCEL
         ? { rejectUnauthorized: false }
         : false,
-    max: 1, // Serverless için tek bağlantı
+    max: 10, // Paralel sorguları karşılamak için artırıldı
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
 });
