@@ -72,6 +72,10 @@ const Dashboard = () => {
     const [showNewPw, setShowNewPw] = useState(false);
     const [showConfirmPw, setShowConfirmPw] = useState(false);
 
+    // Chef's Recommendation State
+    const [chefRecommendation, setChefRecommendation] = useState(null);
+    const [isSavingRecommendation, setIsSavingRecommendation] = useState(false);
+
     useEffect(() => {
         if (!token) {
             navigate('/admin/login');
@@ -84,6 +88,7 @@ const Dashboard = () => {
         if (user.role === 'admin') {
             fetchUsers();
             fetchActivity();
+            fetchRecommendation();
             // Refresh activity data every 60 seconds
             const activityInterval = setInterval(fetchActivity, 60000);
             return () => clearInterval(activityInterval);
@@ -93,7 +98,7 @@ const Dashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['all', 'favorites', 'stats', 'users', 'settings'].includes(tab)) {
+        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation'].includes(tab)) {
             setActiveTab(tab);
         }
     }, [location.search]);
@@ -146,6 +151,31 @@ const Dashboard = () => {
             setStats(res.data);
         } catch (err) {
             console.error('Error fetching stats:', err);
+        }
+    };
+
+    const fetchRecommendation = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/recipes/recommendation`);
+            setChefRecommendation(res.data);
+        } catch (err) {
+            console.error('Error fetching recommendation:', err);
+        }
+    };
+
+    const handleSetRecommendation = async (recipeId) => {
+        setIsSavingRecommendation(true);
+        try {
+            await axios.post(`${API_BASE}/api/recipes/recommendation`, { recipeId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            await fetchRecommendation();
+            alert('Şefin tavsiyesi güncellendi!');
+        } catch (err) {
+            console.error('Error setting recommendation:', err);
+            alert('Güncelleme sırasında bir hata oluştu.');
+        } finally {
+            setIsSavingRecommendation(false);
         }
     };
 
@@ -405,11 +435,13 @@ const Dashboard = () => {
                                         {stats?.recentRecipes?.length > 0 ? stats.recentRecipes.map((r) => (
                                             <Link key={r.id} to={`/recipes/${r.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                                                 <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
-                                                    {r.image_url ? (
-                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-300"><ChefHat className="w-5 h-5" /></div>
-                                                    )}
+                                                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
+                                                        <img
+                                                            src={r.image_url ? (r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`) : '/default-recipe.png'}
+                                                            alt={r.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="text-sm font-bold text-gray-800 line-clamp-1 group-hover:text-[#10B981] transition-colors">{r.title}</div>
@@ -607,6 +639,119 @@ const Dashboard = () => {
             );
         }
 
+        if (activeTab === 'recommendation') {
+            return (
+                <tr>
+                    <td colSpan="5" className="px-4 md:px-6 py-8">
+                        <div className="max-w-4xl mx-auto space-y-10">
+                            {/* Current Recommendation */}
+                            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                                        <Star className="w-5 h-5 text-chefie-yellow fill-current" /> Şu Anki Şefin Tavsiyesi
+                                    </h3>
+                                    {chefRecommendation && (
+                                        <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-green-100">
+                                            YAYINDA
+                                        </span>
+                                    )}
+                                </div>
+
+                                {chefRecommendation ? (
+                                    <div className="flex flex-col md:flex-row gap-8 items-center bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100">
+                                        <div className="w-full md:w-48 h-48 rounded-2xl overflow-hidden shadow-lg border-4 border-white flex-shrink-0">
+                                            <img
+                                                src={chefRecommendation.image_url ? (chefRecommendation.image_url.startsWith('/images/') ? chefRecommendation.image_url : `${API_BASE}${chefRecommendation.image_url}`) : '/default-recipe.png'}
+                                                alt={chefRecommendation.title}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 text-center md:text-left">
+                                            <div className="text-xs font-black text-chefie-yellow uppercase tracking-widest mb-1">{chefRecommendation.category_name || 'GENEL'}</div>
+                                            <h4 className="text-2xl font-black text-gray-800 mb-3">{chefRecommendation.title}</h4>
+                                            <p className="text-gray-500 text-sm line-clamp-2 mb-6 font-medium leading-relaxed">{chefRecommendation.description}</p>
+                                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                                                    <Clock className="w-4 h-4" /> {chefRecommendation.prep_time || 0} dk
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                                                    <Users className="w-4 h-4" /> {chefRecommendation.servings || 4} Kişilik
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                                                    <Star className="w-4 h-4 text-chefie-yellow fill-current" /> {chefRecommendation.avg_rating ? Number(chefRecommendation.avg_rating).toFixed(1) : 'Yeni'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                            <Star className="w-8 h-8 text-gray-200" />
+                                        </div>
+                                        <p className="text-gray-400 font-bold">Henüz bir tavsiye seçilmemiş.</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Select New Recommendation */}
+                            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                                    <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                                        <Plus className="w-5 h-5 text-[#10B981]" /> Yeni Tavsiye Seç
+                                    </h3>
+                                    <div className="relative w-full md:w-64">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                        <input
+                                            type="text"
+                                            placeholder="Tarif ara..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none text-sm transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin">
+                                    {recipes
+                                        .filter(r => r.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((recipe) => (
+                                            <div key={recipe.id} className="group p-4 bg-gray-50/50 hover:bg-white border hover:border-[#10B981] rounded-2xl transition-all duration-300 flex items-center gap-4">
+                                                <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-100 flex-shrink-0">
+                                                    <img
+                                                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                                        alt={recipe.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-sm font-bold text-gray-800 line-clamp-1 group-hover:text-[#10B981] transition-colors">{recipe.title}</div>
+                                                    <div className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-1">{recipe.category_name || 'GENEL'}</div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleSetRecommendation(recipe.id)}
+                                                    disabled={isSavingRecommendation || chefRecommendation?.id === recipe.id}
+                                                    className={`p-2 rounded-xl transition-all ${chefRecommendation?.id === recipe.id ? 'bg-green-500 text-white' : 'bg-white text-gray-400 hover:text-chefie-yellow hover:bg-chefie-cream border border-gray-100 shadow-sm'}`}
+                                                >
+                                                    {chefRecommendation?.id === recipe.id ? (
+                                                        <Star className="w-5 h-5 fill-current" />
+                                                    ) : (
+                                                        <ArrowRight className="w-5 h-5" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        ))
+                                    }
+                                    {recipes.filter(r => r.title.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                                        <div className="col-span-full py-12 text-center text-gray-400 font-medium">Tarif bulunamadı.</div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            );
+        }
+
         if (activeTab === 'settings') {
             return (
                 <tr>
@@ -758,11 +903,11 @@ const Dashboard = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                                    {recipe.image_url ? (
-                                        <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400"><ImageIcon className="w-5 h-5" /></div>
-                                    )}
+                                    <img
+                                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                        alt={recipe.title}
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
                                 <div>
                                     <div className="text-sm font-bold text-gray-800">{recipe.title}</div>
@@ -854,6 +999,7 @@ const Dashboard = () => {
                         <>
                             <button onClick={() => { setActiveTab('stats'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'stats' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> İstatistikler</button>
                             <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
+                            <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
                         </>
                     )}
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
@@ -869,7 +1015,7 @@ const Dashboard = () => {
                 <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-10 gap-4">
                     <div className="flex items-center gap-4 w-full max-w-xl">
                         <h1 className="text-2xl font-bold text-gray-800">
-                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : 'Ayarlar'}
+                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : 'Ayarlar'}
                         </h1>
                         <div className="relative flex-1 hidden md:block ml-8">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -917,7 +1063,7 @@ const Dashboard = () => {
 
                 <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden w-full max-w-[calc(100vw-2rem)] md:max-w-full">
                     <div className="p-4 md:p-6 border-b border-gray-50 flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-                        <h2 className="text-lg font-bold text-gray-800">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : 'Ayarlar'}</h2>
+                        <h2 className="text-lg font-bold text-gray-800">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : 'Ayarlar'}</h2>
                         {activeTab === 'all' && (
                             <Link to="/admin/recipes/new" className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold rounded-xl flex items-center gap-2"><Plus className="w-4 h-4" /> Yeni Ekle</Link>
                         )}

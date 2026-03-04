@@ -480,12 +480,11 @@ const Profile = () => {
                                     {recipes.length > 0 ? recipes.map(recipe => (
                                         <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all overflow-hidden flex flex-col h-full">
                                             <div className="h-48 overflow-hidden relative">
-                                                {recipe.image_url ? (
-                                                    <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300"><ChefHat className="w-12 h-12" /></div>
-                                                )}
-                                                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1">
+                                                <img
+                                                    src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                                    alt={recipe.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                /><div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1">
                                                     <Clock className="w-3 h-3" /> {recipe.prep_time}
                                                 </div>
                                             </div>

@@ -651,13 +651,11 @@ const Menus = () => {
                       className="group flex items-center gap-4 p-4 bg-white rounded-[2rem] border border-gray-100 hover:border-chefie-yellow hover:shadow-lg transition-all text-left"
                     >
                       <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0">
-                        {r.image_url ? (
-                          <img src={r.image_url.startsWith('/images/') ? r.image_url : `${apiBase}${r.image_url}`} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                        ) : (
-                          <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                            <Utensils className="w-6 h-6 text-chefie-yellow/30" />
-                          </div>
-                        )}
+                        <img
+                          src={r.image_url ? (r.image_url.startsWith('/images/') ? r.image_url : `${apiBase}${r.image_url}`) : '/default-recipe.png'}
+                          alt={r.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[10px] font-black tracking-widest uppercase text-gray-300 line-clamp-1">
@@ -847,13 +845,11 @@ const Menus = () => {
                                 title={!active && selectedRecipes.length >= 20 ? 'En fazla 20 tarif ekleyebilirsin' : undefined}
                               >
                                 <div className="w-12 h-12 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0">
-                                  {r.image_url ? (
-                                    <img src={`${apiBase}${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                                      <Utensils className="w-5 h-5 text-chefie-yellow/30" />
-                                    </div>
-                                  )}
+                                  <img
+                                    src={r.image_url ? (r.image_url.startsWith('/images/') ? r.image_url : `${apiBase}${r.image_url}`) : '/default-recipe.png'}
+                                    alt={r.title}
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div

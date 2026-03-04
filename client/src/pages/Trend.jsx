@@ -216,13 +216,11 @@ const Trend = () => {
                                     className="bg-white p-4 rounded-[2rem] shadow-lg shadow-gray-100 border border-gray-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex gap-5 group"
                                 >
                                     <div className="w-28 h-28 md:w-32 md:h-32 rounded-[1.5rem] overflow-hidden shadow-md flex-shrink-0 relative">
-                                        {recipe.image_url ? (
-                                            <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                        ) : (
-                                            <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                                                <Utensils className="w-8 h-8 text-chefie-yellow/20" />
-                                            </div>
-                                        )}
+                                        <img
+                                            src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`) : '/default-recipe.png'}
+                                            alt={recipe.title}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
                                         <div className="absolute top-2 left-2 w-7 h-7 bg-chefie-dark/80 backdrop-blur-md rounded-lg flex items-center justify-center text-white font-black text-[11px]">
                                             #{idx + 1}
                                         </div>
@@ -289,13 +287,11 @@ const Trend = () => {
                                     className="bg-white rounded-[2rem] shadow-lg shadow-gray-100/50 border border-gray-50 overflow-hidden group cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
                                 >
                                     <div className="relative h-36 md:h-44 overflow-hidden">
-                                        {recipe.image_url ? (
-                                            <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                        ) : (
-                                            <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                                                <Utensils className="w-8 h-8 text-chefie-yellow/20" />
-                                            </div>
-                                        )}
+                                        <img
+                                            src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`) : '/default-recipe.png'}
+                                            alt={recipe.title}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                        />
                                         <div className="absolute top-3 left-3">
                                             <div className="px-3 py-1.5 bg-green-500 text-white text-[9px] font-black tracking-widest uppercase rounded-xl shadow-lg flex items-center gap-1">
                                                 <Zap className="w-3 h-3" /> YENİ
@@ -373,17 +369,11 @@ const RecipeCard = ({ recipe, index, navigate, badge }) => (
         className="bg-white rounded-[2.5rem] shadow-lg shadow-gray-200/30 hover:shadow-2xl hover:shadow-chefie-yellow/10 transition-all duration-300 hover:-translate-y-2 border border-gray-50 overflow-hidden flex flex-col group cursor-pointer"
     >
         <div className="relative h-56 overflow-hidden">
-            {recipe.image_url ? (
-                <img
-                    src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-            ) : (
-                <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                    <Utensils className="w-12 h-12 text-chefie-yellow/30" />
-                </div>
-            )}
+            <img
+                src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`) : '/default-recipe.png'}
+                alt={recipe.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            />
 
             {badge}
 

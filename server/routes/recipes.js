@@ -143,6 +143,50 @@ router.get('/public-stats', async (req, res) => {
     }
 });
 
+// GET Chef's Recommendation
+router.get('/recommendation', async (req, res) => {
+    try {
+        const settings = await executeQuery("SELECT value FROM site_settings WHERE key = 'chef_recommendation_id'");
+        const recipeId = settings[0]?.value;
+
+        if (!recipeId) {
+            return res.json(null);
+        }
+
+        const results = await executeQuery(`
+            SELECT 
+                recipes.*, 
+                categories.name as category_name,
+                users.username as chef_username,
+                users.full_name as chef_name,
+                users.profile_image as chef_image,
+                (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating
+            FROM recipes 
+            LEFT JOIN categories ON recipes.category_id = categories.id
+            LEFT JOIN users ON recipes.user_id = users.id
+            WHERE recipes.id = $1
+        `, [recipeId]);
+
+        res.json(results[0] || null);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST Set Chef's Recommendation (Admin only)
+router.post('/recommendation', adminOnly, async (req, res) => {
+    const { recipeId } = req.body;
+    try {
+        await executeQuery(
+            "INSERT INTO site_settings (key, value) VALUES ('chef_recommendation_id', $1) ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP",
+            [recipeId.toString()]
+        );
+        res.json({ message: 'Şefin tavsiyesi güncellendi' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // GET all recipes with pagination and filtering
 router.get('/', async (req, res) => {
     try {

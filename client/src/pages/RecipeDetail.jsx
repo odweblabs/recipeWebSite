@@ -420,11 +420,11 @@ const RecipeDetail = () => {
                                             className="w-full p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-chefie-green focus:border-transparent outline-none min-h-[120px] transition-all"
                                             required
                                         ></textarea>
-                                        <div className="flex justify-end">
+                                        <div className="flex justify-center md:justify-end">
                                             <button
                                                 type="submit"
                                                 disabled={isSubmittingComment}
-                                                className="bg-chefie-green text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-green-700 transition-colors disabled:opacity-50"
+                                                className="bg-chefie-green text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-green-700 transition-colors disabled:opacity-50 w-full md:w-auto justify-center"
                                             >
                                                 {isSubmittingComment ? 'Gönderiliyor...' : (
                                                     <><Send className="w-4 h-4" /> Gönder</>

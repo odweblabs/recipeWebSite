@@ -13,6 +13,7 @@ const Home = () => {
     const [publicStats, setPublicStats] = useState(null);
     const [topChefs, setTopChefs] = useState([]);
     const [totalRecipes, setTotalRecipes] = useState(0);
+    const [recommendation, setRecommendation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const scrollContainerRef = useRef(null);
@@ -41,12 +42,14 @@ const Home = () => {
                     axios.get(`${API_BASE}/api/recipes/latest?limit=12`),
                     axios.get(`${API_BASE}/api/categories`),
                     axios.get(`${API_BASE}/api/recipes/public-stats`),
-                    axios.get(`${API_BASE}/api/auth/top-chefs`)
+                    axios.get(`${API_BASE}/api/auth/top-chefs`),
+                    axios.get(`${API_BASE}/api/recipes/recommendation`)
                 ]);
                 setRecipes(recipesRes.data);
                 setCategories(categoriesRes.data);
                 setPublicStats(statsRes.data);
                 setTopChefs(chefsRes.data);
+                setRecommendation(recommendationRes.data);
                 setTotalRecipes(statsRes.data.counts.recipes);
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -486,28 +489,34 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Featured Banner */}
-            <section className="bg-chefie-yellow rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden shadow-xl shadow-yellow-100/50">
-                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-                <div className="relative z-10 max-w-lg space-y-6 text-center md:text-left">
-                    <span className="px-4 py-1.5 bg-chefie-dark text-white rounded-full text-[10px] font-black tracking-widest uppercase">GÜNÜN ÖZELİ</span>
-                    <h2 className="text-4xl md:text-6xl font-black text-chefie-dark leading-tight">Şefin Tavsiyesi: Akdeniz Esintisi</h2>
-                    <p className="text-chefie-dark/70 text-lg font-medium leading-relaxed">
-                        Haftanın en çok beğenilen tarifi ile akşam yemeğinizi bir ziyafete dönüştürün. Üstelik sadece 45 dakikada!
-                    </p>
-                    <Link to="/recipes" className="inline-flex items-center gap-2 px-10 py-5 bg-chefie-dark text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-gray-900/10">
-                        TARİFİ İNCELE <ArrowUpRight className="w-5 h-5" />
-                    </Link>
-                </div>
-                <div className="flex-1 w-full flex justify-center md:justify-end">
-                    <motion.div
-                        whileHover={{ rotate: 8, scale: 1.05 }}
-                        className="w-64 h-64 md:w-80 md:h-80 rounded-[3rem] overflow-hidden border-8 border-white/30 shadow-2xl rotate-3"
-                    >
-                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800" alt="Featured" className="w-full h-full object-cover" />
-                    </motion.div>
-                </div>
-            </section>
+            {/* Featured Banner - Chef's Recommendation */}
+            {recommendation && (
+                <section className="bg-chefie-yellow rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden shadow-xl shadow-yellow-100/50">
+                    <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                    <div className="relative z-10 max-w-lg space-y-6 text-center md:text-left">
+                        <span className="px-4 py-1.5 bg-chefie-dark text-white rounded-full text-[10px] font-black tracking-widest uppercase">GÜNÜN ÖZELİ</span>
+                        <h2 className="text-4xl md:text-6xl font-black text-chefie-dark leading-tight">Şefin Tavsiyesi: {recommendation.title}</h2>
+                        <p className="text-chefie-dark/70 text-lg font-medium leading-relaxed">
+                            {recommendation.description || 'Haftanın en çok beğenilen tarifi ile akşam yemeğinizi bir ziyafete dönüştürün.'}
+                        </p>
+                        <Link to={`/recipes/${recommendation.id}`} className="inline-flex items-center gap-2 px-10 py-5 bg-chefie-dark text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-gray-900/10">
+                            TARİFİ İNCELE <ArrowUpRight className="w-5 h-5" />
+                        </Link>
+                    </div>
+                    <div className="flex-1 w-full flex justify-center md:justify-end">
+                        <motion.div
+                            whileHover={{ rotate: 8, scale: 1.05 }}
+                            className="w-64 h-64 md:w-80 md:h-80 rounded-[3rem] overflow-hidden border-8 border-white/30 shadow-2xl rotate-3"
+                        >
+                            <img
+                                src={recommendation.image_url ? (recommendation.image_url.startsWith('/images/') ? recommendation.image_url : `${API_BASE}${recommendation.image_url}`) : '/default-recipe.png'}
+                                alt={recommendation.title}
+                                className="w-full h-full object-cover"
+                            />
+                        </motion.div>
+                    </div>
+                </section>
+            )}
         </div>
     );
 };

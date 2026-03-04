@@ -425,13 +425,11 @@ const WhatToCook = () => {
                                             className="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-md shadow-gray-100/50 border border-gray-50 overflow-hidden group cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                                         >
                                             <div className="relative h-28 md:h-36 overflow-hidden">
-                                                {recipe.image_url ? (
-                                                    <img src={recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                                                        <Utensils className="w-6 h-6 text-chefie-yellow/20" />
-                                                    </div>
-                                                )}
+                                                <img
+                                                    src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`) : '/default-recipe.png'}
+                                                    alt={recipe.title}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                />
                                                 <div className="absolute top-2 right-2 bg-chefie-dark/80 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1">
                                                     <Star className="w-2.5 h-2.5 text-chefie-yellow fill-current" />
                                                     <span className="text-white text-[10px] font-black">
