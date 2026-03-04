@@ -7,7 +7,7 @@ const fs = require('fs');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 5050; // Read from .env file or default
+const PORT = process.env.PORT || 5050; // Uses assigned port or 5050 for local development
 
 // Middleware
 app.use(cors());
