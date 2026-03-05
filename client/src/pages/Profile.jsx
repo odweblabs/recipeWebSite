@@ -708,7 +708,7 @@ const Profile = () => {
                                                 <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#10B981] transform group-hover:translate-x-1 transition-all" />
                                             </div>
                                         </Link>
-                                    ) : (
+                                    )) : (
                                         <div className="col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                                             <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-20" />
                                             Henüz bir alışveriş listeniz yok.
