@@ -57,7 +57,8 @@ Projeyi yerel makinenizde çalıştırmak için:
 
 ## 📸 Ekran Görüntüleri
 
-*Daha profesyonel görünmesi için buraya ekran görüntüleri eklenebilir.*
+<img width="3308" height="9922" alt="tarifo vercel app_ (1)" src="https://github.com/user-attachments/assets/ce5cd427-c5b7-4f7f-9dc3-3159cd6f9a9a" />
+
 
 ---
 
