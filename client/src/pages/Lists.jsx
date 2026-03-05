@@ -83,8 +83,10 @@ const Lists = () => {
             setNewListMarket('');
             setIsCreateOpen(false);
             fetchLists();
+            alert('Liste başarıyla oluşturuldu!');
         } catch (err) {
             console.error('Liste oluşturulamadı:', err);
+            alert('Liste oluşturulurken bir hata oluştu: ' + (err.response?.data?.error || err.message));
         }
     };
 
