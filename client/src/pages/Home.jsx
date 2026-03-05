@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Sliders, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare, Soup, Beef, Cake, Croissant, Coffee, Flame, Trophy } from 'lucide-react';
+import { Search, Sliders, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare, Soup, Beef, Cake, Croissant, Coffee, Flame, Trophy, ShoppingCart } from 'lucide-react';
 import { blogPosts } from '../data/blogData';
 
 const Home = () => {
@@ -111,6 +111,9 @@ const Home = () => {
                 <div className="flex items-center gap-4">
                     <Link to="/admin/dashboard?tab=settings" className="p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all flex items-center justify-center">
                         <Sliders className="h-5 w-5" />
+                    </Link>
+                    <Link to="/lists" className="p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all flex items-center justify-center">
+                        <ShoppingCart className="h-5 w-5" />
                     </Link>
                     <Link to="/admin/recipes/new" className="px-8 py-4 bg-chefie-dark text-white font-black text-sm rounded-2xl shadow-xl shadow-gray-200 hover:bg-chefie-yellow hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
                         TARİF PAYLAŞ <ArrowUpRight className="h-4 w-4" />

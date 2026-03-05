@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Search, Heart, User, Plus } from 'lucide-react';
+import { Home, Search, Heart, User, Plus, ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const MobileTabBar = () => {
@@ -37,7 +37,7 @@ const MobileTabBar = () => {
         { path: '/', icon: Home, label: 'Ana Sayfa' },
         { path: '/recipes', icon: Search, label: 'Tarifler' },
         // Center button is handled separately
-        { path: '/admin/dashboard?tab=favorites', icon: Heart, label: 'Koleksiyon' },
+        { path: '/lists', icon: ShoppingCart, label: 'Listeler' },
         { path: user?.id ? `/profile/${user.id}` : '/admin/login', icon: User, label: 'Profil' }
     ];
 

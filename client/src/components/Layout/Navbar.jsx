@@ -24,6 +24,7 @@ const Navbar = () => {
                         <Link to="/menus" className="px-4 py-2 text-gray-500 hover:text-chefie-yellow font-bold transition-all text-xs tracking-widest">MENÜLER</Link>
                         <Link to="/trend" className="px-4 py-2 text-gray-500 hover:text-chefie-yellow font-bold transition-all text-xs tracking-widest">TREND</Link>
                         <Link to="/what-to-cook" className="px-4 py-2 text-gray-500 hover:text-chefie-yellow font-bold transition-all text-xs tracking-widest">NE PİŞİRSEM?</Link>
+                        <Link to="/lists" className="px-4 py-2 text-gray-500 hover:text-chefie-yellow font-bold transition-all text-xs tracking-widest">LİSTELER</Link>
                         <Link to="/admin/login" className="ml-4 px-6 py-2.5 bg-chefie-dark text-white rounded-2xl hover:bg-chefie-yellow transition-all text-xs font-black shadow-lg shadow-gray-100">GİRİŞ YAP</Link>
                     </div>
 
@@ -46,6 +47,7 @@ const Navbar = () => {
                         <Link to="/menus" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-gray-50 rounded-2xl font-black text-xs tracking-wide">MENÜLER</Link>
                         <Link to="/trend" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-gray-50 rounded-2xl font-black text-xs tracking-wide">TREND</Link>
                         <Link to="/what-to-cook" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-gray-50 rounded-2xl font-black text-xs tracking-wide">NE PİŞİRSEM?</Link>
+                        <Link to="/lists" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-gray-50 rounded-2xl font-black text-xs tracking-wide">ALIŞVERİŞ LİSTELERİ</Link>
                         <Link to="/blog" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-gray-50 rounded-2xl font-black text-xs tracking-wide">BLOG / MAKALELER</Link>
                         <div className="h-px bg-gray-100 my-4 mx-4"></div>
                         <Link to="/admin/login" onClick={() => setIsOpen(false)} className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4">YÖNETİM PANELİ / HESABIM</Link>
