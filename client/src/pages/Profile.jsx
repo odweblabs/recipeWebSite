@@ -370,57 +370,50 @@ const Profile = () => {
                         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 mb-2">
                             <div className="flex items-center gap-3">
                                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{profile.full_name || 'İsimsiz Şef'}</h1>
-                                {isOwner && (
-                                    <button
-                                        onClick={handleLogout}
-                                        className="flex md:hidden items-center justify-center p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors border border-red-100"
-                                        title="Çıkış Yap"
-                                    >
-                                        <LogOut className="w-5 h-5" />
-                                    </button>
-                                )}
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                                 {renderFriendButton()}
                                 {isOwner && (
                                     <>
                                         <div className="relative">
                                             <button
                                                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                                                className="relative p-2.5 bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-chefie-yellow shadow-sm transition-all"
+                                                className="relative p-2.5 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-sm transition-all focus:ring-2 focus:ring-chefie-yellow/20"
                                             >
                                                 <Bell className="w-5 h-5" />
                                                 {pendingRequests.length > 0 && (
-                                                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                                                    <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
                                                 )}
                                             </button>
 
                                             <AnimatePresence>
                                                 {isNotificationsOpen && (
                                                     <motion.div
-                                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                        className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden"
+                                                        initial={{ opacity: 0, scale: 0.95, y: 10, x: '-50%' }}
+                                                        animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+                                                        exit={{ opacity: 0, scale: 0.95, y: 10, x: '-50%' }}
+                                                        className="fixed md:absolute left-1/2 md:left-auto md:right-0 top-1/2 md:top-full mt-3 w-[min(90vw,320px)] bg-white rounded-[2rem] shadow-2xl border border-gray-100 z-[100] overflow-hidden"
                                                     >
-                                                        <div className="p-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-                                                            <h3 className="text-xs font-black text-gray-800 uppercase tracking-wider">Bildirimler</h3>
-                                                            <span className="bg-chefie-yellow text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                                                        <div className="p-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                                                            <h3 className="text-xs font-black text-gray-800 uppercase tracking-widest">Bildirimler</h3>
+                                                            <span className="bg-chefie-yellow text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm">
                                                                 {pendingRequests.length} YENİ
                                                             </span>
                                                         </div>
-                                                        <div className="max-h-[300px] overflow-y-auto">
+                                                        <div className="max-h-[350px] overflow-y-auto scrollbar-hide">
                                                             {pendingRequests.length === 0 ? (
-                                                                <div className="p-8 text-center">
-                                                                    <Bell className="w-8 h-8 text-gray-100 mx-auto mb-3" />
-                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase">Yeni bildirim yok</p>
+                                                                <div className="p-10 text-center">
+                                                                    <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                                        <Bell className="w-6 h-6 text-gray-200" />
+                                                                    </div>
+                                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Yeni bildirim bulunmuyor</p>
                                                                 </div>
                                                             ) : (
                                                                 <div className="divide-y divide-gray-50">
                                                                     {pendingRequests.map((request) => (
-                                                                        <div key={request.friendship_id} className="p-4 hover:bg-gray-50 transition-colors">
-                                                                            <div className="flex items-center gap-3 mb-3">
-                                                                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
+                                                                        <div key={request.friendship_id} className="p-5 hover:bg-gray-50 transition-colors">
+                                                                            <div className="flex items-center gap-4 mb-4">
+                                                                                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-white shadow-sm bg-gray-50">
                                                                                     {request.profile_image ? (
                                                                                         <img
                                                                                             src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`}
@@ -428,14 +421,14 @@ const Profile = () => {
                                                                                             className="w-full h-full object-cover"
                                                                                         />
                                                                                     ) : (
-                                                                                        <div className="w-full h-full flex items-center justify-center font-bold text-gray-400 text-xs">
+                                                                                        <div className="w-full h-full flex items-center justify-center font-black text-chefie-dark bg-chefie-cream text-sm">
                                                                                             {request.username.charAt(0).toUpperCase()}
                                                                                         </div>
                                                                                     )}
                                                                                 </div>
                                                                                 <div className="flex-1 min-w-0">
-                                                                                    <p className="text-xs font-black text-gray-800 line-clamp-1">@{request.username}</p>
-                                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Takip İsteği Gönderdi</p>
+                                                                                    <p className="text-xs font-black text-gray-800 truncate">@{request.username}</p>
+                                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight mt-0.5">Seni takip etmek istiyor</p>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex gap-2">
@@ -463,10 +456,10 @@ const Profile = () => {
                                         </div>
                                         <button
                                             onClick={handleLogout}
-                                            className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-gray-100 hover:border-red-100 font-bold text-xs"
+                                            className="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-all border border-red-100 font-bold text-xs shadow-sm shadow-red-100 active:scale-95"
                                         >
                                             <LogOut className="w-4 h-4" />
-                                            <span>Çıkış</span>
+                                            <span className="hidden sm:inline">Çıkış</span>
                                         </button>
                                     </>
                                 )}
