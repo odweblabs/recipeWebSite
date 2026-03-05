@@ -4,7 +4,7 @@ export const blogPosts = [
         title: "Mutfakta Zaman Kazandıran 10 Pratik İpucu",
         excerpt: "Yemek yaparken hem zamandan tasarruf etmek hem de lezzeti artırmak için profesyonel şeflerin kullandığı bu teknikleri mutlaka deneyin.",
         image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=800",
-        author: "Şef Ahmet",
+        author: "Admin",
         date: "18 Şubat 2024",
         category: "Mutfak Sırları",
         content: `
@@ -29,7 +29,7 @@ export const blogPosts = [
         title: "Mevsimine Göre Beslenme Rehberi: Kış Sebzeleri",
         excerpt: "Kış aylarında bağışıklık sisteminizi güçlendirecek, vitamin deposu sebzelerle hazırlayabileceğiniz en sağlıklı ve lezzetli tarifler.",
         image: "https://images.unsplash.com/photo-1597362925123-77861d3fbac7?auto=format&fit=crop&q=80&w=800",
-        author: "Dyt. Ayşe Yılmaz",
+        author: "Admin",
         date: "15 Şubat 2024",
         category: "Sağlıklı Yaşam",
         content: `
@@ -53,7 +53,7 @@ export const blogPosts = [
         title: "Ev Yapımı Ekmek Yapmanın Püf Noktaları",
         excerpt: "Fırından yeni çıkmış sıcacık bir ekmeğin kokusu gibisi yok! Evde tam kıvamında, çıtır kabuklu ekmek yapmanın tüm incelikleri.",
         image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800",
-        author: "Gurme Emre",
+        author: "Admin",
         date: "10 Şubat 2024",
         category: "Hamur İşleri",
         content: `
@@ -80,7 +80,7 @@ export const blogPosts = [
         title: "Kahve Tutkunları İçin: 3. Dalga Kahve Akımı",
         excerpt: "Nitelikli kahve çekirdeklerinden demleme yöntemlerine kadar kahve dünyasında bir yolculuğa çıkmaya hazır mısınız?",
         image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800",
-        author: "Barista Can",
+        author: "Admin",
         date: "05 Şubat 2024",
         category: "İçecek Dünyası",
         content: `
@@ -105,7 +105,7 @@ export const blogPosts = [
         title: "Baharatların Büyülü Dünyası",
         excerpt: "Hangi baharat hangi yemeğe yakışır? Yemeklerinize lezzet ve aroma katacak baharatları doğru kullanma rehberi.",
         image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
-        author: "Şef Melek",
+        author: "Admin",
         date: "01 Şubat 2024",
         category: "Lezzet İpuçları",
         content: `

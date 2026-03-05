@@ -2,7 +2,7 @@ import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut } from 'lucide-react';
+import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight } from 'lucide-react';
 
 const Profile = () => {
     const { id } = useParams();
@@ -11,6 +11,7 @@ const Profile = () => {
     const [recipes, setRecipes] = useState([]);
     const [comments, setComments] = useState([]);
     const [menus, setMenus] = useState([]);
+    const [userLists, setUserLists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('recipes');
 
@@ -74,6 +75,18 @@ const Profile = () => {
         }
     };
 
+    const fetchUserLists = async () => {
+        if (!isOwner || !token) return;
+        try {
+            const res = await axios.get(`${API_BASE}/api/lists`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUserLists(res.data);
+        } catch (err) {
+            console.error('Error fetching user lists:', err);
+        }
+    };
+
     // Fetch pending requests (only for profile owner)
     const fetchPendingRequests = async () => {
         if (!isOwner || !token) return;
@@ -130,6 +143,7 @@ const Profile = () => {
                 await fetchFriends();
                 await fetchFriendStatus();
                 await fetchPendingRequests();
+                await fetchUserLists();
             } catch (err) {
                 console.error('Error fetching profile data:', err);
             } finally {
@@ -470,6 +484,14 @@ const Profile = () => {
                         >
                             Yorumlar ({comments.length})
                         </button>
+                        {isOwner && (
+                            <button
+                                onClick={() => setActiveTab('lists')}
+                                className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'lists' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
+                            >
+                                Listelerim ({userLists.length})
+                            </button>
+                        )}
                     </div>
 
                     <div className="p-6 md:p-8">
@@ -656,6 +678,45 @@ const Profile = () => {
                                         Henüz yorum yapılmamış.
                                     </div>
                                 )}
+                            </div>
+                        )}
+                        {/* Shopping Lists Tab */}
+                        {activeTab === 'lists' && isOwner && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-bold text-gray-800">Alışveriş Listelerim</h2>
+                                    <Link to="/lists" className="text-sm font-bold text-[#10B981] hover:underline">Tümünü Yönet</Link>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {userLists.length > 0 ? userLists.map(list => (
+                                        <Link key={list.id} to="/lists" className="bg-gray-50 p-5 rounded-2xl border border-gray-100 hover:shadow-md transition-all group">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="font-bold text-gray-800 group-hover:text-[#10B981]">{list.name}</h3>
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                    {list.items?.length || 0} ÜRÜN
+                                                </span>
+                                            </div>
+                                            {list.market_name && (
+                                                <div className="text-[11px] font-bold text-gray-400 mb-3 bg-white px-2 py-1 rounded-lg inline-block border border-gray-100">
+                                                    📍 {list.market_name}
+                                                </div>
+                                            )}
+                                            <div className="flex items-center justify-between mt-2">
+                                                <div className="text-[10px] text-gray-300">
+                                                    {new Date(list.created_at).toLocaleDateString('tr-TR')}
+                                                </div>
+                                                <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#10B981] transform group-hover:translate-x-1 transition-all" />
+                                            </div>
+                                        </Link>
+                                    )) : (
+                                        <div className="col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                            <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                            Henüz bir alışveriş listeniz yok.
+                                            <br />
+                                            <Link to="/lists" className="text-[#10B981] font-bold mt-2 inline-block">Yeni Liste Oluştur</Link>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
