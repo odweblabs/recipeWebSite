@@ -11,47 +11,35 @@ import API_BASE from '../utils/api';
 
 const API_URL = `${API_BASE}/api`;
 
-const PRESET_INGREDIENTS = [
-    { name: 'Süt', emoji: '🥛' },
-    { name: 'Yumurta', emoji: '🥚' },
-    { name: 'Ekmek', emoji: '🍞' },
-    { name: 'Peynir', emoji: '🧀' },
-    { name: 'Tereyağı', emoji: '🧈' },
-    { name: 'Yoğurt', emoji: '🍦' },
-    { name: 'Domates', emoji: '🍅' },
-    { name: 'Salatalık', emoji: '🥒' },
-    { name: 'Biber', emoji: '🫑' },
-    { name: 'Soğan', emoji: '🧅' },
-    { name: 'Patates', emoji: '🥔' },
-    { name: 'Tavuk', emoji: '🍗' },
-    { name: 'Kıyma', emoji: '🥩' },
-    { name: 'Makarna', emoji: '🍝' },
-    { name: 'Pirinç', emoji: '🌾' },
-    { name: 'Sıvı Yağ', emoji: '🧴' },
-    { name: 'Zeytinyağı', emoji: '🫒' },
-    { name: 'Un', emoji: '🥡' },
-    { name: 'Şeker', emoji: '🍬' },
-    { name: 'Tuz', emoji: '🧂' },
-    { name: 'Çay', emoji: '☕' },
-    { name: 'Kahve', emoji: '☕' },
-    { name: 'Makarna Sosu', emoji: '🥫' },
-    { name: 'Salça', emoji: '🥫' },
-    { name: 'Baharat', emoji: '🌿' },
-    { name: 'Meyve Suyu', emoji: '🧃' },
-    { name: 'Su', emoji: '💧' },
-    { name: 'Elma', emoji: '🍎' },
-    { name: 'Muz', emoji: '🍌' },
-    { name: 'Limon', emoji: '🍋' },
-    { name: 'Sarımsak', emoji: '🧄' },
-    { name: 'Zeytin', emoji: '🫒' },
-    { name: 'Ketçap', emoji: '🍅' },
-    { name: 'Mayonez', emoji: '🥚' },
-    { name: 'Bulaşık Deterjanı', emoji: '🧼' },
-    { name: 'Sabun', emoji: '🧼' },
-    { name: 'Tuvalet Kağıdı', emoji: '🧻' },
-    { name: 'Kağıt Havlu', emoji: '🧻' },
-    { name: 'Diş Macunu', emoji: '🪥' }
-];
+const CATEGORIZED_INGREDIENTS = {
+    "Temel": [
+        { name: 'Süt', emoji: '🥛' }, { name: 'Yumurta', emoji: '🥚' }, { name: 'Ekmek', emoji: '🍞' },
+        { name: 'Peynir', emoji: '🧀' }, { name: 'Tereyağı', emoji: '🧈' }, { name: 'Yoğurt', emoji: '🍦' },
+        { name: 'Un', emoji: '🥡' }, { name: 'Şeker', emoji: '🍬' }, { name: 'Tuz', emoji: '🧂' },
+        { name: 'Zeytinyağı', emoji: '🫒' }, { name: 'Sıvı Yağ', emoji: '🧴' }
+    ],
+    "Manav": [
+        { name: 'Domates', emoji: '🍅' }, { name: 'Salatalık', emoji: '🥒' }, { name: 'Biber', emoji: '🫑' },
+        { name: 'Soğan', emoji: '🧅' }, { name: 'Patates', emoji: '🥔' }, { name: 'Sarımsak', emoji: '🧄' },
+        { name: 'Elma', emoji: '🍎' }, { name: 'Muz', emoji: '🍌' }, { name: 'Limon', emoji: '🍋' }
+    ],
+    "Kasap": [
+        { name: 'Tavuk', emoji: '🍗' }, { name: 'Kıyma', emoji: '🥩' }, { name: 'Zeytin', emoji: '🫒' }
+    ],
+    "Kiler": [
+        { name: 'Makarna', emoji: '🍝' }, { name: 'Pirinç', emoji: '🌾' }, { name: 'Makarna Sosu', emoji: '🥫' },
+        { name: 'Salça', emoji: '🥫' }, { name: 'Baharat', emoji: '🌿' }, { name: 'Ketçap', emoji: '🍅' },
+        { name: 'Mayonez', emoji: '🥚' }
+    ],
+    "İçecek": [
+        { name: 'Çay', emoji: '☕' }, { name: 'Kahve', emoji: '☕' }, { name: 'Meyve Suyu', emoji: '🧃' },
+        { name: 'Su', emoji: '💧' }
+    ],
+    "Temizlik": [
+        { name: 'Deterjan', emoji: '🧼' }, { name: 'Sabun', emoji: '🧼' },
+        { name: 'T. Kağıdı', emoji: '🧻' }, { name: 'Havlu Kağıt', emoji: '🧻' }, { name: 'Diş Macunu', emoji: '🪥' }
+    ]
+};
 
 const Lists = () => {
     const navigate = useNavigate();
@@ -67,6 +55,7 @@ const Lists = () => {
     const [editingName, setEditingName] = useState('');
     const [editingMarket, setEditingMarket] = useState('');
     const [isPublic, setIsPublic] = useState(false);
+    const [activeCategory, setActiveCategory] = useState('Temel');
 
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
@@ -162,30 +151,34 @@ const Lists = () => {
     };
 
     const handleShare = async (list) => {
-        if (!list.is_public) {
-            alert('Lütfen önce listeyi paylaşıma açın (aşağıdaki butondan).');
-            return;
-        }
-
-        const shareData = {
-            title: `${list.name} - Alışveriş Listem`,
-            text: `${list.market_name ? list.market_name + ' için ' : ''}oluşturduğum alışveriş listesine göz at!`,
-            url: `${window.location.origin}/liste/${list.id}`,
-        };
-
-        if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-            } catch (err) {
-                console.error('Share failed', err);
+        try {
+            // Eğer liste henüz paylaşıma açık değilse önce otomatik olarak açalım
+            if (!list.is_public) {
+                await axios.put(`${API_URL}/lists/${list.id}`, {
+                    ...list,
+                    is_public: true
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                // State'i güncelle ki bir sonraki render'da doğru kalsın
+                setLists(prev => prev.map(l => l.id === list.id ? { ...l, is_public: true } : l));
             }
-        } else {
-            try {
+
+            const shareData = {
+                title: `${list.name} - Alışveriş Listem`,
+                text: `${list.market_name ? list.market_name + ' için ' : ''}oluşturduğum alışveriş listesine göz at!`,
+                url: `${window.location.origin}/liste/${list.id}`,
+            };
+
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
                 await navigator.clipboard.writeText(shareData.url);
                 alert('Bağlantı kopyalandı!');
-            } catch (err) {
-                console.error('Clipboard failed', err);
             }
+        } catch (err) {
+            console.error('Share failed', err);
+            alert('Paylaşırken bir hata oluştu.');
         }
     };
 
@@ -410,16 +403,30 @@ const Lists = () => {
                                     </div>
 
                                     {/* Preset Ingredients (Quick Add) */}
-                                    <div className="mb-6">
-                                        <p className="text-[10px] font-black tracking-widest uppercase text-gray-300 mb-3 ml-1">Önerilenler</p>
-                                        <div className="flex flex-wrap gap-2 overflow-x-auto no-scrollbar py-1">
-                                            {PRESET_INGREDIENTS.map((item, idx) => (
+                                    <div className="mb-6 bg-gray-50/50 p-4 rounded-3xl border border-gray-100">
+                                        <div className="flex items-center justify-between mb-4 px-1">
+                                            <p className="text-[10px] font-black tracking-widest uppercase text-chefie-dark/40">Hızlı Ekle</p>
+                                            <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-[75%]">
+                                                {Object.keys(CATEGORIZED_INGREDIENTS).map(cat => (
+                                                    <button
+                                                        key={cat}
+                                                        onClick={() => setActiveCategory(cat)}
+                                                        className={`text-[10px] font-black px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shadow-sm ${activeCategory === cat ? 'bg-chefie-yellow text-white shadow-chefie-yellow/20' : 'text-gray-400 bg-white hover:bg-gray-50'}`}
+                                                    >
+                                                        {cat.toUpperCase()}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 py-1 max-h-[140px] overflow-y-auto scrollbar-hide">
+                                            {CATEGORIZED_INGREDIENTS[activeCategory].map((item, idx) => (
                                                 <button
                                                     key={idx}
                                                     onClick={() => addItem(openList.id, item.name)}
-                                                    className="px-3 py-1.5 bg-white border border-gray-100 rounded-full text-[11px] font-bold text-gray-500 hover:border-chefie-yellow hover:text-chefie-yellow transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95"
+                                                    className="px-3 py-2 bg-white border border-gray-100 rounded-xl text-[12px] font-bold text-gray-600 hover:border-chefie-yellow hover:text-chefie-yellow transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 flex items-center gap-1.5"
                                                 >
-                                                    {item.emoji} {item.name}
+                                                    <span className="text-base leading-none">{item.emoji}</span>
+                                                    <span>{item.name}</span>
                                                 </button>
                                             ))}
                                         </div>
@@ -461,24 +468,13 @@ const Lists = () => {
                                 {/* Footer (Actions) */}
                                 <div className="p-6 md:p-8 bg-gray-50 border-t border-gray-100 flex flex-col gap-4">
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <button
-                                                onClick={() => setIsPublic(!isPublic)}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${isPublic ? 'bg-chefie-yellow text-white' : 'bg-white text-gray-400 border border-gray-200 hover:bg-gray-100'}`}
-                                            >
-                                                <Share2 className="w-4 h-4" />
-                                                {isPublic ? 'PAYLAŞIMA AÇIK' : 'PAYLAŞIMA AÇ'}
-                                            </button>
-                                            {isPublic && (
-                                                <button
-                                                    onClick={() => handleShare(openList)}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-xs font-black hover:bg-blue-600 transition-all shadow-sm"
-                                                >
-                                                    <Share2 className="w-4 h-4" />
-                                                    PAYLAŞ
-                                                </button>
-                                            )}
-                                        </div>
+                                        <button
+                                            onClick={() => handleShare(openList)}
+                                            className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl text-xs font-black hover:bg-blue-600 transition-all shadow-lg hover:scale-[1.02]"
+                                        >
+                                            <Share2 className="w-4 h-4" />
+                                            PAYLAŞ
+                                        </button>
                                         <button
                                             onClick={() => saveChanges(openList.id)}
                                             className="flex items-center gap-2 px-6 py-3 bg-chefie-dark text-white rounded-xl text-xs font-black hover:bg-chefie-yellow hover:scale-[1.02] transition-all shadow-lg"
@@ -487,22 +483,6 @@ const Lists = () => {
                                             KAYDET
                                         </button>
                                     </div>
-                                    {isPublic && (
-                                        <div className="p-3 bg-white rounded-xl border border-chefie-yellow/20 flex items-center justify-between gap-3">
-                                            <span className="text-[10px] font-bold text-gray-400 truncate">
-                                                {`${window.location.origin}/liste/${openList.id}`}
-                                            </span>
-                                            <button
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(`${window.location.origin}/liste/${openList.id}`);
-                                                    alert('Bağlantı kopyalandı!');
-                                                }}
-                                                className="text-[10px] font-black text-chefie-yellow whitespace-nowrap"
-                                            >
-                                                KOPYALA
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
                             </motion.div>
                         </motion.div>
