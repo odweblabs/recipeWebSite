@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronRight, Plus, Trash2, Check, X, ShoppingCart,
@@ -27,11 +27,35 @@ const PRESET_INGREDIENTS = [
     { name: 'Kıyma', emoji: '🥩' },
     { name: 'Makarna', emoji: '🍝' },
     { name: 'Pirinç', emoji: '🌾' },
-    { name: 'Yağ', emoji: '🧴' }
+    { name: 'Sıvı Yağ', emoji: '🧴' },
+    { name: 'Zeytinyağı', emoji: '🫒' },
+    { name: 'Un', emoji: '🥡' },
+    { name: 'Şeker', emoji: '🍬' },
+    { name: 'Tuz', emoji: '🧂' },
+    { name: 'Çay', emoji: '☕' },
+    { name: 'Kahve', emoji: '☕' },
+    { name: 'Makarna Sosu', emoji: '🥫' },
+    { name: 'Salça', emoji: '🥫' },
+    { name: 'Baharat', emoji: '🌿' },
+    { name: 'Meyve Suyu', emoji: '🧃' },
+    { name: 'Su', emoji: '💧' },
+    { name: 'Elma', emoji: '🍎' },
+    { name: 'Muz', emoji: '🍌' },
+    { name: 'Limon', emoji: '🍋' },
+    { name: 'Sarımsak', emoji: '🧄' },
+    { name: 'Zeytin', emoji: '🫒' },
+    { name: 'Ketçap', emoji: '🍅' },
+    { name: 'Mayonez', emoji: '🥚' },
+    { name: 'Bulaşık Deterjanı', emoji: '🧼' },
+    { name: 'Sabun', emoji: '🧼' },
+    { name: 'Tuvalet Kağıdı', emoji: '🧻' },
+    { name: 'Kağıt Havlu', emoji: '🧻' },
+    { name: 'Diş Macunu', emoji: '🪥' }
 ];
 
 const Lists = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [lists, setLists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -48,11 +72,11 @@ const Lists = () => {
 
     useEffect(() => {
         if (!token) {
-            navigate('/admin/login');
+            navigate('/admin/login', { state: { from: location } });
             return;
         }
         fetchLists();
-    }, [token, navigate]);
+    }, [token, navigate, location]);
 
     const fetchLists = async () => {
         try {
@@ -83,7 +107,6 @@ const Lists = () => {
             setNewListMarket('');
             setIsCreateOpen(false);
             fetchLists();
-            alert('Liste başarıyla oluşturuldu!');
         } catch (err) {
             console.error('Liste oluşturulamadı:', err);
             alert('Liste oluşturulurken bir hata oluştu: ' + (err.response?.data?.error || err.message));
@@ -336,7 +359,7 @@ const Lists = () => {
                                 {/* Items list (Scrollable area) */}
                                 <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4">
                                     {/* Add item input */}
-                                    <div className="flex items-center gap-3 mb-6">
+                                    <div className="flex items-center gap-3 mb-4">
                                         <input
                                             value={newItem}
                                             onChange={(e) => setNewItem(e.target.value)}
@@ -351,6 +374,22 @@ const Lists = () => {
                                         >
                                             <Plus className="w-5 h-5" />
                                         </button>
+                                    </div>
+
+                                    {/* Preset Ingredients (Quick Add) */}
+                                    <div className="mb-6">
+                                        <p className="text-[10px] font-black tracking-widest uppercase text-gray-300 mb-3 ml-1">Önerilenler</p>
+                                        <div className="flex flex-wrap gap-2 overflow-x-auto no-scrollbar py-1">
+                                            {PRESET_INGREDIENTS.map((item, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => addItem(openList.id, item.name)}
+                                                    className="px-3 py-1.5 bg-white border border-gray-100 rounded-full text-[11px] font-bold text-gray-500 hover:border-chefie-yellow hover:text-chefie-yellow transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95"
+                                                >
+                                                    {item.emoji} {item.name}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     {openList.items?.length === 0 ? (
