@@ -1,7 +1,7 @@
 import API_BASE from '../../utils/api';
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { ChefHat, Heart, BookOpen, Users, Settings, LogOut, LayoutDashboard, UtensilsCrossed } from 'lucide-react';
+import { ChefHat, Heart, BookOpen, Users, Settings, LogOut, LayoutDashboard, UtensilsCrossed, ShoppingCart } from 'lucide-react';
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -113,7 +113,7 @@ const Sidebar = () => {
                         `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'}`
                     }
                 >
-                    <Users className="w-5 h-5 mr-3" />
+                    <ShoppingCart className="w-5 h-5 mr-3" />
                     <span className="text-sm">Listeler</span>
                 </NavLink>
 

@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5050/api';
+import API_BASE from '../utils/api';
+
+const API_URL = `${API_BASE}/api`;
 
 const PRESET_INGREDIENTS = [
     { name: 'Süt', emoji: '🥛' },
@@ -42,11 +44,11 @@ const Lists = () => {
     const [editingMarket, setEditingMarket] = useState('');
     const [isPublic, setIsPublic] = useState(false);
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
     useEffect(() => {
         if (!token) {
-            navigate('/login');
+            navigate('/admin/login');
             return;
         }
         fetchLists();
