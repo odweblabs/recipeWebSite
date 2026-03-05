@@ -30,6 +30,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
     const [recipes, setRecipes] = useState([]);
@@ -37,6 +38,7 @@ const Dashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('all');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isDesktopNotificationsOpen, setIsDesktopNotificationsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -72,9 +74,12 @@ const Dashboard = () => {
     const [showNewPw, setShowNewPw] = useState(false);
     const [showConfirmPw, setShowConfirmPw] = useState(false);
 
-    // Chef's Recommendation State
     const [chefRecommendation, setChefRecommendation] = useState(null);
     const [isSavingRecommendation, setIsSavingRecommendation] = useState(false);
+
+    // Pending Friends State
+    const [pendingFriends, setPendingFriends] = useState([]);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
     useEffect(() => {
         if (!token) {
@@ -89,8 +94,12 @@ const Dashboard = () => {
             fetchUsers();
             fetchActivity();
             fetchRecommendation();
+            fetchPendingFriends();
             // Refresh activity data every 60 seconds
-            const activityInterval = setInterval(fetchActivity, 60000);
+            const activityInterval = setInterval(() => {
+                fetchActivity();
+                fetchPendingFriends();
+            }, 60000);
             return () => clearInterval(activityInterval);
         }
     }, [token, navigate, user.role]);
@@ -102,6 +111,39 @@ const Dashboard = () => {
             setActiveTab(tab);
         }
     }, [location.search]);
+
+    const fetchPendingFriends = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/friends/requests/pending`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setPendingFriends(res.data);
+        } catch (err) {
+            console.error('Error fetching pending friends:', err);
+        }
+    };
+
+    const handleAcceptFriend = async (friendshipId) => {
+        try {
+            await axios.put(`${API_BASE}/api/friends/accept/${friendshipId}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchPendingFriends();
+        } catch (err) {
+            alert('İstek kabul edilemedi.');
+        }
+    };
+
+    const handleRejectFriend = async (friendshipId) => {
+        try {
+            await axios.delete(`${API_BASE}/api/friends/reject/${friendshipId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchPendingFriends();
+        } catch (err) {
+            alert('İstek reddedilemedi.');
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -953,10 +995,78 @@ const Dashboard = () => {
                     <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <button className="relative p-2 text-gray-400">
-                        <Bell className="w-6 h-6" />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                            className="relative p-2 text-gray-400"
+                        >
+                            <Bell className="w-6 h-6" />
+                            {pendingFriends.length > 0 && (
+                                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                            )}
+                        </button>
+
+                        <AnimatePresence>
+                            {isNotificationsOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                    className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden"
+                                >
+                                    <div className="p-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                                        <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Bildirimler</h3>
+                                        <span className="bg-chefie-yellow text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                                            {pendingFriends.length} YENİ
+                                        </span>
+                                    </div>
+                                    <div className="max-h-[400px] overflow-y-auto">
+                                        {pendingFriends.length === 0 ? (
+                                            <div className="p-8 text-center">
+                                                <Bell className="w-10 h-10 text-gray-100 mx-auto mb-3" />
+                                                <p className="text-xs font-bold text-gray-400">Yeni bildirim bulunmuyor.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y divide-gray-50">
+                                                {pendingFriends.map((request) => (
+                                                    <div key={request.friendship_id} className="p-4 hover:bg-gray-50 transition-colors">
+                                                        <div className="flex items-center gap-3 mb-3">
+                                                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
+                                                                <img
+                                                                    src={request.profile_image ? (request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`) : "https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png"}
+                                                                    alt={request.username}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-xs font-black text-gray-800 line-clamp-1">@{request.username}</p>
+                                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Seni takip etmek istiyor</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => handleAcceptFriend(request.friendship_id)}
+                                                                className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all shadow-lg shadow-yellow-100"
+                                                            >
+                                                                KABUL ET
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleRejectFriend(request.friendship_id)}
+                                                                className="flex-1 py-2 bg-gray-50 text-gray-400 text-[10px] font-black rounded-lg hover:bg-red-50 hover:text-red-500 transition-all"
+                                                            >
+                                                                REDDET
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
                     <Link to={user?.id ? `/profile/${user.id}` : '#'}>
                         {user.profile_image ? (
                             <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
@@ -1026,6 +1136,80 @@ const Dashboard = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                             />
+                        </div>
+                    </div>
+
+                    <div className="hidden md:flex items-center gap-4 ml-auto border-l border-gray-100 pl-6 mr-4">
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsDesktopNotificationsOpen(!isDesktopNotificationsOpen)}
+                                className="relative p-2.5 text-gray-400 hover:bg-gray-50 rounded-xl transition-all"
+                            >
+                                <Bell className="w-6 h-6" />
+                                {pendingFriends.length > 0 && (
+                                    <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                                )}
+                            </button>
+
+                            <AnimatePresence>
+                                {isDesktopNotificationsOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                        className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden"
+                                    >
+                                        <div className="p-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                                            <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Bildirimler</h3>
+                                            <span className="bg-chefie-yellow text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                                                {pendingFriends.length} YENİ
+                                            </span>
+                                        </div>
+                                        <div className="max-h-[400px] overflow-y-auto">
+                                            {pendingFriends.length === 0 ? (
+                                                <div className="p-8 text-center">
+                                                    <Bell className="w-10 h-10 text-gray-100 mx-auto mb-3" />
+                                                    <p className="text-xs font-bold text-gray-400">Yeni bildirim bulunmuyor.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="divide-y divide-gray-50">
+                                                    {pendingFriends.map((request) => (
+                                                        <div key={request.friendship_id} className="p-4 hover:bg-gray-50 transition-colors">
+                                                            <div className="flex items-center gap-3 mb-3">
+                                                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
+                                                                    <img
+                                                                        src={request.profile_image ? (request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`) : "https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png"}
+                                                                        alt={request.username}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-xs font-black text-gray-800 line-clamp-1">@{request.username}</p>
+                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Seni takip etmek istiyor</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => handleAcceptFriend(request.friendship_id)}
+                                                                    className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all shadow-lg shadow-yellow-100"
+                                                                >
+                                                                    KABUL ET
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleRejectFriend(request.friendship_id)}
+                                                                    className="flex-1 py-2 bg-gray-50 text-gray-400 text-[10px] font-black rounded-lg hover:bg-red-50 hover:text-red-500 transition-all"
+                                                                >
+                                                                    REDDET
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
 

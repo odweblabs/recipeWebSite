@@ -20,6 +20,25 @@ function saveLists(lists) {
     localStorage.setItem(LISTS_STORAGE_KEY, JSON.stringify(lists));
 }
 
+const PRESET_INGREDIENTS = [
+    { name: 'Süt', emoji: '🥛' },
+    { name: 'Yumurta', emoji: '🥚' },
+    { name: 'Ekmek', emoji: '🍞' },
+    { name: 'Peynir', emoji: '🧀' },
+    { name: 'Tereyağı', emoji: '🧈' },
+    { name: 'Yoğurt', emoji: '🍦' },
+    { name: 'Domates', emoji: '🍅' },
+    { name: 'Salatalık', emoji: '🥒' },
+    { name: 'Biber', emoji: '🫑' },
+    { name: 'Soğan', emoji: '🧅' },
+    { name: 'Patates', emoji: '🥔' },
+    { name: 'Tavuk', emoji: '🍗' },
+    { name: 'Kıyma', emoji: '🥩' },
+    { name: 'Makarna', emoji: '🍝' },
+    { name: 'Pirinç', emoji: '🌾' },
+    { name: 'Yağ', emoji: '🧴' }
+];
+
 const Lists = () => {
     const [lists, setLists] = useState(() => loadLists());
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -62,17 +81,17 @@ const Lists = () => {
         setEditingName('');
     };
 
-    const addItem = (listId) => {
-        const text = newItem.trim();
+    const addItem = (listId, customText = null) => {
+        const text = customText || newItem.trim();
         if (!text) return;
         setLists(prev => prev.map(l => {
             if (l.id !== listId) return l;
             return {
                 ...l,
-                items: [...l.items, { id: `${Date.now()}`, text, checked: false }]
+                items: [...l.items, { id: `${Date.now()}-${Math.random()}`, text, checked: false }]
             };
         }));
-        setNewItem('');
+        if (!customText) setNewItem('');
     };
 
     const toggleItem = (listId, itemId) => {
@@ -278,6 +297,21 @@ const Lists = () => {
                                         >
                                             <Plus className="w-5 h-5" />
                                         </button>
+                                    </div>
+
+                                    {/* Quick Add Section */}
+                                    <div className="mt-4 flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                        <div className="w-full text-[10px] font-black tracking-widest uppercase text-gray-300 mb-1">Hızlı Ekle</div>
+                                        {PRESET_INGREDIENTS.map((ing) => (
+                                            <button
+                                                key={ing.name}
+                                                onClick={() => addItem(openList.id, ing.name)}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-chefie-yellow hover:text-white rounded-xl border border-gray-100 transition-all text-xs font-bold text-gray-500 whitespace-nowrap shadow-sm active:scale-95"
+                                            >
+                                                <span>{ing.emoji}</span>
+                                                <span>{ing.name}</span>
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
