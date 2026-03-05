@@ -2,7 +2,8 @@ import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight } from 'lucide-react';
+import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Profile = () => {
     const { id } = useParams();
@@ -14,6 +15,7 @@ const Profile = () => {
     const [userLists, setUserLists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('recipes');
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
     // Comment Edit State
     const [editingCommentId, setEditingCommentId] = useState(null);
@@ -378,16 +380,95 @@ const Profile = () => {
                                     </button>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 {renderFriendButton()}
                                 {isOwner && (
-                                    <button
-                                        onClick={handleLogout}
-                                        className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-gray-100 hover:border-red-100 font-bold text-xs"
-                                    >
-                                        <LogOut className="w-4 h-4" />
-                                        <span>Çıkış</span>
-                                    </button>
+                                    <>
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                                                className="relative p-2.5 bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-chefie-yellow shadow-sm transition-all"
+                                            >
+                                                <Bell className="w-5 h-5" />
+                                                {pendingRequests.length > 0 && (
+                                                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                                                )}
+                                            </button>
+
+                                            <AnimatePresence>
+                                                {isNotificationsOpen && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                        className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden"
+                                                    >
+                                                        <div className="p-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                                                            <h3 className="text-xs font-black text-gray-800 uppercase tracking-wider">Bildirimler</h3>
+                                                            <span className="bg-chefie-yellow text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                                                                {pendingRequests.length} YENİ
+                                                            </span>
+                                                        </div>
+                                                        <div className="max-h-[300px] overflow-y-auto">
+                                                            {pendingRequests.length === 0 ? (
+                                                                <div className="p-8 text-center">
+                                                                    <Bell className="w-8 h-8 text-gray-100 mx-auto mb-3" />
+                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase">Yeni bildirim yok</p>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="divide-y divide-gray-50">
+                                                                    {pendingRequests.map((request) => (
+                                                                        <div key={request.friendship_id} className="p-4 hover:bg-gray-50 transition-colors">
+                                                                            <div className="flex items-center gap-3 mb-3">
+                                                                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
+                                                                                    {request.profile_image ? (
+                                                                                        <img
+                                                                                            src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`}
+                                                                                            alt={request.username}
+                                                                                            className="w-full h-full object-cover"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <div className="w-full h-full flex items-center justify-center font-bold text-gray-400 text-xs">
+                                                                                            {request.username.charAt(0).toUpperCase()}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <p className="text-xs font-black text-gray-800 line-clamp-1">@{request.username}</p>
+                                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Takip İsteği Gönderdi</p>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex gap-2">
+                                                                                <button
+                                                                                    onClick={() => acceptRequest(request.friendship_id)}
+                                                                                    className="flex-1 py-1.5 bg-chefie-yellow text-white text-[10px] font-black rounded-lg shadow-sm active:scale-95 transition-all"
+                                                                                >
+                                                                                    KABUL ET
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => rejectRequest(request.friendship_id)}
+                                                                                    className="flex-1 py-1.5 bg-gray-100 text-gray-400 text-[10px] font-black rounded-lg active:scale-95 transition-all"
+                                                                                >
+                                                                                    REDDET
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-gray-100 hover:border-red-100 font-bold text-xs"
+                                        >
+                                            <LogOut className="w-4 h-4" />
+                                            <span>Çıkış</span>
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
