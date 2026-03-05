@@ -140,6 +140,7 @@ const Lists = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEditingListId(null);
+            setOpenListId(null);
             fetchLists();
         } catch (err) {
             console.error('Değişiklikler kaydedilemedi:', err);
@@ -158,6 +159,38 @@ const Lists = () => {
             };
         }));
         if (!customText) setNewItem('');
+    };
+
+    const handleShare = async (list) => {
+        if (!list.is_public) {
+            alert('Lütfen önce listeyi paylaşıma açın (aşağıdaki butondan).');
+            return;
+        }
+
+        const shareData = {
+            title: `${list.name} - Alışveriş Listem`,
+            text: `${list.market_name ? list.market_name + ' için ' : ''}oluşturduğum alışveriş listesine göz at!`,
+            url: `${window.location.origin}/liste/${list.id}`,
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error('Share failed', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(shareData.url);
+                alert('Bağlantı kopyalandı!');
+            } catch (err) {
+                console.error('Clipboard failed', err);
+            }
+        }
+    };
+
+    const handlePrint = () => {
+        window.print();
     };
 
     const toggleItem = (listId, itemId) => {
@@ -436,6 +469,15 @@ const Lists = () => {
                                                 <Share2 className="w-4 h-4" />
                                                 {isPublic ? 'PAYLAŞIMA AÇIK' : 'PAYLAŞIMA AÇ'}
                                             </button>
+                                            {isPublic && (
+                                                <button
+                                                    onClick={() => handleShare(openList)}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-xs font-black hover:bg-blue-600 transition-all shadow-sm"
+                                                >
+                                                    <Share2 className="w-4 h-4" />
+                                                    PAYLAŞ
+                                                </button>
+                                            )}
                                         </div>
                                         <button
                                             onClick={() => saveChanges(openList.id)}
