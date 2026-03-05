@@ -2,8 +2,7 @@
 
 > Mutfakta profesyonel bir rehberle tanışın. Kendi tariflerinizi paylaşın, yeni lezzetler keşfedin ve şeflik yolculuğunuza bugün başlayın.
 
-🌐 **Canlı Uygulama:** [Buraya Linki Ekleyin](https://chefie-recipe.vercel.app) *(Not: Eğer link farklıysa lütfen güncelleyin)*
-
+🌐 **Canlı Uygulama:** (https://tarifo.vercel.app)
 ---
 
 ## ✨ Özellikler
@@ -36,7 +35,7 @@ Projeyi yerel makinenizde çalıştırmak için:
 
 1. **Repoyu Klonlayın:**
    ```bash
-   git clone https://github.com/osmandegirmenci/recipeWebSite.git
+   git clone https://github.com/odweblabs/recipeWebSite.git
    ```
 
 2. **Sunucu (Backend) Kurulumu:**
@@ -64,4 +63,4 @@ Projeyi yerel makinenizde çalıştırmak için:
 
 ## 📝 Lisans
 
-Bu proje bir portfolyo çalışmasıdır. Tüm hakları saklıdır.
+Creative Commons Zero v1.0 Universal
