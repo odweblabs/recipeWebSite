@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Clock, Mic, ChevronLeft, Utensils, Flame, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import API_BASE from '../utils/api';
 
 const popularSearches = ['tatlı', 'çorba', 'meze', 'revani', 'sütlü tatlılar', 'makarna'];
 const quickAccess = [
@@ -15,10 +17,12 @@ const ingredients = [
     { name: 'mor lahana', image: 'https://images.unsplash.com/photo-1506544777-64cfbea6bdcf?w=150&h=150&fit=crop' }
 ];
 
-const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel tarifi keşfet...", onSearch }) => {
+const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel tarifi keşfet...", onSearch, iconOnlyOnMobile = false, onOpenChange }) => {
     const [query, setQuery] = useState(initialQuery);
     const [isOpen, setIsOpen] = useState(false);
     const [recentSearches, setRecentSearches] = useState([]);
+    const [recipeCount, setRecipeCount] = useState(0);
+    const [isListening, setIsListening] = useState(false);
     const inputRef = useRef(null);
     const modalInputRef = useRef(null);
     const navigate = useNavigate();
@@ -28,6 +32,23 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
     }, [initialQuery]);
 
     useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                const res = await axios.get(`${API_BASE}/api/recipes/count`);
+                if (res.data && typeof res.data.count !== 'undefined') {
+                    setRecipeCount(res.data.count);
+                }
+            } catch (err) {
+                console.error("Failed to fetch recipe count", err);
+            }
+        };
+        fetchCount();
+    }, []);
+
+    useEffect(() => {
+        if (onOpenChange) {
+            onOpenChange(isOpen);
+        }
         const stored = localStorage.getItem('chefie_recent_searches');
         if (stored) {
             try {
@@ -36,7 +57,47 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                 setRecentSearches([]);
             }
         }
-    }, [isOpen]);
+    }, [isOpen, onOpenChange]);
+
+    const handleVoiceSearch = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Üzgünüz, tarayıcınız sesli aramayı desteklemiyor.");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'tr-TR';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            setIsListening(true);
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            setQuery(transcript);
+            setTimeout(() => {
+                handleSearch(transcript);
+            }, 500); // Auto search after a brief delay
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error", event.error);
+            setIsListening(false);
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+        };
+
+        if (isListening) {
+            recognition.stop();
+        } else {
+            recognition.start();
+        }
+    };
 
     const handleSearch = (searchQuery) => {
         if (!searchQuery?.trim()) return;
@@ -69,14 +130,15 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
     return (
         <div className={`relative ${className}`}>
             {/* Main Input (Closed State) */}
-            <div className="relative group min-w-full md:w-auto flex items-center justify-end">
-                <div className="absolute inset-0 bg-chefie-yellow/10 blur-xl group-focus-within:bg-chefie-yellow/20 transition-all rounded-[2rem] hidden md:block"></div>
+            <div className={`relative group ${iconOnlyOnMobile ? 'w-auto flex items-center justify-start' : 'min-w-full'}`}>
+                <div className={`absolute inset-0 bg-chefie-yellow/10 blur-xl group-focus-within:bg-chefie-yellow/20 transition-all rounded-[2rem] ${iconOnlyOnMobile ? 'hidden md:block' : ''}`}></div>
+
                 <div
-                    className="relative cursor-pointer md:w-full flex items-center justify-center md:justify-start"
+                    className={`relative cursor-pointer ${iconOnlyOnMobile ? 'md:w-full flex items-center justify-center md:justify-start' : ''}`}
                     onClick={() => setIsOpen(true)}
                 >
-                    {/* Desktop View */}
-                    <div className="hidden md:block w-full">
+                    {/* Desktop View / Default Full Width */}
+                    <div className={`${iconOnlyOnMobile ? 'hidden md:block w-full' : 'w-full block'}`}>
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-hover:text-chefie-yellow group-hover:scale-110 transition-all pointer-events-none" />
                         <input
                             ref={inputRef}
@@ -89,9 +151,11 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                     </div>
 
                     {/* Mobile View (Icon Button) */}
-                    <div className="md:hidden w-11 h-11 bg-white border border-gray-100 rounded-2xl shadow-sm flex items-center justify-center text-gray-400 group-hover:text-chefie-yellow group-hover:border-chefie-yellow/30 transition-all">
-                        <Search className="h-5 w-5" />
-                    </div>
+                    {iconOnlyOnMobile && (
+                        <div className="md:hidden h-[48px] w-[48px] bg-white border border-gray-100 rounded-2xl shadow-xl shadow-gray-100/50 flex items-center justify-center text-gray-400 group-hover:text-chefie-yellow group-hover:border-chefie-yellow/30 transition-all">
+                            <Search className="h-[20px] w-[20px]" />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -132,7 +196,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                         value={query}
                                         onChange={(e) => setQuery(e.target.value)}
                                         onKeyDown={handleKeyDown}
-                                        placeholder="981.993 tarif içinde ara"
+                                        placeholder={recipeCount > 0 ? `${recipeCount} tarif içinde ara` : "Tariflerde ara..."}
                                         className="w-full pl-10 pr-10 py-3 bg-white border-0 rounded-full text-sm font-medium text-chefie-dark focus:ring-2 focus:ring-white/50 outline-none"
                                     />
                                     {query && (
@@ -141,7 +205,11 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                         </button>
                                     )}
                                 </div>
-                                <button className="p-2 text-white hover:bg-white/10 rounded-xl transition-colors">
+                                <button
+                                    onClick={handleVoiceSearch}
+                                    className={`p-2 rounded-xl transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-white hover:bg-white/10'}`}
+                                    title="Sesli Arama"
+                                >
                                     <Mic className="w-5 h-5" />
                                 </button>
                             </div>

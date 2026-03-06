@@ -12,6 +12,7 @@ const Recipes = () => {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchOpen, setSearchOpen] = useState(false);
     const [sortBy, setSortBy] = useState('popular'); // a-z, z-a, newest, rating, popular
     const { hash } = useLocation();
     const navigate = useNavigate();
@@ -105,16 +106,17 @@ const Recipes = () => {
             </header>
 
             {/* Unified Filter Bar (Sticky) */}
-            <div className="sticky top-0 z-40 -mx-4 px-4 py-4 mb-12 bg-[#FFFBF2]/80 backdrop-blur-md">
+            <div className={`sticky top-0 -mx-4 px-4 pt-4 pb-2 mb-8 bg-[#FFFBF2] md:bg-[#FFFBF2]/80 md:backdrop-blur-md ${searchOpen ? 'z-[100]' : 'z-40'}`}>
                 <div className="max-w-7xl mx-auto">
-                    <div className="bg-white/80 backdrop-blur-xl border border-white shadow-2xl shadow-gray-200/50 rounded-[2.5rem] p-3 md:p-4 flex flex-row lg:flex-row items-center gap-2 md:gap-4">
+                    <div className="bg-white border border-gray-100 shadow-sm md:shadow-2xl md:shadow-gray-200/50 rounded-2xl md:rounded-[2.5rem] p-2 md:p-4 flex flex-col md:flex-row items-center gap-3 md:gap-4">
 
                         {/* Search Input */}
-                        <div className="relative z-50 md:flex-1">
+                        <div className="relative z-50 w-full md:flex-1">
                             <SearchBar
                                 initialQuery={searchQuery}
                                 placeholder="Tarif veya malzeme ara..."
                                 className="w-full"
+                                onOpenChange={setSearchOpen}
                                 onSearch={(q) => {
                                     setSearchQuery(q);
                                     const params = new URLSearchParams(searchParams);
@@ -131,13 +133,13 @@ const Recipes = () => {
                         {/* Category Select */}
                         <div className="flex flex-row flex-1 items-center gap-2 md:gap-3 w-full lg:w-auto">
                             <div className="flex-1 lg:w-64 relative group">
-                                <div className="absolute left-2.5 md:left-4 top-1/2 -translate-y-1/2 p-1 bg-chefie-yellow/10 rounded-lg group-hover:bg-chefie-yellow/20 transition-colors">
+                                <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-1 md:p-1.5 bg-chefie-yellow/10 rounded-md md:rounded-lg group-hover:bg-chefie-yellow/20 transition-colors">
                                     <LayoutGrid className="w-3.5 h-3.5 md:w-4 md:h-4 text-chefie-yellow" />
                                 </div>
                                 <select
                                     value={selectedCategory || ''}
                                     onChange={(e) => setSelectedCategory(e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full pl-8 md:pl-12 pr-6 md:pr-10 py-2.5 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-[10px] sm:text-xs md:text-sm truncate"
+                                    className="w-full pl-8 md:pl-12 pr-6 md:pr-10 py-2.5 md:py-4 bg-gray-50 border-0 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-[10px] sm:text-xs md:text-sm truncate"
                                 >
                                     <option value="">Kategori</option>
                                     {categories.map(cat => (
@@ -149,13 +151,13 @@ const Recipes = () => {
 
                             {/* Sort Select */}
                             <div className="flex-1 lg:w-56 relative group">
-                                <div className="absolute left-2.5 md:left-4 top-1/2 -translate-y-1/2 p-1 bg-chefie-dark/5 rounded-lg group-hover:bg-chefie-dark/10 transition-colors">
+                                <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-1 md:p-1.5 bg-chefie-dark/5 rounded-md md:rounded-lg group-hover:bg-chefie-dark/10 transition-colors">
                                     <SlidersHorizontal className="w-3.5 h-3.5 md:w-4 md:h-4 text-chefie-dark" />
                                 </div>
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full pl-8 md:pl-12 pr-6 md:pr-10 py-2.5 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-[10px] sm:text-xs md:text-sm truncate"
+                                    className="w-full pl-8 md:pl-12 pr-6 md:pr-10 py-2.5 md:py-4 bg-gray-50 border-0 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-[10px] sm:text-xs md:text-sm truncate"
                                 >
                                     <option value="a-z">A-Z</option>
                                     <option value="z-a">Z-A</option>

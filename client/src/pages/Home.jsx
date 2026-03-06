@@ -17,6 +17,7 @@ const Home = () => {
     const [recommendation, setRecommendation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchOpen, setSearchOpen] = useState(false);
     const scrollContainerRef = useRef(null);
     const chefsScrollRef = useRef(null);
 
@@ -79,24 +80,28 @@ const Home = () => {
     return (
         <div className="space-y-16 pb-20">
             {/* Top Header & Search */}
-            <header className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <header className="flex flex-row justify-between items-center gap-2 md:gap-6">
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="relative w-full md:w-[450px] z-[60]"
+                    className={`relative w-auto flex-none md:w-[450px] ${searchOpen ? 'z-[100]' : 'z-30'}`}
                 >
-                    <SearchBar initialQuery={searchQuery} />
+                    <SearchBar
+                        initialQuery={searchQuery}
+                        iconOnlyOnMobile={true}
+                        onOpenChange={setSearchOpen}
+                    />
                 </motion.div>
 
-                <div className="flex items-center gap-4">
-                    <Link to="/admin/dashboard?tab=settings" className="p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all flex items-center justify-center">
+                <div className="flex items-center justify-end gap-2 md:gap-4 overflow-x-auto scrollbar-hide w-full py-1">
+                    <Link to="/admin/dashboard?tab=settings" className="w-[48px] h-[48px] md:w-auto md:h-auto md:p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all flex items-center justify-center shrink-0">
                         <Sliders className="h-5 w-5" />
                     </Link>
-                    <Link to="/lists" className="p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all flex items-center justify-center">
+                    <Link to="/lists" className="w-[48px] h-[48px] md:w-auto md:h-auto md:p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-xl shadow-gray-100 transition-all flex items-center justify-center shrink-0">
                         <ShoppingCart className="h-5 w-5" />
                     </Link>
-                    <Link to="/admin/recipes/new" className="px-8 py-4 bg-chefie-dark text-white font-black text-sm rounded-2xl shadow-xl shadow-gray-200 hover:bg-chefie-yellow hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                        TARİF PAYLAŞ <ArrowUpRight className="h-4 w-4" />
+                    <Link to="/admin/recipes/new" className="h-[48px] md:h-auto px-4 md:px-8 py-0 md:py-4 bg-chefie-dark text-white font-black text-[10px] sm:text-xs md:text-sm rounded-2xl shadow-xl shadow-gray-200 hover:bg-chefie-yellow hover:scale-105 active:scale-95 transition-all flex items-center gap-1 shrink-0">
+                        TARİF PAYLAŞ <ArrowUpRight className="h-3 w-3 md:h-4 md:w-4" />
                     </Link>
                 </div>
             </header>
