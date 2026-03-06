@@ -213,8 +213,10 @@ router.get('/', async (req, res) => {
             params.push(category_id);
         }
         if (req.query.title) {
-            whereClauses.push(`recipes.title ILIKE $${paramIndex++}`);
-            params.push(`%${req.query.title}%`);
+            const searchTerm = `%${req.query.title}%`;
+            whereClauses.push(`(recipes.title ILIKE $${paramIndex} OR recipes.description ILIKE $${paramIndex} OR recipes.ingredients ILIKE $${paramIndex})`);
+            params.push(searchTerm);
+            paramIndex++;
         }
 
         if (whereClauses.length > 0) {

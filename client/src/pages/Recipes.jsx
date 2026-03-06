@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Clock, Users, ArrowRight, Home, ChevronRight, Search, SlidersHorizontal, Utensils, Award, Filter, LayoutGrid } from 'lucide-react';
+import SearchBar from '../components/SearchBar';
 
 const Recipes = () => {
     const [recipes, setRecipes] = useState([]);
@@ -109,55 +110,52 @@ const Recipes = () => {
                     <div className="bg-white/80 backdrop-blur-xl border border-white shadow-2xl shadow-gray-200/50 rounded-[2.5rem] p-3 md:p-4 flex flex-col lg:flex-row items-center gap-4">
 
                         {/* Search Input */}
-                        <div className="relative flex-1 w-full">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 w-5 h-5" />
-                            <input
-                                type="text"
+                        <div className="relative flex-1 w-full z-50">
+                            <SearchBar
+                                initialQuery={searchQuery}
                                 placeholder="Tarif veya malzeme ara..."
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    setSearchQuery(value);
+                                className="w-full"
+                                onSearch={(q) => {
+                                    setSearchQuery(q);
                                     const params = new URLSearchParams(searchParams);
-                                    if (value.trim()) {
-                                        params.set('q', value.trim());
+                                    if (q.trim()) {
+                                        params.set('q', q.trim());
                                     } else {
                                         params.delete('q');
                                     }
                                     setSearchParams(params);
                                 }}
-                                className="w-full pl-14 pr-6 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-700 font-bold placeholder-gray-300 transition-all"
                             />
                         </div>
 
                         {/* Category Select */}
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                            <div className="w-full sm:flex-1 lg:w-64 relative group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 p-1.5 bg-chefie-yellow/10 rounded-lg group-hover:bg-chefie-yellow/20 transition-colors">
+                        <div className="flex flex-row items-center gap-2 md:gap-3 w-full lg:w-auto">
+                            <div className="flex-1 lg:w-64 relative group">
+                                <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 p-1.5 bg-chefie-yellow/10 rounded-lg group-hover:bg-chefie-yellow/20 transition-colors">
                                     <LayoutGrid className="w-4 h-4 text-chefie-yellow" />
                                 </div>
                                 <select
                                     value={selectedCategory || ''}
                                     onChange={(e) => setSelectedCategory(e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full pl-12 pr-10 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-sm"
+                                    className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-xs md:text-sm"
                                 >
                                     <option value="">Tüm Kategoriler</option>
                                     {categories.map(cat => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
-                                <ChevronRight className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 rotate-90 pointer-events-none" />
+                                <ChevronRight className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 rotate-90 pointer-events-none" />
                             </div>
 
                             {/* Sort Select */}
                             <div className="flex-1 lg:w-56 relative group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 p-1.5 bg-chefie-dark/5 rounded-lg group-hover:bg-chefie-dark/10 transition-colors">
+                                <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 p-1.5 bg-chefie-dark/5 rounded-lg group-hover:bg-chefie-dark/10 transition-colors">
                                     <SlidersHorizontal className="w-4 h-4 text-chefie-dark" />
                                 </div>
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full pl-12 pr-10 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-sm"
+                                    className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-xs md:text-sm"
                                 >
                                     <option value="a-z">A'dan Z'ye</option>
                                     <option value="z-a">Z'den A'ya</option>
@@ -165,7 +163,7 @@ const Recipes = () => {
                                     <option value="rating">En Beğenilen</option>
                                     <option value="popular">En Popüler</option>
                                 </select>
-                                <ChevronRight className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 rotate-90 pointer-events-none" />
+                                <ChevronRight className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 rotate-90 pointer-events-none" />
                             </div>
                         </div>
                     </div>

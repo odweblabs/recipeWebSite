@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Sliders, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare, Soup, Beef, Cake, Croissant, Coffee, Flame, Trophy, ShoppingCart } from 'lucide-react';
 import { blogPosts } from '../data/blogData';
+import SearchBar from '../components/SearchBar';
 
 const Home = () => {
     const navigate = useNavigate();
@@ -82,30 +83,9 @@ const Home = () => {
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="relative w-full md:w-[450px] group"
+                    className="relative w-full md:w-[450px] z-[60]"
                 >
-                    <div className="absolute inset-0 bg-chefie-yellow/10 blur-xl group-focus-within:bg-chefie-yellow/20 transition-all rounded-full"></div>
-                    <div className="relative">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-focus-within:text-chefie-yellow group-focus-within:scale-110 transition-all" />
-                        <input
-                            type="text"
-                            placeholder="Mükemmel tarifi keşfet..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    const q = searchQuery.trim();
-                                    if (q) {
-                                        navigate(`/recipes?q=${encodeURIComponent(q)}`);
-                                    } else {
-                                        navigate('/recipes');
-                                    }
-                                }
-                            }}
-                            className="w-full pl-14 pr-6 py-4 bg-white border-0 rounded-2xl shadow-xl shadow-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 text-gray-700 font-medium placeholder-gray-300 transition-all outline-none"
-                        />
-                    </div>
+                    <SearchBar initialQuery={searchQuery} />
                 </motion.div>
 
                 <div className="flex items-center gap-4">
