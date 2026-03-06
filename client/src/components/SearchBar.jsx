@@ -69,18 +69,29 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
     return (
         <div className={`relative ${className}`}>
             {/* Main Input (Closed State) */}
-            <div className="relative group min-w-full">
-                <div className="absolute inset-0 bg-chefie-yellow/10 blur-xl group-focus-within:bg-chefie-yellow/20 transition-all rounded-[2rem]"></div>
-                <div className="relative" onClick={() => setIsOpen(true)}>
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-hover:text-chefie-yellow group-hover:scale-110 transition-all pointer-events-none" />
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder={placeholder}
-                        value={query}
-                        readOnly
-                        className="w-full pl-14 pr-6 py-4 bg-white border-0 rounded-2xl shadow-xl shadow-gray-100/50 text-gray-700 font-medium placeholder-gray-400 cursor-pointer outline-none cursor-text"
-                    />
+            <div className="relative group min-w-full md:w-auto flex items-center justify-end">
+                <div className="absolute inset-0 bg-chefie-yellow/10 blur-xl group-focus-within:bg-chefie-yellow/20 transition-all rounded-[2rem] hidden md:block"></div>
+                <div
+                    className="relative cursor-pointer md:w-full flex items-center justify-center md:justify-start"
+                    onClick={() => setIsOpen(true)}
+                >
+                    {/* Desktop View */}
+                    <div className="hidden md:block w-full">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-hover:text-chefie-yellow group-hover:scale-110 transition-all pointer-events-none" />
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder={placeholder}
+                            value={query}
+                            readOnly
+                            className="w-full pl-14 pr-6 py-4 bg-white border-0 rounded-2xl shadow-xl shadow-gray-100/50 text-gray-700 font-medium placeholder-gray-400 cursor-pointer outline-none cursor-text"
+                        />
+                    </div>
+
+                    {/* Mobile View (Icon Button) */}
+                    <div className="md:hidden w-11 h-11 bg-white border border-gray-100 rounded-2xl shadow-sm flex items-center justify-center text-gray-400 group-hover:text-chefie-yellow group-hover:border-chefie-yellow/30 transition-all">
+                        <Search className="h-5 w-5" />
+                    </div>
                 </div>
             </div>
 

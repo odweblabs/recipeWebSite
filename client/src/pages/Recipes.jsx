@@ -107,10 +107,10 @@ const Recipes = () => {
             {/* Unified Filter Bar (Sticky) */}
             <div className="sticky top-0 z-40 -mx-4 px-4 py-4 mb-12 bg-[#FFFBF2]/80 backdrop-blur-md">
                 <div className="max-w-7xl mx-auto">
-                    <div className="bg-white/80 backdrop-blur-xl border border-white shadow-2xl shadow-gray-200/50 rounded-[2.5rem] p-3 md:p-4 flex flex-col lg:flex-row items-center gap-4">
+                    <div className="bg-white/80 backdrop-blur-xl border border-white shadow-2xl shadow-gray-200/50 rounded-[2.5rem] p-3 md:p-4 flex flex-row lg:flex-row items-center gap-2 md:gap-4">
 
                         {/* Search Input */}
-                        <div className="relative flex-1 w-full z-50">
+                        <div className="relative z-50 md:flex-1">
                             <SearchBar
                                 initialQuery={searchQuery}
                                 placeholder="Tarif veya malzeme ara..."
@@ -129,41 +129,41 @@ const Recipes = () => {
                         </div>
 
                         {/* Category Select */}
-                        <div className="flex flex-row items-center gap-2 md:gap-3 w-full lg:w-auto">
+                        <div className="flex flex-row flex-1 items-center gap-2 md:gap-3 w-full lg:w-auto">
                             <div className="flex-1 lg:w-64 relative group">
-                                <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 p-1.5 bg-chefie-yellow/10 rounded-lg group-hover:bg-chefie-yellow/20 transition-colors">
-                                    <LayoutGrid className="w-4 h-4 text-chefie-yellow" />
+                                <div className="absolute left-2.5 md:left-4 top-1/2 -translate-y-1/2 p-1 bg-chefie-yellow/10 rounded-lg group-hover:bg-chefie-yellow/20 transition-colors">
+                                    <LayoutGrid className="w-3.5 h-3.5 md:w-4 md:h-4 text-chefie-yellow" />
                                 </div>
                                 <select
                                     value={selectedCategory || ''}
                                     onChange={(e) => setSelectedCategory(e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-xs md:text-sm"
+                                    className="w-full pl-8 md:pl-12 pr-6 md:pr-10 py-2.5 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-[10px] sm:text-xs md:text-sm truncate"
                                 >
-                                    <option value="">Tüm Kategoriler</option>
+                                    <option value="">Kategori</option>
                                     {categories.map(cat => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
-                                <ChevronRight className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 rotate-90 pointer-events-none" />
+                                <ChevronRight className="absolute right-2 md:right-5 top-1/2 -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-gray-300 rotate-90 pointer-events-none" />
                             </div>
 
                             {/* Sort Select */}
                             <div className="flex-1 lg:w-56 relative group">
-                                <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 p-1.5 bg-chefie-dark/5 rounded-lg group-hover:bg-chefie-dark/10 transition-colors">
-                                    <SlidersHorizontal className="w-4 h-4 text-chefie-dark" />
+                                <div className="absolute left-2.5 md:left-4 top-1/2 -translate-y-1/2 p-1 bg-chefie-dark/5 rounded-lg group-hover:bg-chefie-dark/10 transition-colors">
+                                    <SlidersHorizontal className="w-3.5 h-3.5 md:w-4 md:h-4 text-chefie-dark" />
                                 </div>
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-xs md:text-sm"
+                                    className="w-full pl-8 md:pl-12 pr-6 md:pr-10 py-2.5 md:py-4 bg-gray-50 border-0 rounded-2xl md:rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold appearance-none cursor-pointer text-[10px] sm:text-xs md:text-sm truncate"
                                 >
-                                    <option value="a-z">A'dan Z'ye</option>
-                                    <option value="z-a">Z'den A'ya</option>
+                                    <option value="a-z">A-Z</option>
+                                    <option value="z-a">Z-A</option>
                                     <option value="newest">En Yeni</option>
-                                    <option value="rating">En Beğenilen</option>
-                                    <option value="popular">En Popüler</option>
+                                    <option value="rating">Beğenilen</option>
+                                    <option value="popular">Popüler</option>
                                 </select>
-                                <ChevronRight className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 rotate-90 pointer-events-none" />
+                                <ChevronRight className="absolute right-2 md:right-5 top-1/2 -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-gray-300 rotate-90 pointer-events-none" />
                             </div>
                         </div>
                     </div>
