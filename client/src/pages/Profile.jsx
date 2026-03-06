@@ -2,7 +2,37 @@ import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell } from 'lucide-react';
+import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell, Globe } from 'lucide-react';
+
+// Country list with flag emojis
+const COUNTRY_LIST = [
+    { code: 'TR', name: 'Türkiye', flag: '🇹🇷' },
+    { code: 'US', name: 'ABD', flag: '🇺🇸' },
+    { code: 'DE', name: 'Almanya', flag: '🇩🇪' },
+    { code: 'FR', name: 'Fransa', flag: '🇫🇷' },
+    { code: 'GB', name: 'İngiltere', flag: '🇬🇧' },
+    { code: 'NL', name: 'Hollanda', flag: '🇳🇱' },
+    { code: 'BE', name: 'Belçika', flag: '🇧🇪' },
+    { code: 'AT', name: 'Avusturya', flag: '🇦🇹' },
+    { code: 'CH', name: 'İsviçre', flag: '🇨🇭' },
+    { code: 'SE', name: 'İsveç', flag: '🇸🇪' },
+    { code: 'NO', name: 'Norveç', flag: '🇳🇴' },
+    { code: 'DK', name: 'Danimarka', flag: '🇩🇰' },
+    { code: 'IT', name: 'İtalya', flag: '🇮🇹' },
+    { code: 'ES', name: 'İspanya', flag: '🇪🇸' },
+    { code: 'AZ', name: 'Azerbaycan', flag: '🇦🇿' },
+    { code: 'RU', name: 'Rusya', flag: '🇷🇺' },
+    { code: 'AU', name: 'Avustralya', flag: '🇦🇺' },
+    { code: 'CA', name: 'Kanada', flag: '🇨🇦' },
+    { code: 'JP', name: 'Japonya', flag: '🇯🇵' },
+    { code: 'KR', name: 'Güney Kore', flag: '🇰🇷' },
+    { code: 'SA', name: 'Suudi Arabistan', flag: '🇸🇦' },
+    { code: 'AE', name: 'BAE', flag: '🇦🇪' },
+    { code: 'BR', name: 'Brezilya', flag: '🇧🇷' },
+    { code: 'OTHER', name: 'Diğer', flag: '🌍' },
+];
+
+const getCountryInfo = (code) => COUNTRY_LIST.find(c => c.code === code) || null;
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Profile = () => {
@@ -13,6 +43,7 @@ const Profile = () => {
     const [comments, setComments] = useState([]);
     const [menus, setMenus] = useState([]);
     const [userLists, setUserLists] = useState([]);
+    const [userFavorites, setUserFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('recipes');
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -89,6 +120,15 @@ const Profile = () => {
         }
     };
 
+    const fetchUserFavorites = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/favorites/user/${id}`);
+            setUserFavorites(res.data);
+        } catch (err) {
+            console.error('Error fetching user favorites:', err);
+        }
+    };
+
     // Fetch pending requests (only for profile owner)
     const fetchPendingRequests = async () => {
         if (!isOwner || !token) return;
@@ -146,6 +186,7 @@ const Profile = () => {
                 await fetchFriendStatus();
                 await fetchPendingRequests();
                 await fetchUserLists();
+                await fetchUserFavorites();
             } catch (err) {
                 console.error('Error fetching profile data:', err);
             } finally {
@@ -490,6 +531,19 @@ const Profile = () => {
                                 <MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" />
                                 <span>{comments.length} Yorum</span>
                             </div>
+                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                                <Heart className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />
+                                <span>{userFavorites.length} Favori</span>
+                            </div>
+                            {profile.country && (() => {
+                                const countryInfo = getCountryInfo(profile.country);
+                                return countryInfo ? (
+                                    <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
+                                        <span className="text-base">{countryInfo.flag}</span>
+                                        <span>{countryInfo.name}</span>
+                                    </div>
+                                ) : null;
+                            })()}
                         </div>
                     </div>
                 </div>
@@ -545,6 +599,12 @@ const Profile = () => {
                             className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'recipes' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
                         >
                             Tarifler ({recipes.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('favorites')}
+                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'favorites' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
+                        >
+                            Favoriler ({userFavorites.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('friends')}
@@ -664,6 +724,41 @@ const Profile = () => {
                                         )}
                                     </div>
                                 )}
+                            </>
+                        )}
+
+                        {/* Favorites Tab */}
+                        {activeTab === 'favorites' && (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {userFavorites.length > 0 ? userFavorites.map(recipe => (
+                                        <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all overflow-hidden flex flex-col h-full">
+                                            <div className="h-48 overflow-hidden relative">
+                                                <img
+                                                    src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                                    alt={recipe.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" /> {recipe.prep_time}
+                                                </div>
+                                                <div className="absolute top-3 left-3 bg-rose-500/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm flex items-center gap-1">
+                                                    <Heart className="w-3 h-3 fill-white" /> Favori
+                                                </div>
+                                            </div>
+                                            <div className="p-4 flex-1 flex flex-col">
+                                                <div className="text-xs font-bold text-[#10B981] mb-2 uppercase tracking-wide">{recipe.category_name || 'Genel'}</div>
+                                                <h3 className="font-bold text-gray-800 text-lg mb-2 line-clamp-1 group-hover:text-[#10B981] transition-colors">{recipe.title}</h3>
+                                                <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{recipe.description}</p>
+                                            </div>
+                                        </Link>
+                                    )) : (
+                                        <div className="col-span-full py-12 text-center text-gray-400">
+                                            <Heart className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                            Henüz favori tarif eklenmemiş.
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         )}
 

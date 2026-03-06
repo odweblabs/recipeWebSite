@@ -72,4 +72,23 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
+// Get favorites for a specific user (public - for profile pages)
+router.get('/user/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const favorites = await executeQuery(`
+            SELECT recipes.*, categories.name as category_name
+            FROM recipes
+            JOIN favorites ON recipes.id = favorites.recipe_id
+            LEFT JOIN categories ON recipes.category_id = categories.id
+            WHERE favorites.user_id = $1
+            ORDER BY favorites.created_at DESC
+        `, [userId]);
+        res.json(favorites);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

@@ -32,6 +32,36 @@ import {
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Country list with flag emojis
+const COUNTRY_LIST = [
+    { code: 'TR', name: 'Türkiye', flag: '🇹🇷' },
+    { code: 'US', name: 'ABD', flag: '🇺🇸' },
+    { code: 'DE', name: 'Almanya', flag: '🇩🇪' },
+    { code: 'FR', name: 'Fransa', flag: '🇫🇷' },
+    { code: 'GB', name: 'İngiltere', flag: '🇬🇧' },
+    { code: 'NL', name: 'Hollanda', flag: '🇳🇱' },
+    { code: 'BE', name: 'Belçika', flag: '🇧🇪' },
+    { code: 'AT', name: 'Avusturya', flag: '🇦🇹' },
+    { code: 'CH', name: 'İsviçre', flag: '🇨🇭' },
+    { code: 'SE', name: 'İsveç', flag: '🇸🇪' },
+    { code: 'NO', name: 'Norveç', flag: '🇳🇴' },
+    { code: 'DK', name: 'Danimarka', flag: '🇩🇰' },
+    { code: 'IT', name: 'İtalya', flag: '🇮🇹' },
+    { code: 'ES', name: 'İspanya', flag: '🇪🇸' },
+    { code: 'AZ', name: 'Azerbaycan', flag: '🇦🇿' },
+    { code: 'RU', name: 'Rusya', flag: '🇷🇺' },
+    { code: 'AU', name: 'Avustralya', flag: '🇦🇺' },
+    { code: 'CA', name: 'Kanada', flag: '🇨🇦' },
+    { code: 'JP', name: 'Japonya', flag: '🇯🇵' },
+    { code: 'KR', name: 'Güney Kore', flag: '🇰🇷' },
+    { code: 'SA', name: 'Suudi Arabistan', flag: '🇸🇦' },
+    { code: 'AE', name: 'BAE', flag: '🇦🇪' },
+    { code: 'BR', name: 'Brezilya', flag: '🇧🇷' },
+    { code: 'OTHER', name: 'Diğer', flag: '🌍' },
+];
+
+const getCountryInfo = (code) => COUNTRY_LIST.find(c => c.code === code) || null;
+
 const Dashboard = () => {
     const [recipes, setRecipes] = useState([]);
     const [favorites, setFavorites] = useState([]);
@@ -52,7 +82,7 @@ const Dashboard = () => {
     const [users, setUsers] = useState([]);
     const [categories, setCategories] = useState([]);
     const [stats, setStats] = useState(null);
-    const [profileData, setProfileData] = useState({ fullName: user.full_name || '', profileImage: null });
+    const [profileData, setProfileData] = useState({ fullName: user.full_name || '', profileImage: null, country: user.country || '' });
     const [isUpdating, setIsUpdating] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
@@ -326,6 +356,7 @@ const Dashboard = () => {
         try {
             const formData = new FormData();
             formData.append('full_name', profileData.fullName);
+            formData.append('country', profileData.country || '');
             if (profileData.profileImage) {
                 formData.append('profile_image', profileData.profileImage);
             }
@@ -513,7 +544,13 @@ const Dashboard = () => {
                                                     </div>
                                                 )}
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="text-sm font-bold text-gray-800 group-hover:text-[#10B981] transition-colors">{u.full_name || 'İsimsiz Şef'}</div>
+                                                    <div className="text-sm font-bold text-gray-800 group-hover:text-[#10B981] transition-colors flex items-center gap-1.5">
+                                                        {u.full_name || 'İsimsiz Şef'}
+                                                        {u.country && (() => {
+                                                            const ci = getCountryInfo(u.country);
+                                                            return ci ? <span className="text-sm" title={ci.name}>{ci.flag}</span> : null;
+                                                        })()}
+                                                    </div>
                                                     <div className="text-xs text-gray-400">@{u.username}</div>
                                                 </div>
                                                 <span className="text-[10px] font-bold text-gray-300 flex-shrink-0">{new Date(u.created_at).toLocaleDateString('tr-TR')}</span>
@@ -659,6 +696,10 @@ const Dashboard = () => {
                                                             <span className="text-sm font-bold text-gray-800 truncate">{a.full_name || a.username}</span>
                                                             {isOnline && <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0 animate-pulse" />}
                                                             {a.role === 'admin' && <span className="text-[8px] font-black bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md uppercase border border-amber-200 shadow-sm leading-none">Admin</span>}
+                                                            {a.country && (() => {
+                                                                const ci = getCountryInfo(a.country);
+                                                                return ci ? <span className="text-sm" title={ci.name}>{ci.flag}</span> : null;
+                                                            })()}
                                                         </div>
                                                         <div className="text-[10px] text-gray-400 truncate">@{a.username}</div>
                                                     </div>
@@ -812,6 +853,19 @@ const Dashboard = () => {
                                                 className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none"
                                                 required
                                             />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Ülke</label>
+                                            <select
+                                                value={profileData.country}
+                                                onChange={(e) => setProfileData({ ...profileData, country: e.target.value })}
+                                                className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none appearance-none"
+                                            >
+                                                <option value="">Ülke Seçiniz</option>
+                                                {COUNTRY_LIST.map(c => (
+                                                    <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Profil Fotoğrafı</label>

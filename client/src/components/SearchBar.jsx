@@ -11,10 +11,57 @@ const quickAccess = [
     { title: 'Pratik ana yemekler', icon: <Flame className="w-4 h-4 text-orange-500" />, query: 'pratik' }
 ];
 const ingredients = [
-    { name: 'tavuk eti', image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=150&h=150&fit=crop' },
-    { name: 'bakla', image: 'https://images.unsplash.com/photo-1599577180579-246e7f2231ff?w=150&h=150&fit=crop' },
-    { name: 'pirinç', image: 'https://images.unsplash.com/photo-1579585641193-41bb38038d17?w=150&h=150&fit=crop' },
-    { name: 'mor lahana', image: 'https://images.unsplash.com/photo-1506544777-64cfbea6bdcf?w=150&h=150&fit=crop' }
+    // Proteinler
+    { name: 'tavuk eti', emoji: '🍗', category: 'protein' },
+    { name: 'kıyma', emoji: '🥩', category: 'protein' },
+    { name: 'dana eti', emoji: '🥩', category: 'protein' },
+    { name: 'balık', emoji: '🐟', category: 'protein' },
+    { name: 'yumurta', emoji: '🥚', category: 'protein' },
+    { name: 'karides', emoji: '🦐', category: 'protein' },
+    // Sebzeler
+    { name: 'patates', emoji: '🥔', category: 'sebze' },
+    { name: 'soğan', emoji: '🧅', category: 'sebze' },
+    { name: 'domates', emoji: '🍅', category: 'sebze' },
+    { name: 'biber', emoji: '🌶️', category: 'sebze' },
+    { name: 'havuç', emoji: '🥕', category: 'sebze' },
+    { name: 'kabak', emoji: '🥒', category: 'sebze' },
+    { name: 'patlıcan', emoji: '🍆', category: 'sebze' },
+    { name: 'ıspanak', emoji: '🥬', category: 'sebze' },
+    { name: 'sarımsak', emoji: '🧄', category: 'sebze' },
+    { name: 'bezelye', emoji: '🟢', category: 'sebze' },
+    { name: 'mantar', emoji: '🍄', category: 'sebze' },
+    { name: 'brokoli', emoji: '🥦', category: 'sebze' },
+    { name: 'mısır', emoji: '🌽', category: 'sebze' },
+    { name: 'fasulye', emoji: '🫘', category: 'sebze' },
+    { name: 'lahana', emoji: '🥬', category: 'sebze' },
+    { name: 'pırasa', emoji: '🧅', category: 'sebze' },
+    { name: 'enginar', emoji: '🌿', category: 'sebze' },
+    { name: 'bakla', emoji: '🫛', category: 'sebze' },
+    // Tahıl & Makarna
+    { name: 'pirinç', emoji: '🍚', category: 'tahıl' },
+    { name: 'makarna', emoji: '🍝', category: 'tahıl' },
+    { name: 'bulgur', emoji: '🌾', category: 'tahıl' },
+    { name: 'un', emoji: '🌾', category: 'tahıl' },
+    { name: 'ekmek', emoji: '🍞', category: 'tahıl' },
+    { name: 'nohut', emoji: '🟤', category: 'tahıl' },
+    { name: 'mercimek', emoji: '🟠', category: 'tahıl' },
+    // Süt Ürünleri
+    { name: 'süt', emoji: '🥛', category: 'süt' },
+    { name: 'peynir', emoji: '🧀', category: 'süt' },
+    { name: 'yoğurt', emoji: '🥣', category: 'süt' },
+    { name: 'tereyağı', emoji: '🧈', category: 'süt' },
+    { name: 'krema', emoji: '🍶', category: 'süt' },
+    // Baharat & Diğer
+    { name: 'zeytinyağı', emoji: '🫒', category: 'baharat' },
+    { name: 'limon', emoji: '🍋', category: 'baharat' },
+    { name: 'tuz', emoji: '🧂', category: 'baharat' },
+    { name: 'şeker', emoji: '🍬', category: 'baharat' },
+    { name: 'salça', emoji: '🥫', category: 'baharat' },
+    { name: 'karabiber', emoji: '⚫', category: 'baharat' },
+    { name: 'pul biber', emoji: '🌶️', category: 'baharat' },
+    { name: 'nane', emoji: '🌿', category: 'baharat' },
+    { name: 'maydanoz', emoji: '🌿', category: 'baharat' },
+    { name: 'dereotu', emoji: '🌿', category: 'baharat' },
 ];
 
 const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel tarifi keşfet...", onSearch, iconOnlyOnMobile = false, onOpenChange }) => {
@@ -23,6 +70,9 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
     const [recentSearches, setRecentSearches] = useState([]);
     const [recipeCount, setRecipeCount] = useState(0);
     const [isListening, setIsListening] = useState(false);
+    const [selectedIngredients, setSelectedIngredients] = useState([]);
+    const [ingredientFilter, setIngredientFilter] = useState('');
+    const [activeIngredientCategory, setActiveIngredientCategory] = useState('all');
     const inputRef = useRef(null);
     const modalInputRef = useRef(null);
     const navigate = useNavigate();
@@ -126,6 +176,38 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
         localStorage.removeItem('chefie_recent_searches');
         setRecentSearches([]);
     };
+
+    const handleIngredientToggle = (ingredientName) => {
+        setSelectedIngredients(prev => {
+            if (prev.includes(ingredientName)) {
+                return prev.filter(i => i !== ingredientName);
+            } else {
+                return [...prev, ingredientName];
+            }
+        });
+    };
+
+    const handleIngredientSearch = () => {
+        if (selectedIngredients.length === 0) return;
+        const searchQuery = selectedIngredients.join(' ');
+        handleSearch(searchQuery);
+        setSelectedIngredients([]);
+    };
+
+    const filteredIngredients = ingredients.filter(ing => {
+        const matchesFilter = ing.name.toLowerCase().includes(ingredientFilter.toLowerCase());
+        const matchesCategory = activeIngredientCategory === 'all' || ing.category === activeIngredientCategory;
+        return matchesFilter && matchesCategory;
+    });
+
+    const ingredientCategories = [
+        { key: 'all', label: 'Tümü' },
+        { key: 'protein', label: 'Protein' },
+        { key: 'sebze', label: 'Sebze' },
+        { key: 'tahıl', label: 'Tahıl' },
+        { key: 'süt', label: 'Süt Ürünleri' },
+        { key: 'baharat', label: 'Baharat' },
+    ];
 
     return (
         <div className={`relative ${className}`}>
@@ -285,25 +367,111 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                     <h3 className="text-sm font-black text-chefie-dark flex items-center gap-2 mb-4">
                                         <Utensils className="w-4 h-4 text-orange-400" /> Malzemeye Göre Tarif Ara
                                     </h3>
-                                    <div className="relative mb-6">
+
+                                    {/* Selected Ingredients Chips */}
+                                    {selectedIngredients.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {selectedIngredients.map(name => {
+                                                const ing = ingredients.find(i => i.name === name);
+                                                return (
+                                                    <button
+                                                        key={name}
+                                                        onClick={() => handleIngredientToggle(name)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-chefie-yellow/20 text-chefie-dark border border-chefie-yellow/40 rounded-full text-xs font-bold transition-colors hover:bg-chefie-yellow/30"
+                                                    >
+                                                        <span>{ing?.emoji}</span>
+                                                        <span>{name}</span>
+                                                        <X className="w-3 h-3 ml-0.5" />
+                                                    </button>
+                                                );
+                                            })}
+                                            <button
+                                                onClick={handleIngredientSearch}
+                                                className="flex items-center gap-1.5 px-4 py-1.5 bg-chefie-yellow text-white rounded-full text-xs font-bold transition-all hover:bg-chefie-yellow/90 shadow-sm"
+                                            >
+                                                <Search className="w-3 h-3" />
+                                                Tarif Ara ({selectedIngredients.length})
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Ingredient Filter */}
+                                    <div className="relative mb-4">
                                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                         <input
                                             type="text"
-                                            placeholder="Malzeme Ara"
+                                            placeholder="Malzeme ara..."
+                                            value={ingredientFilter}
+                                            onChange={(e) => setIngredientFilter(e.target.value)}
                                             className="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-xl text-sm font-medium focus:ring-2 focus:ring-chefie-yellow/20 outline-none"
                                         />
                                     </div>
-                                    <div className="grid grid-cols-4 gap-4 pb-6">
-                                        {ingredients.map((ing, idx) => (
-                                            <div key={idx} className="flex flex-col items-center gap-2 cursor-pointer group" onClick={() => handleSearch(ing.name)}>
-                                                <div className="relative w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group-hover:border-chefie-yellow transition-colors">
-                                                    <img src={ing.image} alt={ing.name} className="w-full h-full object-cover p-1 rounded-2xl" />
-                                                    <div className="absolute top-1 right-1 w-4 h-4 bg-gray-100 rounded-full flex items-center justify-center border border-white text-gray-500 font-bold text-xs"><Plus size={10} /></div>
-                                                </div>
-                                                <span className="text-[10px] md:text-xs font-bold text-gray-600 text-center leading-tight">{ing.name}</span>
-                                            </div>
+
+                                    {/* Category Tabs */}
+                                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4 -mx-6 px-6">
+                                        {ingredientCategories.map(cat => (
+                                            <button
+                                                key={cat.key}
+                                                onClick={() => setActiveIngredientCategory(cat.key)}
+                                                className={`whitespace-nowrap px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors border ${activeIngredientCategory === cat.key
+                                                        ? 'bg-chefie-yellow text-white border-chefie-yellow shadow-sm'
+                                                        : 'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100'
+                                                    }`}
+                                            >
+                                                {cat.label}
+                                            </button>
                                         ))}
                                     </div>
+
+                                    {/* Ingredient Grid */}
+                                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 pb-6 max-h-[300px] overflow-y-auto scrollbar-hide">
+                                        {filteredIngredients.map((ing, idx) => {
+                                            const isSelected = selectedIngredients.includes(ing.name);
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    className={`flex flex-col items-center gap-1.5 cursor-pointer group`}
+                                                    onClick={() => handleIngredientToggle(ing.name)}
+                                                >
+                                                    <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-2xl md:text-3xl transition-all border-2 ${isSelected
+                                                            ? 'bg-chefie-yellow/20 border-chefie-yellow shadow-md scale-105'
+                                                            : 'bg-white border-gray-100 shadow-sm group-hover:border-chefie-yellow/50 group-hover:shadow-md'
+                                                        }`}>
+                                                        {ing.emoji}
+                                                        {isSelected ? (
+                                                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-chefie-yellow rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                                                                <span className="text-white text-[10px] font-black">✓</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center border-2 border-white text-gray-400">
+                                                                <Plus size={10} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <span className={`text-[10px] font-bold text-center leading-tight ${isSelected ? 'text-chefie-dark' : 'text-gray-500'
+                                                        }`}>{ing.name}</span>
+                                                </div>
+                                            );
+                                        })}
+                                        {filteredIngredients.length === 0 && (
+                                            <div className="col-span-full py-6 text-center text-gray-400 text-xs font-bold">
+                                                Malzeme bulunamadı.
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Bottom Search Button */}
+                                    {selectedIngredients.length > 0 && (
+                                        <div className="pt-4 border-t border-gray-100">
+                                            <button
+                                                onClick={handleIngredientSearch}
+                                                className="w-full py-3.5 bg-chefie-yellow text-white font-bold text-sm rounded-2xl shadow-lg shadow-chefie-yellow/30 hover:shadow-xl hover:shadow-chefie-yellow/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                            >
+                                                <Search className="w-4 h-4" />
+                                                {selectedIngredients.length} malzeme ile tarif ara
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Spacer for mobile */}
