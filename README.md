@@ -1,4 +1,4 @@
-# 🍳 Chefie - Modern Yemek Tarifleri Platformu
+# 🍳 Tarifo - Modern Yemek Tarifleri Platformu
 
 > Mutfakta profesyonel bir rehberle tanışın. Kendi tariflerinizi paylaşın, yeni lezzetler keşfedin ve şeflik yolculuğunuza bugün başlayın.
 
