@@ -2,8 +2,10 @@ import API_BASE from '../../utils/api';
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { ChefHat, Heart, BookOpen, Users, Settings, LogOut, LayoutDashboard, UtensilsCrossed, ShoppingCart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Sidebar = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
 
@@ -21,7 +23,7 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className="w-64 bg-white min-h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col p-6 z-50 hidden md:flex shadow-2xl shadow-gray-100">
+        <aside className="w-64 bg-chefie-card min-h-screen fixed left-0 top-0 border-r border-chefie-border flex flex-col p-6 z-50 hidden md:flex shadow-2xl shadow-gray-100 dark:shadow-none">
             {/* Brand */}
             <div className="mb-10 flex justify-center">
                 <Link to="/" className="group">
@@ -34,20 +36,20 @@ const Sidebar = () => {
             </div>
 
             {/* User Profile */}
-            <div className="bg-chefie-cream/50 p-4 rounded-3xl mb-8 border border-white shadow-sm transition-transform hover:scale-105">
+            <div className="bg-chefie-cream/50 p-4 rounded-3xl mb-8 border border-chefie-border shadow-sm transition-transform hover:scale-105">
                 <Link to={user ? `/profile/${user.id}` : '#'} className="block group">
                     <div className="relative w-20 h-20 mx-auto mb-3">
                         <div className="absolute inset-0 bg-chefie-yellow rounded-full rotate-6 group-hover:rotate-12 transition-transform"></div>
                         <img
                             src={user?.profile_image ? (user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`) : "https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png"}
                             alt="Profile"
-                            className="relative w-20 h-20 rounded-full object-cover border-2 border-white shadow-md"
+                            className="relative w-20 h-20 rounded-full object-cover border-2 border-chefie-card shadow-md"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-chefie-green rounded-full border-2 border-white shadow-sm"></div>
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-chefie-green rounded-full border-2 border-chefie-card shadow-sm"></div>
                     </div>
                     <div className="text-center">
-                        <h2 className="font-bold text-gray-900 text-sm line-clamp-1 group-hover:text-chefie-yellow transition-colors">{user?.full_name || user?.username || "Konuk Şef"}</h2>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{user?.role === 'admin' ? 'Master Chef' : 'Gurme Şef'}</p>
+                        <h2 className="font-bold text-chefie-dark text-sm line-clamp-1 group-hover:text-chefie-yellow transition-colors">{user?.full_name || user?.username || t('common.guest_chef')}</h2>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{user?.role === 'admin' ? t('common.master_chef') : t('common.gourme_chef')}</p>
                     </div>
                 </Link>
             </div>
@@ -64,7 +66,7 @@ const Sidebar = () => {
                     }
                 >
                     <UtensilsCrossed className={`w-5 h-5 mr-3 transition-transform group-hover:rotate-12`} />
-                    <span className="text-sm">Tarifler</span>
+                    <span className="text-sm">{t('nav.recipes')}</span>
                 </NavLink>
 
                 <NavLink
@@ -74,7 +76,7 @@ const Sidebar = () => {
                     }
                 >
                     <BookOpen className="w-5 h-5 mr-3" />
-                    <span className="text-sm">Menüler</span>
+                    <span className="text-sm">{t('nav.menus')}</span>
                 </NavLink>
 
                 <NavLink
@@ -84,7 +86,7 @@ const Sidebar = () => {
                     }
                 >
                     <Heart className="w-5 h-5 mr-3" />
-                    <span className="text-sm">Trend</span>
+                    <span className="text-sm">{t('nav.trend')}</span>
                 </NavLink>
 
                 <NavLink
@@ -94,7 +96,7 @@ const Sidebar = () => {
                     }
                 >
                     <ChefHat className="w-5 h-5 mr-3" />
-                    <span className="text-sm">Ne Pişirsem?</span>
+                    <span className="text-sm">{t('nav.what_to_cook')}</span>
                 </NavLink>
 
                 <NavLink
@@ -104,7 +106,7 @@ const Sidebar = () => {
                     }
                 >
                     <BookOpen className="w-5 h-5 mr-3" />
-                    <span className="text-sm">Blog</span>
+                    <span className="text-sm">{t('nav.blog')}</span>
                 </NavLink>
 
                 <NavLink
@@ -114,7 +116,7 @@ const Sidebar = () => {
                     }
                 >
                     <ShoppingCart className="w-5 h-5 mr-3" />
-                    <span className="text-sm">Listeler</span>
+                    <span className="text-sm">{t('nav.lists')}</span>
                 </NavLink>
 
                 <NavLink
@@ -124,18 +126,18 @@ const Sidebar = () => {
                     }
                 >
                     <Settings className="w-5 h-5 mr-3" />
-                    <span className="text-sm">Kaç Kalori?</span>
+                    <span className="text-sm">{t('nav.calories')}</span>
                 </NavLink>
             </nav>
 
             {/* Bottom Actions */}
-            <div className="pt-6 mt-6 border-t border-gray-50 space-y-2">
+            <div className="pt-6 mt-6 border-t border-chefie-border space-y-2">
                 <NavLink
                     to="/admin/dashboard"
                     className="flex items-center px-4 py-3 text-gray-400 hover:text-chefie-yellow hover:bg-chefie-cream/50 rounded-2xl transition-all text-sm group"
                 >
                     <LayoutDashboard className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
-                    Yönetici Paneli
+                    {t('nav.admin_panel')}
                 </NavLink>
                 {user && (
                     <button
@@ -143,7 +145,7 @@ const Sidebar = () => {
                         className="flex items-center px-4 py-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all text-sm w-full group"
                     >
                         <LogOut className="w-5 h-5 mr-3 group-hover:translate-x-1 transition-transform" />
-                        Çıkış Yap
+                        {t('nav.logout')}
                     </button>
                 )}
             </div>

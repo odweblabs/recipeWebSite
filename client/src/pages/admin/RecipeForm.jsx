@@ -144,9 +144,9 @@ const RecipeForm = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row min-h-screen bg-[#FFFBF2] font-sans pb-24 md:pb-0">
+        <div className="flex flex-col md:flex-row min-h-screen bg-chefie-cream font-sans pb-24 md:pb-0">
             {/* Mobile Header Box */}
-            <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
+            <div className="md:hidden flex items-center justify-between p-4 bg-chefie-card border-b border-chefie-border sticky top-0 z-30 shadow-sm dark:shadow-none">
                 <Link to="/" className="flex items-center gap-2">
                     <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
                 </Link>
@@ -164,7 +164,7 @@ const RecipeForm = () => {
                     </Link>
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="p-2 text-gray-600 bg-gray-50 rounded-xl ml-1"
+                        className="p-2 text-chefie-text bg-chefie-cream rounded-xl ml-1 border border-chefie-border"
                     >
                         {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </button>
@@ -180,9 +180,9 @@ const RecipeForm = () => {
             )}
 
             {/* Sidebar */}
-            <aside className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-300 w-64 bg-white border-r border-gray-100 flex flex-col fixed h-full z-50`}>
+            <aside className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-300 w-64 bg-chefie-card border-r border-chefie-border flex flex-col fixed h-full z-50 shadow-lg dark:shadow-none`}>
                 <div className="flex items-center justify-between p-6">
-                    <Link to="/" className="flex items-center gap-2 hover:bg-gray-50 transition-colors group">
+                    <Link to="/" className="flex items-center gap-2 hover:bg-chefie-cream transition-colors group">
                         <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
                     </Link>
                     <button className="md:hidden text-gray-500" onClick={() => setIsMobileMenuOpen(false)}>
@@ -193,7 +193,7 @@ const RecipeForm = () => {
                 <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 uppercase tracking-wide">Menu</div>
 
-                    <Link to="/admin/dashboard" className="flex items-center px-4 py-3 text-[#10B981] bg-[#FFFBF2] rounded-xl font-medium transition-colors">
+                    <Link to="/admin/dashboard" className="flex items-center px-4 py-3 text-chefie-yellow bg-chefie-cream border border-chefie-border rounded-xl font-medium transition-colors">
                         <LayoutDashboard className="w-5 h-5 mr-3" />
                         Panele Dön
                     </Link>
@@ -205,14 +205,14 @@ const RecipeForm = () => {
 
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
 
-                    <a href="#" className="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                    <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-chefie-cream rounded-xl font-medium transition-colors border border-transparent hover:border-chefie-border">
                         <Settings className="w-5 h-5 mr-3" />
                         Ayarlar
                     </a>
                 </nav>
 
-                <div className="p-4 border-t border-gray-100">
-                    <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <div className="p-4 border-t border-chefie-border">
+                    <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl font-medium transition-colors border border-transparent hover:border-red-500/20">
                         <LogOut className="w-5 h-5 mr-3" />
                         Çıkış Yap
                     </button>
@@ -224,12 +224,12 @@ const RecipeForm = () => {
                 {/* Header */}
                 <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-10 gap-4">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/admin/dashboard')} className="p-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                            <ArrowLeft className="w-5 h-5 text-gray-600" />
+                        <button onClick={() => navigate('/admin/dashboard')} className="p-2 bg-chefie-card border border-chefie-border rounded-xl hover:bg-chefie-cream transition-colors">
+                            <ArrowLeft className="w-5 h-5 text-chefie-text" />
                         </button>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-800">{isEditing ? 'Tarifi Düzenle' : 'Yeni Tarif Ekle'}</h1>
-                            <p className="text-sm text-gray-500">Tarif detaylarını aşağıdan yönetebilirsiniz.</p>
+                            <h1 className="text-2xl font-bold text-chefie-text">{isEditing ? 'Tarifi Düzenle' : 'Yeni Tarif Ekle'}</h1>
+                            <p className="text-sm text-gray-400">Tarif detaylarını aşağıdan yönetebilirsiniz.</p>
                         </div>
                     </div>
 
@@ -261,7 +261,7 @@ const RecipeForm = () => {
 
                 {/* Content */}
                 <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="bg-chefie-card rounded-3xl shadow-sm md:shadow-lg dark:shadow-none border border-chefie-border overflow-hidden">
                         <div className="p-8 space-y-8">
 
                             {/* Temel Bilgiler Section */}
@@ -272,7 +272,7 @@ const RecipeForm = () => {
                                 </h3>
                                 <div className="grid gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Tarif Başlığı</label>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Tarif Başlığı</label>
                                         <input
                                             type="text"
                                             name="title"
@@ -280,19 +280,19 @@ const RecipeForm = () => {
                                             onChange={handleChange}
                                             required
                                             placeholder="Örn: Kremalı Mantar Çorbası"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all placeholder-gray-400"
+                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Kısa Açıklama</label>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Kısa Açıklama</label>
                                         <textarea
                                             name="description"
                                             value={formData.description}
                                             onChange={handleChange}
                                             rows="3"
                                             placeholder="Tarif hakkında kısa, iştah açıcı bir açıklama..."
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all placeholder-gray-400"
+                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500"
                                         ></textarea>
                                     </div>
                                 </div>
@@ -310,13 +310,13 @@ const RecipeForm = () => {
                                     <div className="space-y-6">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                                                <label className="block text-sm font-medium text-gray-400 mb-2">Kategori</label>
                                                 <div className="relative">
                                                     <select
                                                         name="category_id"
                                                         value={formData.category_id}
                                                         onChange={handleChange}
-                                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none appearance-none"
+                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none appearance-none"
                                                     >
                                                         <option value="">Seçiniz</option>
                                                         {categories.map(cat => (
@@ -327,7 +327,7 @@ const RecipeForm = () => {
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Porsiyon</label>
+                                                <label className="block text-sm font-medium text-gray-400 mb-2">Porsiyon</label>
                                                 <div className="relative">
                                                     <input
                                                         type="number"
@@ -335,7 +335,7 @@ const RecipeForm = () => {
                                                         value={formData.servings}
                                                         onChange={handleChange}
                                                         placeholder="4"
-                                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none pl-10"
+                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none pl-10"
                                                     />
                                                     <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                                 </div>
@@ -344,7 +344,7 @@ const RecipeForm = () => {
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Hazırlama</label>
+                                                <label className="block text-sm font-medium text-gray-400 mb-2">Hazırlama</label>
                                                 <div className="relative">
                                                     <input
                                                         type="text"
@@ -352,13 +352,13 @@ const RecipeForm = () => {
                                                         value={formData.prep_time}
                                                         onChange={handleChange}
                                                         placeholder="20 dk"
-                                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none pl-10"
+                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none pl-10"
                                                     />
                                                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Pişirme</label>
+                                                <label className="block text-sm font-medium text-gray-400 mb-2">Pişirme</label>
                                                 <div className="relative">
                                                     <input
                                                         type="text"
@@ -366,7 +366,7 @@ const RecipeForm = () => {
                                                         value={formData.cook_time}
                                                         onChange={handleChange}
                                                         placeholder="45 dk"
-                                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none pl-10"
+                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none pl-10"
                                                     />
                                                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                                 </div>
@@ -375,8 +375,8 @@ const RecipeForm = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Kapak Görseli</label>
-                                        <label className="flex flex-col items-center justify-center w-full h-[180px] border-2 border-gray-200 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors overflow-hidden relative group">
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Kapak Görseli</label>
+                                        <label className="flex flex-col items-center justify-center w-full h-[180px] border-2 border-chefie-border border-dashed rounded-xl cursor-pointer bg-chefie-cream hover:bg-chefie-card transition-colors overflow-hidden relative group">
                                             {previewImage ? (
                                                 <>
                                                     <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
@@ -386,7 +386,7 @@ const RecipeForm = () => {
                                                 </>
                                             ) : (
                                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm text-gray-400">
+                                                    <div className="w-12 h-12 bg-chefie-card rounded-full flex items-center justify-center mb-3 shadow-sm text-gray-400">
                                                         <ImageIcon className="w-6 h-6" />
                                                     </div>
                                                     <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Yüklemek için tıklayın</span></p>
@@ -410,7 +410,7 @@ const RecipeForm = () => {
 
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Malzemeler</label>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Malzemeler</label>
                                         <textarea
                                             name="ingredients"
                                             value={formData.ingredients}
@@ -418,12 +418,12 @@ const RecipeForm = () => {
                                             required
                                             rows="4"
                                             placeholder="Her satıra bir malzeme gelecek şekilde yazınız..."
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all placeholder-gray-400 font-mono text-sm"
+                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500 font-mono text-sm"
                                         ></textarea>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Hazırlanışı</label>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Hazırlanışı</label>
                                         <textarea
                                             name="instructions"
                                             value={formData.instructions}
@@ -431,7 +431,7 @@ const RecipeForm = () => {
                                             required
                                             rows="6"
                                             placeholder="Tarifin yapılış aşamalarını detaylıca anlatınız..."
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all placeholder-gray-400"
+                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500"
                                         ></textarea>
                                     </div>
                                 </div>
@@ -440,18 +440,18 @@ const RecipeForm = () => {
                         </div>
 
                         {/* Footer Actions */}
-                        <div className="bg-gray-50 px-8 py-6 flex items-center justify-between border-t border-gray-100">
+                        <div className="bg-chefie-cream px-8 py-6 flex items-center justify-between border-t border-chefie-border">
                             <button
                                 type="button"
                                 onClick={() => navigate('/admin/dashboard')}
-                                className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
+                                className="px-6 py-2.5 bg-chefie-card border border-chefie-border text-gray-400 font-medium rounded-xl hover:bg-chefie-cream hover:text-chefie-text transition-colors shadow-sm dark:shadow-none"
                             >
                                 Vazgeç
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-8 py-2.5 bg-[#10B981] hover:bg-[#059669] text-white font-bold rounded-xl shadow-lg shadow-green-500/20 flex items-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-8 py-2.5 bg-chefie-yellow hover:bg-chefie-yellow/80 text-white font-bold rounded-xl shadow-lg shadow-yellow-500/20 dark:shadow-none flex items-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? (
                                     <>Kaydediliyor...</>

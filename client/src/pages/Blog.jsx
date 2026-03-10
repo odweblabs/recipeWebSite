@@ -23,7 +23,7 @@ const Blog = () => {
                 <motion.h1
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-4xl md:text-6xl font-black text-chefie-dark mb-6 leading-tight"
+                    className="text-4xl md:text-6xl font-black text-chefie-text mb-6 leading-tight"
                 >
                     Mutfak Hikayeleri & <br />
                     <span className="text-chefie-yellow relative">
@@ -46,7 +46,7 @@ const Blog = () => {
             >
                 <div
                     onClick={() => navigate(`/blog/${blogPosts[0].id}`)}
-                    className="relative rounded-[3rem] overflow-hidden group cursor-pointer shadow-2xl shadow-gray-200"
+                    className="relative rounded-[3rem] overflow-hidden group cursor-pointer shadow-2xl shadow-gray-200 dark:shadow-none"
                 >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
                     <img
@@ -80,8 +80,8 @@ const Blog = () => {
 
             {/* Recent Posts Grid */}
             <section className="max-w-7xl mx-auto">
-                <div className="flex items-center justify-between mb-10 border-b border-gray-100 pb-4">
-                    <h3 className="text-2xl font-black text-chefie-dark flex items-center gap-2">
+                <div className="flex items-center justify-between mb-10 border-b border-chefie-border pb-4">
+                    <h3 className="text-2xl font-black text-chefie-text flex items-center gap-2">
                         <Coffee className="text-chefie-yellow" /> Son Yazılar
                     </h3>
                 </div>
@@ -95,7 +95,7 @@ const Blog = () => {
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
                             onClick={() => navigate(`/blog/${post.id}`)}
-                            className="bg-white rounded-[2rem] p-4 shadow-xl shadow-gray-100/50 hover:shadow-2xl hover:shadow-chefie-yellow/10 transition-all group cursor-pointer border border-gray-50 flex flex-col"
+                            className="bg-chefie-card rounded-[2rem] p-4 shadow-xl shadow-gray-100/50 dark:shadow-none hover:shadow-2xl hover:shadow-chefie-yellow/10 transition-all group cursor-pointer border border-chefie-border flex flex-col"
                         >
                             <div className="h-56 rounded-3xl overflow-hidden mb-6 relative">
                                 <img
@@ -103,7 +103,7 @@ const Blog = () => {
                                     alt={post.title}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
-                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-chefie-dark px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide">
+                                <div className="absolute top-4 left-4 bg-chefie-card/90 backdrop-blur text-chefie-text px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide">
                                     {post.category}
                                 </div>
                             </div>
@@ -115,7 +115,7 @@ const Blog = () => {
                                     <span>{post.author}</span>
                                 </div>
 
-                                <h3 className="text-xl font-black text-chefie-dark mb-3 leading-snug group-hover:text-chefie-yellow transition-colors">
+                                <h3 className="text-xl font-black text-chefie-text mb-3 leading-snug group-hover:text-chefie-yellow transition-colors">
                                     {post.title}
                                 </h3>
 
@@ -123,8 +123,8 @@ const Blog = () => {
                                     {post.excerpt}
                                 </p>
 
-                                <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
-                                    <span className="text-chefie-dark font-black text-xs uppercase tracking-widest group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                                <div className="mt-auto pt-6 border-t border-chefie-border flex items-center justify-between">
+                                    <span className="text-chefie-text font-black text-xs uppercase tracking-widest group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
                                         DEVAMINI OKU <ArrowRight className="w-3 h-3 text-chefie-yellow" />
                                     </span>
                                 </div>

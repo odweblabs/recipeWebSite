@@ -2,7 +2,8 @@ import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell, Globe } from 'lucide-react';
+import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell, Globe, Flame, Settings, BadgeCheck, MessageCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Country list with flag emojis
 const COUNTRY_LIST = [
@@ -36,6 +37,7 @@ const getCountryInfo = (code) => COUNTRY_LIST.find(c => c.code === code) || null
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Profile = () => {
+    const { t, i18n } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
@@ -143,7 +145,7 @@ const Profile = () => {
     };
 
     const handleLogout = () => {
-        if (!window.confirm('Çıkış yapmak istediğinize emin misiniz?')) return;
+        if (!window.confirm(t('profile.logout_confirm'))) return;
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
@@ -155,13 +157,41 @@ const Profile = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const profileRes = await axios.get(`${API_BASE}/api/auth/users/${id}/profile`);
+                // Parallelize all initial profile data fetching
+                const [
+                    profileRes,
+                    commentsRes,
+                    friendsRes,
+                    friendStatusRes,
+                    pendingRequestsRes,
+                    userListsRes,
+                    userFavoritesRes
+                ] = await Promise.all([
+                    axios.get(`${API_BASE}/api/auth/users/${id}/profile`),
+                    axios.get(`${API_BASE}/api/recipes/users/${id}/comments`),
+                    axios.get(`${API_BASE}/api/friends/${id}`),
+                    (isLoggedIn && !isOwner) ? axios.get(`${API_BASE}/api/friends/status/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }) : Promise.resolve({ data: { status: 'none' } }),
+                    (isOwner && token) ? axios.get(`${API_BASE}/api/friends/requests/pending`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }) : Promise.resolve({ data: [] }),
+                    (isOwner && token) ? axios.get(`${API_BASE}/api/lists`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }) : Promise.resolve({ data: [] }),
+                    axios.get(`${API_BASE}/api/favorites/user/${id}`)
+                ]);
+
                 setProfile(profileRes.data);
-
-                await fetchRecipes();
-
-                const commentsRes = await axios.get(`${API_BASE}/api/recipes/users/${id}/comments`);
                 setComments(commentsRes.data);
+                setFriends(friendsRes.data);
+                setFriendStatus(friendStatusRes.data);
+                setPendingRequests(pendingRequestsRes.data);
+                setUserLists(userListsRes.data);
+                setUserFavorites(userFavoritesRes.data);
+
+                // Fetch recipes separately as it might be larger or has its own logic
+                await fetchRecipes();
 
                 // Load menus from localStorage only for profile owner
                 try {
@@ -181,12 +211,6 @@ const Profile = () => {
                     setMenus([]);
                 }
 
-                // Fetch friend data
-                await fetchFriends();
-                await fetchFriendStatus();
-                await fetchPendingRequests();
-                await fetchUserLists();
-                await fetchUserFavorites();
             } catch (err) {
                 console.error('Error fetching profile data:', err);
             } finally {
@@ -194,7 +218,7 @@ const Profile = () => {
             }
         };
         fetchData();
-    }, [id, navigate]);
+    }, [id, navigate, isLoggedIn, isOwner, token]);
 
     // Friend Action Handlers
     const sendFriendRequest = async () => {
@@ -205,7 +229,7 @@ const Profile = () => {
             });
             await fetchFriendStatus();
         } catch (err) {
-            alert(err.response?.data?.error || 'Bir hata oluştu.');
+            alert(err.response?.data?.error || t('profile.error_generic'));
         } finally {
             setFriendActionLoading(false);
         }
@@ -219,14 +243,14 @@ const Profile = () => {
             });
             setFriendStatus({ status: 'none' });
         } catch (err) {
-            alert(err.response?.data?.error || 'Bir hata oluştu.');
+            alert(err.response?.data?.error || t('profile.error_generic'));
         } finally {
             setFriendActionLoading(false);
         }
     };
 
     const removeFriend = async () => {
-        if (!window.confirm('Takibi bırakmak istediğinize emin misiniz?')) return;
+        if (!window.confirm(t('profile.unfollow_confirm'))) return;
         setFriendActionLoading(true);
         try {
             await axios.delete(`${API_BASE}/api/friends/remove/${id}`, {
@@ -235,7 +259,7 @@ const Profile = () => {
             setFriendStatus({ status: 'none' });
             setFriends(prev => prev.filter(f => f.id !== parseInt(id)));
         } catch (err) {
-            alert(err.response?.data?.error || 'Bir hata oluştu.');
+            alert(err.response?.data?.error || t('profile.error_generic'));
         } finally {
             setFriendActionLoading(false);
         }
@@ -249,7 +273,7 @@ const Profile = () => {
             setPendingRequests(prev => prev.filter(r => r.friendship_id !== friendshipId));
             await fetchFriends();
         } catch (err) {
-            alert(err.response?.data?.error || 'Bir hata oluştu.');
+            alert(err.response?.data?.error || t('profile.error_generic'));
         }
     };
 
@@ -260,7 +284,7 @@ const Profile = () => {
             });
             setPendingRequests(prev => prev.filter(r => r.friendship_id !== friendshipId));
         } catch (err) {
-            alert(err.response?.data?.error || 'Bir hata oluştu.');
+            alert(err.response?.data?.error || t('profile.error_generic'));
         }
     };
 
@@ -275,7 +299,7 @@ const Profile = () => {
             setFriendStatus({ status: 'accepted', friendship_id: friendStatus.friendship_id });
             await fetchFriends();
         } catch (err) {
-            alert(err.response?.data?.error || 'Bir hata oluştu.');
+            alert(err.response?.data?.error || t('profile.error_generic'));
         } finally {
             setFriendActionLoading(false);
         }
@@ -290,21 +314,21 @@ const Profile = () => {
             });
             setFriendStatus({ status: 'none' });
         } catch (err) {
-            alert(err.response?.data?.error || 'Bir hata oluştu.');
+            alert(err.response?.data?.error || t('profile.error_generic'));
         } finally {
             setFriendActionLoading(false);
         }
     };
 
     const handleDeleteComment = async (commentId) => {
-        if (!window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+        if (!window.confirm(t('profile.comment_delete_confirm'))) return;
         try {
             await axios.delete(`${API_BASE}/api/recipes/comments/${commentId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setComments(comments.filter(c => c.id !== commentId));
         } catch (err) {
-            alert('Yorum silinemedi.');
+            alert(t('profile.comment_delete_error'));
         }
     };
 
@@ -326,7 +350,7 @@ const Profile = () => {
             setComments(comments.map(c => c.id === commentId ? { ...c, content: editContent } : c));
             setEditingCommentId(null);
         } catch (err) {
-            alert('Yorum güncellenemedi.');
+            alert(t('profile.comment_update_error'));
         }
     };
 
@@ -338,7 +362,7 @@ const Profile = () => {
             return (
                 <button disabled className="friend-btn friend-btn--loading">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>İşleniyor...</span>
+                    <span>{t('profile.processing')}</span>
                 </button>
             );
         }
@@ -347,7 +371,7 @@ const Profile = () => {
             return (
                 <button onClick={removeFriend} className="friend-btn friend-btn--accepted">
                     <UserCheck className="w-4 h-4" />
-                    <span>Takip Ediyorsun</span>
+                    <span>{t('profile.following')}</span>
                 </button>
             );
         }
@@ -357,7 +381,7 @@ const Profile = () => {
                 return (
                     <button onClick={cancelFriendRequest} className="friend-btn friend-btn--pending">
                         <Clock className="w-4 h-4" />
-                        <span>İstek Gönderildi</span>
+                        <span>{t('profile.request_sent')}</span>
                     </button>
                 );
             }
@@ -366,11 +390,11 @@ const Profile = () => {
                 <div className="friend-incoming-actions">
                     <button onClick={acceptIncomingRequest} className="friend-btn friend-btn--accept">
                         <Check className="w-4 h-4" />
-                        <span>Kabul Et</span>
+                        <span>{t('profile.accept')}</span>
                     </button>
                     <button onClick={rejectIncomingRequest} className="friend-btn friend-btn--reject">
                         <X className="w-4 h-4" />
-                        <span>Reddet</span>
+                        <span>{t('profile.reject')}</span>
                     </button>
                 </div>
             );
@@ -379,210 +403,108 @@ const Profile = () => {
         return (
             <button onClick={sendFriendRequest} className="friend-btn friend-btn--add">
                 <UserPlus className="w-4 h-4" />
-                <span>Takip Et</span>
+                <span>{t('profile.follow')}</span>
             </button>
         );
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FFFBF2]">Yükleniyor...</div>;
-    if (!profile) return <div className="min-h-screen flex items-center justify-center bg-[#FFFBF2]">Kullanıcı bulunamadı.</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-chefie-cream text-chefie-text">{t('profile.loading')}</div>;
+    if (!profile) return <div className="min-h-screen flex items-center justify-center bg-chefie-cream text-chefie-text">{t('profile.not_found')}</div>;
 
     return (
-        <div className="min-h-screen bg-[#FFFBF2] pt-4 md:pt-24 pb-12 px-4">
+        <div className="min-h-screen bg-chefie-cream text-chefie-text pt-12 pb-24 px-4 overflow-x-hidden">
             <style>{friendStyles}</style>
-            <div className="max-w-5xl mx-auto">
-                {/* Profile Header */}
-                <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
-                    <div className="relative">
-                        {profile.profile_image ? (
-                            <img
-                                src={profile.profile_image.startsWith('http') ? profile.profile_image : `${API_BASE}${profile.profile_image}`}
-                                alt={profile.full_name}
-                                className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-md mx-auto md:mx-0"
-                            />
-                        ) : (
-                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center text-white text-3xl md:text-4xl font-bold border-4 border-white shadow-md mx-auto md:mx-0">
-                                {(profile.full_name || profile.username).charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex-1 w-full">
-                        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 mb-2">
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{profile.full_name || 'İsimsiz Şef'}</h1>
-                            </div>
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                                {renderFriendButton()}
-                                {isOwner && (
-                                    <>
-                                        <div className="relative">
-                                            <button
-                                                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                                                className="relative p-2.5 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-chefie-yellow shadow-sm transition-all focus:ring-2 focus:ring-chefie-yellow/20"
-                                            >
-                                                <Bell className="w-5 h-5" />
-                                                {pendingRequests.length > 0 && (
-                                                    <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-                                                )}
-                                            </button>
-
-                                            <AnimatePresence>
-                                                {isNotificationsOpen && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0, scale: 0.95, y: 10, x: '-50%' }}
-                                                        animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
-                                                        exit={{ opacity: 0, scale: 0.95, y: 10, x: '-50%' }}
-                                                        className="fixed md:absolute left-1/2 md:left-auto md:right-0 top-1/2 md:top-full mt-3 w-[min(90vw,320px)] bg-white rounded-[2rem] shadow-2xl border border-gray-100 z-[100] overflow-hidden"
-                                                    >
-                                                        <div className="p-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-                                                            <h3 className="text-xs font-black text-gray-800 uppercase tracking-widest">Bildirimler</h3>
-                                                            <span className="bg-chefie-yellow text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm">
-                                                                {pendingRequests.length} YENİ
-                                                            </span>
-                                                        </div>
-                                                        <div className="max-h-[350px] overflow-y-auto scrollbar-hide">
-                                                            {pendingRequests.length === 0 ? (
-                                                                <div className="p-10 text-center">
-                                                                    <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                                        <Bell className="w-6 h-6 text-gray-200" />
-                                                                    </div>
-                                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Yeni bildirim bulunmuyor</p>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="divide-y divide-gray-50">
-                                                                    {pendingRequests.map((request) => (
-                                                                        <div key={request.friendship_id} className="p-5 hover:bg-gray-50 transition-colors">
-                                                                            <div className="flex items-center gap-4 mb-4">
-                                                                                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-white shadow-sm bg-gray-50">
-                                                                                    {request.profile_image ? (
-                                                                                        <img
-                                                                                            src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`}
-                                                                                            alt={request.username}
-                                                                                            className="w-full h-full object-cover"
-                                                                                        />
-                                                                                    ) : (
-                                                                                        <div className="w-full h-full flex items-center justify-center font-black text-chefie-dark bg-chefie-cream text-sm">
-                                                                                            {request.username.charAt(0).toUpperCase()}
-                                                                                        </div>
-                                                                                    )}
-                                                                                </div>
-                                                                                <div className="flex-1 min-w-0">
-                                                                                    <p className="text-xs font-black text-gray-800 truncate">@{request.username}</p>
-                                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight mt-0.5">Seni takip etmek istiyor</p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex gap-2">
-                                                                                <button
-                                                                                    onClick={() => acceptRequest(request.friendship_id)}
-                                                                                    className="flex-1 py-1.5 bg-chefie-yellow text-white text-[10px] font-black rounded-lg shadow-sm active:scale-95 transition-all"
-                                                                                >
-                                                                                    KABUL ET
-                                                                                </button>
-                                                                                <button
-                                                                                    onClick={() => rejectRequest(request.friendship_id)}
-                                                                                    className="flex-1 py-1.5 bg-gray-100 text-gray-400 text-[10px] font-black rounded-lg active:scale-95 transition-all"
-                                                                                >
-                                                                                    REDDET
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-all border border-red-100 font-bold text-xs shadow-sm shadow-red-100 active:scale-95"
-                                        >
-                                            <LogOut className="w-4 h-4" />
-                                            <span className="hidden sm:inline">Çıkış</span>
-                                        </button>
-                                    </>
-                                )}
-                            </div>
+            <div className="max-w-xl mx-auto">
+                {/* Header Navigation */}
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-2xl font-bold font-sans text-chefie-text">{t('profile.title')}</h1>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5 bg-chefie-card px-3 py-1.5 rounded-full border border-chefie-border shadow-sm">
+                            <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
+                            <span className="font-bold text-sm text-chefie-text">5</span>
                         </div>
-                        <p className="text-gray-500 font-medium mb-6">@{profile.username}</p>
+                        <button
+                            onClick={() => isOwner && navigate('/settings')}
+                            className="p-2 bg-chefie-card rounded-full border border-chefie-border shadow-sm hover:bg-chefie-cream transition-colors text-chefie-secondary"
+                        >
+                            <Settings className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
 
-                        <div className="grid grid-cols-2 min-[480px]:grid-cols-3 gap-3 md:flex md:flex-wrap md:items-center md:justify-start md:gap-6 text-[11px] md:text-sm text-gray-600 bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
-                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                                <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#10B981]" />
-                                <span className="truncate">Katılım: {new Date(profile.created_at).toLocaleDateString('tr-TR')}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                                <ChefHat className="w-3.5 h-3.5 md:w-4 md:h-4 text-orange-500" />
-                                <span>{recipes.length} Tarif</span>
-                            </div>
-                            {isOwner && (
-                                <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                                    <ChefHat className="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-500" />
-                                    <span>{menus.length} Menü</span>
+                {/* Profile Info Section */}
+                <div className="flex flex-col items-center text-center mb-10">
+                    <div className="relative mb-6">
+                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-chefie-card shadow-xl bg-chefie-card">
+                            {profile.profile_image ? (
+                                <img
+                                    src={profile.profile_image.startsWith('http') ? profile.profile_image : `${API_BASE}${profile.profile_image}`}
+                                    alt={profile.full_name}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-chefie-green to-emerald-700 flex items-center justify-center text-white text-4xl font-bold">
+                                    {(profile.full_name || profile.username).charAt(0).toUpperCase()}
                                 </div>
                             )}
-                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                                <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
-                                <span>{friends.length} Takip</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                                <MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" />
-                                <span>{comments.length} Yorum</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                                <Heart className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />
-                                <span>{userFavorites.length} Favori</span>
-                            </div>
-                            {profile.country && (() => {
-                                const countryInfo = getCountryInfo(profile.country);
-                                return countryInfo ? (
-                                    <div className="flex items-center gap-1.5 bg-white md:bg-transparent p-2 md:p-0 rounded-lg md:rounded-none shadow-sm md:shadow-none">
-                                        <span className="text-base">{countryInfo.flag}</span>
-                                        <span>{countryInfo.name}</span>
-                                    </div>
-                                ) : null;
-                            })()}
                         </div>
                     </div>
+
+                    <div className="flex items-center gap-2 mb-2">
+                        <h2 className="text-2xl font-bold font-sans text-chefie-text">{profile.full_name || profile.username}</h2>
+                        <BadgeCheck className="w-6 h-6 text-chefie-yellow fill-chefie-yellow text-black" />
+                    </div>
+
+                    <div className="flex items-center gap-2 text-chefie-secondary text-sm font-medium">
+                        <span>{profile.follower_count || 0} {t('profile.followers')}</span>
+                        <span className="w-1.5 h-1.5 bg-chefie-border rounded-full"></span>
+                        <span>{profile.following_count || 0} {t('profile.following_count')}</span>
+                    </div>
+
+                    {!isOwner && (
+                        <div className="mt-6 w-full px-8">
+                            {renderFriendButton()}
+                        </div>
+                    )}
                 </div>
 
                 {/* Pending Friend Requests (owner only) */}
                 {isOwner && pendingRequests.length > 0 && (
-                    <div className="pending-requests-card mb-8">
-                        <div className="pending-requests-header">
-                            <UserPlus className="w-5 h-5 text-orange-500" />
-                            <h2>Bekleyen Takip İstekleri ({pendingRequests.length})</h2>
+                    <div className="bg-chefie-card rounded-[2rem] p-6 border border-chefie-yellow/20 shadow-md mb-8Text">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-chefie-yellow/10 rounded-xl">
+                                <UserPlus className="w-5 h-5 text-chefie-yellow" />
+                            </div>
+                            <h2 className="font-bold text-chefie-text">{t('profile.pending_requests')} ({pendingRequests.length})</h2>
                         </div>
-                        <div className="pending-requests-list">
+                        <div className="space-y-4">
                             {pendingRequests.map(request => (
-                                <div key={request.friendship_id} className="pending-request-item">
-                                    <Link to={`/profile/${request.id}`} className="pending-request-user">
-                                        {request.profile_image ? (
-                                            <img
-                                                src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`}
-                                                alt={request.full_name || request.username}
-                                                className="pending-request-avatar"
-                                            />
-                                        ) : (
-                                            <div className="pending-request-avatar-placeholder">
-                                                {(request.full_name || request.username).charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
-                                        <div>
-                                            <div className="pending-request-name">{request.full_name || request.username}</div>
-                                            <div className="pending-request-username">@{request.username}</div>
+                                <div key={request.friendship_id} className="flex items-center justify-between gap-4 p-3 bg-chefie-cream rounded-2xl border border-chefie-border">
+                                    <Link to={`/profile/${request.id}`} className="flex items-center gap-3 min-w-0">
+                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-card shadow-sm flex-shrink-0">
+                                            {request.profile_image ? (
+                                                <img
+                                                    src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`}
+                                                    alt={request.username}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold text-sm">
+                                                    {request.username.charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="truncate">
+                                            <div className="font-bold text-sm truncate text-chefie-text">{request.full_name || request.username}</div>
+                                            <div className="text-[11px] text-chefie-secondary truncate">@{request.username}</div>
                                         </div>
                                     </Link>
-                                    <div className="pending-request-actions">
-                                        <button onClick={() => acceptRequest(request.friendship_id)} className="friend-btn friend-btn--accept friend-btn--sm">
-                                            <Check className="w-3.5 h-3.5" />
-                                            <span>Kabul Et</span>
+                                    <div className="flex gap-1.5">
+                                        <button onClick={() => acceptRequest(request.friendship_id)} className="p-2 bg-chefie-green text-white rounded-xl shadow-sm hover:scale-105 transition-transform">
+                                            <Check className="w-4 h-4" />
                                         </button>
-                                        <button onClick={() => rejectRequest(request.friendship_id)} className="friend-btn friend-btn--reject friend-btn--sm">
-                                            <X className="w-3.5 h-3.5" />
-                                            <span>Reddet</span>
+                                        <button onClick={() => rejectRequest(request.friendship_id)} className="p-2 bg-chefie-card text-chefie-secondary rounded-xl border border-chefie-border shadow-sm hover:bg-chefie-cream">
+                                            <X className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
@@ -591,304 +513,185 @@ const Profile = () => {
                     </div>
                 )}
 
-                {/* Content Tabs */}
-                <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden min-h-[500px]">
-                    <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar scroll-smooth bg-gray-50/20">
-                        <button
-                            onClick={() => setActiveTab('recipes')}
-                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'recipes' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
-                        >
-                            Tarifler ({recipes.length})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('favorites')}
-                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'favorites' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
-                        >
-                            Favoriler ({userFavorites.length})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('friends')}
-                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'friends' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
-                        >
-                            Takip ({friends.length})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('comments')}
-                            className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'comments' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
-                        >
-                            Yorumlar ({comments.length})
-                        </button>
-                        {isOwner && (
-                            <button
-                                onClick={() => setActiveTab('lists')}
-                                className={`flex-1 min-w-[100px] md:min-w-[120px] py-4 text-[11px] md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'lists' ? 'text-[#10B981] border-b-2 border-[#10B981] bg-white' : 'text-gray-500 hover:bg-white/50'}`}
-                            >
-                                Listelerim ({userLists.length})
-                            </button>
-                        )}
-                    </div>
+                {/* New Tab System */}
+                <div className="flex items-center gap-2 mb-8 bg-chefie-card/50 p-1 rounded-full border border-chefie-border shadow-md">
+                    <button
+                        onClick={() => setActiveTab('recipes')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'recipes'
+                            ? 'bg-chefie-yellow text-white shadow-md'
+                            : 'text-chefie-secondary hover:text-chefie-text'
+                            }`}
+                    >
+                        <ChefHat className="w-4 h-4" />
+                        <span className="hidden min-[380px]:inline">{t('profile.tabs.recipes')}</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('favorites')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'favorites'
+                            ? 'bg-chefie-yellow text-white shadow-md'
+                            : 'text-chefie-secondary hover:text-chefie-text'
+                            }`}
+                    >
+                        <Flame className="w-4 h-4" />
+                        <span className="hidden min-[380px]:inline">{t('profile.tabs.favorites')}</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('notifications')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'notifications'
+                            ? 'bg-chefie-yellow text-white shadow-md'
+                            : 'text-chefie-secondary hover:text-chefie-text'
+                            }`}
+                    >
+                        <Bell className="w-4 h-4" />
+                        <span className="hidden min-[380px]:inline">{t('profile.tabs.notifications')}</span>
+                    </button>
+                </div>
 
-                    <div className="p-6 md:p-8">
-                        {/* Recipes Tab */}
-                        {activeTab === 'recipes' && (
-                            <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {recipes.length > 0 ? recipes.map(recipe => (
-                                        <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all overflow-hidden flex flex-col h-full">
-                                            <div className="h-48 overflow-hidden relative">
-                                                <img
-                                                    src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
-                                                    alt={recipe.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                /><div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" /> {recipe.prep_time}
+                {/* Content Area */}
+                <div className="space-y-8">
+                    {(activeTab === 'recipes' || activeTab === 'favorites') && (
+                        <>
+                            {(activeTab === 'recipes' ? recipes : userFavorites).length > 0 ? (
+                                (activeTab === 'recipes' ? recipes : userFavorites).map(recipe => (
+                                    <div key={recipe.id} className="bg-chefie-card rounded-[2.5rem] border border-chefie-border overflow-hidden shadow-md hover:shadow-xl transition-shadow">
+                                        {/* Card Header */}
+                                        <div className="p-5 flex items-center justify-between">
+                                            <Link to={`/profile/${profile.id}`} className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-border shadow-sm">
+                                                    {profile.profile_image ? (
+                                                        <img src={profile.profile_image.startsWith('http') ? profile.profile_image : `${API_BASE}${profile.profile_image}`} className="w-full h-full object-cover" alt="" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-xs font-bold">
+                                                            {profile.username.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                            <div className="p-4 flex-1 flex flex-col">
-                                                <div className="text-xs font-bold text-[#10B981] mb-2 uppercase tracking-wide">{recipe.category_name || 'Genel'}</div>
-                                                <h3 className="font-bold text-gray-800 text-lg mb-2 line-clamp-1 group-hover:text-[#10B981] transition-colors">{recipe.title}</h3>
-                                                <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{recipe.description}</p>
-                                            </div>
-                                        </Link>
-                                    )) : (
-                                        !loading && (
-                                            <div className="col-span-full py-12 text-center text-gray-400">
-                                                <ChefHat className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                                Henüz tarif paylaşılmamış.
-                                            </div>
-                                        )
-                                    )}
-                                </div>
-                                {hasMore && (
-                                    <div className="mt-8 text-center">
-                                        <button
-                                            onClick={() => fetchRecipes(true)}
-                                            className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-sm"
-                                            disabled={loading}
-                                        >
-                                            {loading ? 'Yükleniyor...' : 'Daha Fazla Göster'}
-                                        </button>
-                                    </div>
-                                )}
-
-                                {isOwner && (
-                                    <div className="mt-10 border-t border-gray-100 pt-8">
-                                        <h2 className="text-lg font-bold text-gray-800 mb-4">Menülerim</h2>
-                                        {menus.length === 0 ? (
-                                            <p className="text-gray-400 text-sm">
-                                                Henüz menü oluşturulmamış. İlk menünü <Link to="/menus" className="text-[#10B981] font-semibold">Menüler</Link> sayfasından oluştur.
-                                            </p>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {menus.map(menu => (
-                                                    <div key={menu.id} className="bg-gray-50 rounded-2xl border border-gray-100 p-4 flex flex-col">
-                                                        <div className="flex items-center justify-between mb-3">
-                                                            <div>
-                                                                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                                                                    MENÜ
-                                                                </div>
-                                                                <h3 className="font-bold text-gray-800 text-base">{menu.title}</h3>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-gray-400">
-                                                                {new Date(menu.createdAt).toLocaleDateString('tr-TR')}
-                                                            </div>
-                                                        </div>
-                                                        {menu.description && (
-                                                            <p className="text-gray-500 text-sm mb-4 line-clamp-2">
-                                                                {menu.description}
-                                                            </p>
-                                                        )}
-                                                        <div className="flex -space-x-2 mb-4">
-                                                            {(menu.recipes || []).slice(0, 3).map(r => (
-                                                                <div key={r.id} className="w-9 h-9 rounded-full border-2 border-white overflow-hidden bg-gray-100">
-                                                                    {r.image_url && (
-                                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                            {Math.max(0, (menu.recipes || []).length - 3) > 0 && (
-                                                                <div className="w-9 h-9 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">
-                                                                    +{Math.max(0, (menu.recipes || []).length - 3)}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <Link
-                                                            to="/menus"
-                                                            className="mt-auto inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-[#10B981] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-                                                        >
-                                                            Menüyü Görüntüle
-                                                        </Link>
+                                                <div>
+                                                    <div className="font-bold text-sm text-chefie-text">{profile.full_name || profile.username}</div>
+                                                    <div className="text-[10px] text-chefie-secondary font-medium tracking-wide">
+                                                        {new Date(recipe.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'long' }).toUpperCase()}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        {/* Favorites Tab */}
-                        {activeTab === 'favorites' && (
-                            <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {userFavorites.length > 0 ? userFavorites.map(recipe => (
-                                        <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all overflow-hidden flex flex-col h-full">
-                                            <div className="h-48 overflow-hidden relative">
-                                                <img
-                                                    src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
-                                                    alt={recipe.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                />
-                                                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" /> {recipe.prep_time}
                                                 </div>
-                                                <div className="absolute top-3 left-3 bg-rose-500/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-white shadow-sm flex items-center gap-1">
-                                                    <Heart className="w-3 h-3 fill-white" /> Favori
-                                                </div>
-                                            </div>
-                                            <div className="p-4 flex-1 flex flex-col">
-                                                <div className="text-xs font-bold text-[#10B981] mb-2 uppercase tracking-wide">{recipe.category_name || 'Genel'}</div>
-                                                <h3 className="font-bold text-gray-800 text-lg mb-2 line-clamp-1 group-hover:text-[#10B981] transition-colors">{recipe.title}</h3>
-                                                <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{recipe.description}</p>
-                                            </div>
-                                        </Link>
-                                    )) : (
-                                        <div className="col-span-full py-12 text-center text-gray-400">
-                                            <Heart className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                            Henüz favori tarif eklenmemiş.
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
-
-                        {/* Friends Tab */}
-                        {activeTab === 'friends' && (
-                            <div className="friends-grid">
-                                {friends.length > 0 ? friends.map(friend => (
-                                    <Link key={friend.id} to={`/profile/${friend.id}`} className="friend-card group">
-                                        {friend.profile_image ? (
-                                            <img
-                                                src={friend.profile_image.startsWith('http') ? friend.profile_image : `${API_BASE}${friend.profile_image}`}
-                                                alt={friend.full_name || friend.username}
-                                                className="friend-card-avatar"
-                                            />
-                                        ) : (
-                                            <div className="friend-card-avatar-placeholder">
-                                                {(friend.full_name || friend.username).charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
-                                        <div className="friend-card-info flex-1 min-w-0">
-                                            <div className="friend-card-name group-hover:text-[#10B981] transition-colors truncate">{friend.full_name || friend.username}</div>
-                                            <div className="friend-card-username truncate">@{friend.username}</div>
-                                            <div className="friend-card-since mt-1 flex md:hidden items-center gap-1.5 text-[10px] text-gray-400">
-                                                <Calendar className="w-3 h-3 text-[#10B981]" />
-                                                {new Date(friend.friends_since).toLocaleDateString('tr-TR')}
-                                            </div>
-                                        </div>
-                                        <div className="friend-card-since hidden md:flex items-center gap-1.5 text-[11px] text-gray-300">
-                                            <Calendar className="w-3 h-3" />
-                                            {new Date(friend.friends_since).toLocaleDateString('tr-TR')}
-                                        </div>
-                                    </Link>
-                                )) : (
-                                    <div className="col-span-full py-12 text-center text-gray-400">
-                                        <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                        Henüz kimse takip edilmemiş.
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Comments Tab */}
-                        {activeTab === 'comments' && (
-                            <div className="space-y-4 max-w-3xl mx-auto">
-                                {comments.length > 0 ? comments.map(comment => (
-                                    <div key={comment.id} className="bg-gray-50 rounded-2xl p-5 border border-gray-100 relative group">
-                                        <div className="flex items-start justify-between mb-2 gap-4">
-                                            <Link to={`/recipes/${comment.recipe_id}`} className="font-bold text-gray-800 hover:text-[#10B981] transition-colors flex-1">
-                                                {comment.recipe_title}
                                             </Link>
-                                            <div className="flex flex-col md:flex-row items-end md:items-center gap-2">
-                                                <span className="text-xs text-gray-400">{new Date(comment.created_at).toLocaleDateString('tr-TR')}</span>
-
-                                                {/* Actions for Owner */}
-                                                {(isOwner || currentUser.role === 'admin') && !editingCommentId && (
-                                                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        {isOwner && (
-                                                            <button onClick={() => startEditing(comment)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-white rounded-lg transition-colors shadow-sm"><Edit className="w-4 h-4" /></button>
-                                                        )}
-                                                        <button onClick={() => handleDeleteComment(comment.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-colors shadow-sm"><Trash2 className="w-4 h-4" /></button>
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <button className="p-2 text-chefie-secondary/50 hover:text-chefie-text transition-colors">
+                                                <Globe className="w-4 h-4" />
+                                            </button>
                                         </div>
 
-                                        {editingCommentId === comment.id ? (
-                                            <div className="mt-2">
-                                                <textarea
-                                                    value={editContent}
-                                                    onChange={(e) => setEditContent(e.target.value)}
-                                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#10B981] focus:outline-none mb-3"
-                                                    rows="3"
-                                                />
-                                                <div className="flex justify-end gap-2">
-                                                    <button onClick={cancelEditing} className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:bg-gray-200 rounded-lg flex items-center gap-1"><X className="w-3 h-3" /> İptal</button>
-                                                    <button onClick={() => saveComment(comment.id)} className="px-3 py-1.5 text-xs font-bold text-white bg-[#10B981] hover:bg-[#059669] rounded-lg flex items-center gap-1"><Save className="w-3 h-3" /> Kaydet</button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p className="text-gray-600 text-sm leading-relaxed">{comment.content}</p>
-                                        )}
-                                    </div>
-                                )) : (
-                                    <div className="py-12 text-center text-gray-400">
-                                        <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                        Henüz yorum yapılmamış.
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {/* Shopping Lists Tab */}
-                        {activeTab === 'lists' && isOwner && (
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl font-bold text-gray-800">Alışveriş Listelerim</h2>
-                                    <Link to="/lists" className="text-sm font-bold text-[#10B981] hover:underline">Tümünü Yönet</Link>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {userLists.length > 0 ? userLists.map(list => (
-                                        <Link key={list.id} to="/lists" className="bg-gray-50 p-5 rounded-2xl border border-gray-100 hover:shadow-md transition-all group">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-bold text-gray-800 group-hover:text-[#10B981]">{list.name}</h3>
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    {list.items?.length || 0} ÜRÜN
-                                                </span>
-                                            </div>
-                                            {list.market_name && (
-                                                <div className="text-[11px] font-bold text-gray-400 mb-3 bg-white px-2 py-1 rounded-lg inline-block border border-gray-100">
-                                                    📍 {list.market_name}
+                                        {/* Content Text */}
+                                        <div className="px-6 pb-4">
+                                            <h3 className="font-bold text-lg mb-1.5 hover:text-chefie-green transition-colors leading-tight text-chefie-text">
+                                                <Link to={`/recipes/${recipe.id}`}>{recipe.title}</Link>
+                                            </h3>
+                                            <p className="text-chefie-secondary text-sm line-clamp-2 leading-relaxed">
+                                                {recipe.description}
+                                            </p>
+                                        </div>
+
+                                        {/* Media */}
+                                        <Link to={`/recipes/${recipe.id}`} className="block relative aspect-[1.1] mx-5 rounded-[2rem] overflow-hidden group shadow-inner">
+                                            <img
+                                                src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                                alt={recipe.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                            />
+                                            {recipe.prep_time && (
+                                                <div className="absolute top-4 right-4 bg-chefie-card/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-chefie-text flex items-center gap-1.5 border border-chefie-border shadow-md">
+                                                    <Clock className="w-3 h-3 text-chefie-yellow" /> {recipe.prep_time.toUpperCase()}
                                                 </div>
                                             )}
-                                            <div className="flex items-center justify-between mt-2">
-                                                <div className="text-[10px] text-gray-300">
-                                                    {new Date(list.created_at).toLocaleDateString('tr-TR')}
-                                                </div>
-                                                <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#10B981] transform group-hover:translate-x-1 transition-all" />
-                                            </div>
                                         </Link>
-                                    )) : (
-                                        <div className="col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                            <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                            Henüz bir alışveriş listeniz yok.
-                                            <br />
-                                            <Link to="/lists" className="text-[#10B981] font-bold mt-2 inline-block">Yeni Liste Oluştur</Link>
+
+                                        {/* Engagement Footer */}
+                                        <div className="p-5 flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-2 bg-chefie-cream px-4 py-2.5 rounded-full border border-chefie-border hover:bg-chefie-cream/80 transition-colors cursor-pointer group">
+                                                    <MessageCircle className="w-4 h-4 text-chefie-secondary/50 group-hover:text-chefie-green" />
+                                                    <span className="text-xs font-bold text-chefie-text">{recipe.comment_count || 0}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 bg-chefie-cream px-4 py-2.5 rounded-full border border-chefie-border hover:bg-chefie-cream/80 transition-colors cursor-pointer group">
+                                                    <Heart className="w-4 h-4 text-chefie-secondary/50 group-hover:text-rose-500" />
+                                                    <span className="text-xs font-bold text-chefie-text">{recipe.favorite_count || 0}</span>
+                                                </div>
+                                            </div>
+
+                                            {isLoggedIn && currentUser.id === recipe.author_id && (
+                                                <div className="flex items-center gap-2">
+                                                    <Link to={`/admin/recipes/edit/${recipe.id}`} className="p-2.5 text-chefie-yellow hover:text-chefie-yellow/80 transition-colors hover:bg-chefie-yellow/5 rounded-full">
+                                                        <Edit className="w-4 h-4" />
+                                                    </Link>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="py-24 text-center">
+                                    <div className="w-20 h-20 bg-chefie-green/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-chefie-green/20">
+                                        <ChefHat className="w-10 h-10 text-chefie-green" />
+                                    </div>
+                                    <p className="text-chefie-secondary font-medium text-lg">{t('profile.no_posts')}</p>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+
+                            {hasMore && activeTab === 'recipes' && (
+                                <div className="pt-8 text-center pb-8">
+                                    <button
+                                        onClick={() => fetchRecipes(true)}
+                                        className="px-10 py-3.5 bg-chefie-card border border-chefie-border text-chefie-secondary font-bold rounded-full hover:bg-chefie-cream transition-all text-sm shadow-md hover:shadow-xl"
+                                        disabled={loading}
+                                    >
+                                        {loading ? t('profile.loading') : t('profile.show_more')}
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === 'notifications' && (
+                        <div className="space-y-4">
+                            {pendingRequests.length === 0 ? (
+                                <div className="py-24 text-center">
+                                    <div className="w-20 h-20 bg-chefie-yellow/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-chefie-yellow/20">
+                                        <Bell className="w-10 h-10 text-chefie-yellow" />
+                                    </div>
+                                    <p className="text-chefie-secondary font-medium text-lg">{t('profile.no_notifications')}</p>
+                                </div>
+                            ) : (
+                                pendingRequests.map((request) => (
+                                    <div key={request.friendship_id} className="bg-chefie-card rounded-3xl border border-chefie-border p-5 flex items-center gap-4 animate-in fade-in duration-500 shadow-md">
+                                        <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 shadow-sm">
+                                            {request.profile_image ? (
+                                                <img src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`} className="w-full h-full object-cover" alt="" />
+                                            ) : (
+                                                <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold">
+                                                    {request.username.charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold truncate text-chefie-text">@{request.username}</p>
+                                            <p className="text-[11px] text-chefie-secondary font-medium">{t('profile.wants_to_follow')}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => acceptRequest(request.friendship_id)}
+                                                className="w-10 h-10 bg-chefie-green rounded-full flex items-center justify-center text-white shadow-lg shadow-chefie-green/10 hover:scale-110 transition-transform"
+                                            >
+                                                <Check className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={() => rejectRequest(request.friendship_id)}
+                                                className="w-10 h-10 bg-chefie-cream rounded-full flex items-center justify-center text-chefie-secondary border border-chefie-border hover:bg-chefie-cream/80 transition-colors"
+                                            >
+                                                <X className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -973,12 +776,11 @@ const friendStyles = `
 
     /* Pending Requests Card */
     .pending-requests-card {
-        background: white;
+        background: var(--bg-chefie-card);
         border-radius: 2rem;
         padding: 24px 28px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        border: 1px solid #FDE68A;
-        background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid var(--border-chefie-border);
     }
     .pending-requests-header {
         display: flex;

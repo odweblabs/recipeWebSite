@@ -4,67 +4,10 @@ import { Search, X, Clock, Mic, ChevronLeft, Utensils, Flame, Plus } from 'lucid
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import API_BASE from '../utils/api';
+import { useTranslation } from 'react-i18next';
 
-const popularSearches = ['tatlı', 'çorba', 'meze', 'revani', 'sütlü tatlılar', 'makarna'];
-const quickAccess = [
-    { title: 'Günün menüsü', icon: <Utensils className="w-4 h-4 text-gray-500" />, query: 'günün menüsü' },
-    { title: 'Pratik ana yemekler', icon: <Flame className="w-4 h-4 text-orange-500" />, query: 'pratik' }
-];
-const ingredients = [
-    // Proteinler
-    { name: 'tavuk eti', emoji: '🍗', category: 'protein' },
-    { name: 'kıyma', emoji: '🥩', category: 'protein' },
-    { name: 'dana eti', emoji: '🥩', category: 'protein' },
-    { name: 'balık', emoji: '🐟', category: 'protein' },
-    { name: 'yumurta', emoji: '🥚', category: 'protein' },
-    { name: 'karides', emoji: '🦐', category: 'protein' },
-    // Sebzeler
-    { name: 'patates', emoji: '🥔', category: 'sebze' },
-    { name: 'soğan', emoji: '🧅', category: 'sebze' },
-    { name: 'domates', emoji: '🍅', category: 'sebze' },
-    { name: 'biber', emoji: '🌶️', category: 'sebze' },
-    { name: 'havuç', emoji: '🥕', category: 'sebze' },
-    { name: 'kabak', emoji: '🥒', category: 'sebze' },
-    { name: 'patlıcan', emoji: '🍆', category: 'sebze' },
-    { name: 'ıspanak', emoji: '🥬', category: 'sebze' },
-    { name: 'sarımsak', emoji: '🧄', category: 'sebze' },
-    { name: 'bezelye', emoji: '🟢', category: 'sebze' },
-    { name: 'mantar', emoji: '🍄', category: 'sebze' },
-    { name: 'brokoli', emoji: '🥦', category: 'sebze' },
-    { name: 'mısır', emoji: '🌽', category: 'sebze' },
-    { name: 'fasulye', emoji: '🫘', category: 'sebze' },
-    { name: 'lahana', emoji: '🥬', category: 'sebze' },
-    { name: 'pırasa', emoji: '🧅', category: 'sebze' },
-    { name: 'enginar', emoji: '🌿', category: 'sebze' },
-    { name: 'bakla', emoji: '🫛', category: 'sebze' },
-    // Tahıl & Makarna
-    { name: 'pirinç', emoji: '🍚', category: 'tahıl' },
-    { name: 'makarna', emoji: '🍝', category: 'tahıl' },
-    { name: 'bulgur', emoji: '🌾', category: 'tahıl' },
-    { name: 'un', emoji: '🌾', category: 'tahıl' },
-    { name: 'ekmek', emoji: '🍞', category: 'tahıl' },
-    { name: 'nohut', emoji: '🟤', category: 'tahıl' },
-    { name: 'mercimek', emoji: '🟠', category: 'tahıl' },
-    // Süt Ürünleri
-    { name: 'süt', emoji: '🥛', category: 'süt' },
-    { name: 'peynir', emoji: '🧀', category: 'süt' },
-    { name: 'yoğurt', emoji: '🥣', category: 'süt' },
-    { name: 'tereyağı', emoji: '🧈', category: 'süt' },
-    { name: 'krema', emoji: '🍶', category: 'süt' },
-    // Baharat & Diğer
-    { name: 'zeytinyağı', emoji: '🫒', category: 'baharat' },
-    { name: 'limon', emoji: '🍋', category: 'baharat' },
-    { name: 'tuz', emoji: '🧂', category: 'baharat' },
-    { name: 'şeker', emoji: '🍬', category: 'baharat' },
-    { name: 'salça', emoji: '🥫', category: 'baharat' },
-    { name: 'karabiber', emoji: '⚫', category: 'baharat' },
-    { name: 'pul biber', emoji: '🌶️', category: 'baharat' },
-    { name: 'nane', emoji: '🌿', category: 'baharat' },
-    { name: 'maydanoz', emoji: '🌿', category: 'baharat' },
-    { name: 'dereotu', emoji: '🌿', category: 'baharat' },
-];
-
-const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel tarifi keşfet...", onSearch, iconOnlyOnMobile = false, onOpenChange }) => {
+const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSearch, iconOnlyOnMobile = false, onOpenChange }) => {
+    const { t, i18n } = useTranslation();
     const [query, setQuery] = useState(initialQuery);
     const [isOpen, setIsOpen] = useState(false);
     const [recentSearches, setRecentSearches] = useState([]);
@@ -76,6 +19,76 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
     const inputRef = useRef(null);
     const modalInputRef = useRef(null);
     const navigate = useNavigate();
+
+    const currentPlaceholder = placeholder || t('search.placeholder');
+
+    const popularSearches = [
+        t('search.popular_items.dessert'),
+        t('search.popular_items.soup'),
+        t('search.popular_items.appetizer'),
+        t('search.popular_items.revani'),
+        t('search.popular_items.milky_desserts'),
+        t('search.popular_items.pasta')
+    ];
+
+    const quickAccess = [
+        { title: t('search.quick_access_items.daily_menu'), icon: <Utensils className="w-4 h-4 text-gray-500" />, query: t('search.quick_access_items.daily_menu').toLowerCase() },
+        { title: t('search.quick_access_items.practical_main'), icon: <Flame className="w-4 h-4 text-orange-500" />, query: t('search.quick_access_items.practical_main').toLowerCase() }
+    ];
+
+    const ingredients = [
+        // Proteinler
+        { name: t('search.by_ingredient.items.chicken'), emoji: '🍗', category: 'protein' },
+        { name: t('search.by_ingredient.items.minced'), emoji: '🥩', category: 'protein' },
+        { name: t('search.by_ingredient.items.beef'), emoji: '🥩', category: 'protein' },
+        { name: t('search.by_ingredient.items.fish'), emoji: '🐟', category: 'protein' },
+        { name: t('search.by_ingredient.items.egg'), emoji: '🥚', category: 'protein' },
+        { name: t('search.by_ingredient.items.shrimp'), emoji: '🦐', category: 'protein' },
+        // Sebzeler
+        { name: t('search.by_ingredient.items.potato'), emoji: '🥔', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.onion'), emoji: '🧅', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.tomato'), emoji: '🍅', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.pepper'), emoji: '🌶️', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.carrot'), emoji: '🥕', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.zucchini'), emoji: '🥒', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.eggplant'), emoji: '🍆', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.spinach'), emoji: '🥬', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.garlic'), emoji: '🧄', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.peas'), emoji: '🟢', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.mushroom'), emoji: '🍄', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.broccoli'), emoji: '🥦', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.corn'), emoji: '🌽', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.beans'), emoji: '🫘', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.cabbage'), emoji: '🥬', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.leek'), emoji: '🧅', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.artichoke'), emoji: '🌿', category: 'vegetable' },
+        { name: t('search.by_ingredient.items.broad_beans'), emoji: '🫛', category: 'vegetable' },
+        // Tahıl & Makarna
+        { name: t('search.by_ingredient.items.rice'), emoji: '🍚', category: 'grain' },
+        { name: t('search.by_ingredient.items.pasta'), emoji: '🍝', category: 'grain' },
+        { name: t('search.by_ingredient.items.bulgur'), emoji: '🌾', category: 'grain' },
+        { name: t('search.by_ingredient.items.flour'), emoji: '🌾', category: 'grain' },
+        { name: t('search.by_ingredient.items.bread'), emoji: '🍞', category: 'grain' },
+        { name: t('search.by_ingredient.items.chickpeas'), emoji: '🟤', category: 'grain' },
+        { name: t('search.by_ingredient.items.lentils'), emoji: '🟠', category: 'grain' },
+        // Süt Ürünleri
+        { name: t('search.by_ingredient.items.milk'), emoji: '🥛', category: 'dairy' },
+        { name: t('search.by_ingredient.items.cheese'), emoji: '🧀', category: 'dairy' },
+        { name: t('search.by_ingredient.items.yogurt'), emoji: '🥣', category: 'dairy' },
+        { name: t('search.by_ingredient.items.butter'), emoji: '🧈', category: 'dairy' },
+        { name: t('search.by_ingredient.items.cream'), emoji: '🍶', category: 'dairy' },
+        // Baharat & Diğer
+        { name: t('search.by_ingredient.items.olive_oil'), emoji: '🫒', category: 'spice' },
+        { name: t('search.by_ingredient.items.lemon'), emoji: '🍋', category: 'spice' },
+        { name: t('search.by_ingredient.items.salt'), emoji: '🧂', category: 'spice' },
+        { name: t('search.by_ingredient.items.sugar'), emoji: '🍬', category: 'spice' },
+        { name: t('search.by_ingredient.items.tomato_paste'), emoji: '🥫', category: 'spice' },
+        { name: t('search.by_ingredient.items.black_pepper'), emoji: '⚫', category: 'spice' },
+        { name: t('search.by_ingredient.items.chili_flakes'), emoji: '🌶️', category: 'spice' },
+        { name: t('search.by_ingredient.items.mint'), emoji: '🌿', category: 'spice' },
+        { name: t('search.by_ingredient.items.parsley'), emoji: '🌿', category: 'spice' },
+        { name: t('search.by_ingredient.items.dill'), emoji: '🌿', category: 'spice' },
+    ];
 
     useEffect(() => {
         setQuery(initialQuery);
@@ -112,12 +125,12 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
     const handleVoiceSearch = () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
-            alert("Üzgünüz, tarayıcınız sesli aramayı desteklemiyor.");
+            alert(t('search.voice_error'));
             return;
         }
 
         const recognition = new SpeechRecognition();
-        recognition.lang = 'tr-TR';
+        recognition.lang = i18n.language === 'tr' ? 'tr-TR' : 'en-US';
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
@@ -201,12 +214,12 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
     });
 
     const ingredientCategories = [
-        { key: 'all', label: 'Tümü' },
-        { key: 'protein', label: 'Protein' },
-        { key: 'sebze', label: 'Sebze' },
-        { key: 'tahıl', label: 'Tahıl' },
-        { key: 'süt', label: 'Süt Ürünleri' },
-        { key: 'baharat', label: 'Baharat' },
+        { key: 'all', label: t('search.by_ingredient.categories.all') },
+        { key: 'protein', label: t('search.by_ingredient.categories.protein') },
+        { key: 'vegetable', label: t('search.by_ingredient.categories.vegetable') },
+        { key: 'grain', label: t('search.by_ingredient.categories.grain') },
+        { key: 'dairy', label: t('search.by_ingredient.categories.dairy') },
+        { key: 'spice', label: t('search.by_ingredient.categories.spice') },
     ];
 
     return (
@@ -225,16 +238,16 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                         <input
                             ref={inputRef}
                             type="text"
-                            placeholder={placeholder}
+                            placeholder={currentPlaceholder}
                             value={query}
                             readOnly
-                            className="w-full pl-14 pr-6 py-4 bg-white border-0 rounded-2xl shadow-xl shadow-gray-100/50 text-gray-700 font-medium placeholder-gray-400 cursor-pointer outline-none cursor-text"
+                            className="w-full pl-14 pr-6 py-4 bg-chefie-card border-0 rounded-2xl shadow-xl shadow-gray-100/50 dark:shadow-none text-chefie-text font-medium placeholder-gray-400 cursor-pointer outline-none cursor-text"
                         />
                     </div>
 
                     {/* Mobile View (Icon Button) */}
                     {iconOnlyOnMobile && (
-                        <div className="md:hidden h-[48px] w-[48px] bg-white border border-gray-100 rounded-2xl shadow-xl shadow-gray-100/50 flex items-center justify-center text-gray-400 group-hover:text-chefie-yellow group-hover:border-chefie-yellow/30 transition-all">
+                        <div className="md:hidden h-[48px] w-[48px] bg-chefie-card border border-chefie-border rounded-2xl shadow-xl shadow-gray-100/50 dark:shadow-none text-gray-400 group-hover:text-chefie-yellow group-hover:border-chefie-yellow/30 transition-all flex items-center justify-center">
                             <Search className="h-[20px] w-[20px]" />
                         </div>
                     )}
@@ -262,7 +275,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -20, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className="fixed md:absolute inset-0 md:inset-auto md:top-0 md:left-0 md:right-0 w-full md:w-[500px] h-full md:h-auto md:max-h-[85vh] bg-white z-[101] md:rounded-[2rem] md:shadow-2xl overflow-hidden flex flex-col pt-0 md:pt-0"
+                            className="fixed md:absolute inset-0 md:inset-auto md:top-0 md:left-0 md:right-0 w-full md:w-[500px] h-full md:h-auto md:max-h-[85vh] bg-chefie-card z-[101] md:rounded-[2rem] md:shadow-2xl overflow-hidden flex flex-col pt-0 md:pt-0"
                         >
                             {/* Modal Header */}
                             <div className="flex items-center gap-3 p-4 bg-chefie-yellow shadow-sm md:rounded-t-[2rem]">
@@ -278,7 +291,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                         value={query}
                                         onChange={(e) => setQuery(e.target.value)}
                                         onKeyDown={handleKeyDown}
-                                        placeholder={recipeCount > 0 ? `${recipeCount} tarif içinde ara` : "Tariflerde ara..."}
+                                        placeholder={recipeCount > 0 ? `${recipeCount} ${t('search.searching_in')}` : t('search.search_generic')}
                                         className="w-full pl-10 pr-10 py-3 bg-white border-0 rounded-full text-sm font-medium text-chefie-dark focus:ring-2 focus:ring-white/50 outline-none"
                                     />
                                     {query && (
@@ -290,26 +303,26 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                 <button
                                     onClick={handleVoiceSearch}
                                     className={`p-2 rounded-xl transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-white hover:bg-white/10'}`}
-                                    title="Sesli Arama"
+                                    title={t('search.voice_error')}
                                 >
                                     <Mic className="w-5 h-5" />
                                 </button>
                             </div>
 
                             {/* Modal Body */}
-                            <div className="flex-1 overflow-y-auto w-full scrollbar-hide bg-gray-50/50">
+                            <div className="flex-1 overflow-y-auto w-full scrollbar-hide bg-chefie-cream/50">
 
                                 {/* Popüler Aramalar */}
-                                <div className="p-6 border-b border-gray-100 bg-white">
-                                    <h3 className="text-sm font-black text-chefie-dark flex items-center gap-2 mb-4">
-                                        <Flame className="w-4 h-4 text-orange-500" /> Popüler Aramalar
+                                <div className="p-6 border-b border-chefie-border bg-chefie-card">
+                                    <h3 className="text-sm font-black text-chefie-text flex items-center gap-2 mb-4">
+                                        <Flame className="w-4 h-4 text-orange-500" /> {t('search.popular')}
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {popularSearches.map(item => (
                                             <button
                                                 key={item}
                                                 onClick={() => handleSearch(item)}
-                                                className="px-4 py-2 bg-gray-50 border border-gray-100 hover:bg-chefie-yellow/20 hover:text-chefie-dark hover:border-chefie-yellow/50 text-gray-700 text-xs font-bold rounded-full transition-colors"
+                                                className="px-4 py-2 bg-chefie-cream border border-chefie-border hover:bg-chefie-yellow/20 hover:text-chefie-text hover:border-chefie-yellow/50 text-chefie-text text-xs font-bold rounded-full transition-colors"
                                             >
                                                 {item}
                                             </button>
@@ -319,19 +332,19 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
 
                                 {/* Son Aradıklarım */}
                                 {recentSearches.length > 0 && (
-                                    <div className="p-6 border-b border-gray-100 bg-white">
+                                    <div className="p-6 border-b border-chefie-border bg-chefie-card">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-sm font-black text-chefie-dark flex items-center gap-2">
-                                                <Clock className="w-4 h-4 text-orange-400" /> Son Aradıklarım
+                                            <h3 className="text-sm font-black text-chefie-text flex items-center gap-2">
+                                                <Clock className="w-4 h-4 text-orange-400" /> {t('search.recent')}
                                             </h3>
-                                            <button onClick={clearRecent} className="text-xs font-bold text-gray-400 hover:text-chefie-dark transition-colors">Tümünü Gör</button>
+                                            <button onClick={clearRecent} className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors">{t('search.clear_recent')}</button>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {recentSearches.map(item => (
                                                 <button
                                                     key={item}
                                                     onClick={() => handleSearch(item)}
-                                                    className="px-4 py-2 bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-full transition-colors flex items-center gap-2"
+                                                    className="px-4 py-2 bg-chefie-cream border border-chefie-border hover:bg-chefie-cream/80 text-chefie-text text-xs font-bold rounded-full transition-colors flex items-center gap-2"
                                                 >
                                                     {item}
                                                 </button>
@@ -341,31 +354,31 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                 )}
 
                                 {/* Hızlı Erişim */}
-                                <div className="p-6 border-b border-gray-100 bg-white">
+                                <div className="p-6 border-b border-chefie-border bg-chefie-card">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-sm font-black text-chefie-dark flex items-center gap-2">
-                                            <Search className="w-4 h-4 text-orange-400" /> Hızlı Erişim
+                                        <h3 className="text-sm font-black text-chefie-text flex items-center gap-2">
+                                            <Search className="w-4 h-4 text-orange-400" /> {t('search.quick_access')}
                                         </h3>
-                                        <button className="text-xs font-bold text-gray-400 hover:text-chefie-dark transition-colors">Tümünü Gör</button>
+                                        <button className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors">{t('search.clear_recent')}</button>
                                     </div>
                                     <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6">
                                         {quickAccess.map((item, idx) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => handleSearch(item.query)}
-                                                className="whitespace-nowrap px-4 py-3 bg-gray-50 border border-gray-100 hover:border-gray-300 rounded-full flex items-center gap-3 transition-colors"
+                                                className="whitespace-nowrap px-4 py-3 bg-chefie-cream border border-chefie-border hover:border-chefie-yellow rounded-full flex items-center gap-3 transition-colors"
                                             >
-                                                <div className="p-1 bg-white rounded-full shadow-sm">{item.icon}</div>
-                                                <span className="text-xs font-black text-gray-700">{item.title}</span>
+                                                <div className="p-1 bg-chefie-card rounded-full shadow-sm">{item.icon}</div>
+                                                <span className="text-xs font-black text-chefie-text">{item.title}</span>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Malzemeye Göre Tarif Ara */}
-                                <div className="p-6 bg-white">
-                                    <h3 className="text-sm font-black text-chefie-dark flex items-center gap-2 mb-4">
-                                        <Utensils className="w-4 h-4 text-orange-400" /> Malzemeye Göre Tarif Ara
+                                <div className="p-6 bg-chefie-card">
+                                    <h3 className="text-sm font-black text-chefie-text flex items-center gap-2 mb-4">
+                                        <Utensils className="w-4 h-4 text-orange-400" /> {t('search.by_ingredient.title')}
                                     </h3>
 
                                     {/* Selected Ingredients Chips */}
@@ -390,7 +403,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                                 className="flex items-center gap-1.5 px-4 py-1.5 bg-chefie-yellow text-white rounded-full text-xs font-bold transition-all hover:bg-chefie-yellow/90 shadow-sm"
                                             >
                                                 <Search className="w-3 h-3" />
-                                                Tarif Ara ({selectedIngredients.length})
+                                                {t('search.by_ingredient.search_button')} ({selectedIngredients.length})
                                             </button>
                                         </div>
                                     )}
@@ -400,10 +413,10 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                         <input
                                             type="text"
-                                            placeholder="Malzeme ara..."
+                                            placeholder={t('search.by_ingredient.placeholder')}
                                             value={ingredientFilter}
                                             onChange={(e) => setIngredientFilter(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-xl text-sm font-medium focus:ring-2 focus:ring-chefie-yellow/20 outline-none"
+                                            className="w-full pl-10 pr-4 py-3 bg-chefie-cream border-0 rounded-xl text-sm font-medium focus:ring-2 focus:ring-chefie-yellow/20 outline-none text-chefie-text"
                                         />
                                     </div>
 
@@ -414,8 +427,8 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                                 key={cat.key}
                                                 onClick={() => setActiveIngredientCategory(cat.key)}
                                                 className={`whitespace-nowrap px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors border ${activeIngredientCategory === cat.key
-                                                        ? 'bg-chefie-yellow text-white border-chefie-yellow shadow-sm'
-                                                        : 'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100'
+                                                    ? 'bg-chefie-yellow text-white border-chefie-yellow shadow-sm'
+                                                    : 'bg-chefie-cream text-gray-600 border-chefie-border hover:bg-chefie-cream/80'
                                                     }`}
                                             >
                                                 {cat.label}
@@ -434,8 +447,8 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                                     onClick={() => handleIngredientToggle(ing.name)}
                                                 >
                                                     <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-2xl md:text-3xl transition-all border-2 ${isSelected
-                                                            ? 'bg-chefie-yellow/20 border-chefie-yellow shadow-md scale-105'
-                                                            : 'bg-white border-gray-100 shadow-sm group-hover:border-chefie-yellow/50 group-hover:shadow-md'
+                                                        ? 'bg-chefie-yellow/20 border-chefie-yellow shadow-md scale-105'
+                                                        : 'bg-chefie-card border-chefie-border shadow-sm group-hover:border-chefie-yellow/50 group-hover:shadow-md'
                                                         }`}>
                                                         {ing.emoji}
                                                         {isSelected ? (
@@ -448,27 +461,27 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = "Mükemmel
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className={`text-[10px] font-bold text-center leading-tight ${isSelected ? 'text-chefie-dark' : 'text-gray-500'
+                                                    <span className={`text-[10px] font-bold text-center leading-tight ${isSelected ? 'text-chefie-text' : 'text-gray-500'
                                                         }`}>{ing.name}</span>
                                                 </div>
                                             );
                                         })}
                                         {filteredIngredients.length === 0 && (
                                             <div className="col-span-full py-6 text-center text-gray-400 text-xs font-bold">
-                                                Malzeme bulunamadı.
+                                                {t('search.by_ingredient.not_found')}
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Bottom Search Button */}
                                     {selectedIngredients.length > 0 && (
-                                        <div className="pt-4 border-t border-gray-100">
+                                        <div className="pt-4 border-t border-chefie-border">
                                             <button
                                                 onClick={handleIngredientSearch}
                                                 className="w-full py-3.5 bg-chefie-yellow text-white font-bold text-sm rounded-2xl shadow-lg shadow-chefie-yellow/30 hover:shadow-xl hover:shadow-chefie-yellow/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                                             >
                                                 <Search className="w-4 h-4" />
-                                                {selectedIngredients.length} malzeme ile tarif ara
+                                                {selectedIngredients.length} {t('search.by_ingredient.with_ingredients')}
                                             </button>
                                         </div>
                                     )}

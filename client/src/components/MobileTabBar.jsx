@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Search, Heart, User, Plus, ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const MobileTabBar = () => {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(true);
@@ -34,11 +36,11 @@ const MobileTabBar = () => {
     }, [lastScrollY]);
 
     const tabs = [
-        { path: '/', icon: Home, label: 'Ana Sayfa' },
-        { path: '/recipes', icon: Search, label: 'Tarifler' },
+        { path: '/', icon: Home, label: t('nav.home') },
+        { path: '/recipes', icon: Search, label: t('nav.recipes') },
         // Center button is handled separately
-        { path: '/lists', icon: ShoppingCart, label: 'Listeler' },
-        { path: user?.id ? `/profile/${user.id}` : '/admin/login', icon: User, label: 'Profil' }
+        { path: '/lists', icon: ShoppingCart, label: t('nav.lists') },
+        { path: user?.id ? `/profile/${user.id}` : '/admin/login', icon: User, label: t('nav.login') }
     ];
 
     const isActive = (path) => {
@@ -72,14 +74,14 @@ const MobileTabBar = () => {
                     <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={() => navigate('/admin/recipes/new')}
-                        className="bg-chefie-yellow w-14 h-14 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgb(255,193,7,0.4)] border-4 border-[#FAFAF9]"
+                        className="bg-chefie-yellow w-14 h-14 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgb(255,193,7,0.4)] border-4 border-chefie-cream"
                     >
                         <Plus className="w-6 h-6 stroke-[3]" />
                     </motion.button>
                 </div>
 
                 {/* The main bar */}
-                <div className="bg-white/90 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-[2rem] px-6 py-4 flex items-center justify-between relative overflow-hidden">
+                <div className="bg-chefie-card/90 backdrop-blur-xl border border-chefie-border shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-[2rem] px-6 py-4 flex items-center justify-between relative overflow-hidden">
                     {tabs.map((tab, idx) => {
                         const active = isActive(tab.path);
                         const Icon = tab.icon;
@@ -93,14 +95,14 @@ const MobileTabBar = () => {
                                         to={tab.path}
                                         className="relative flex flex-col items-center justify-center w-12 h-10 group"
                                     >
-                                        <div className={`relative z-10 transition-colors duration-300 ${active ? 'text-chefie-dark' : 'text-gray-400'}`}>
+                                        <div className={`relative z-10 transition-colors duration-300 ${active ? 'text-chefie-yellow' : 'text-gray-400'}`}>
                                             <Icon className="w-5 h-5 mx-auto mb-1" />
                                         </div>
                                         {/* Active background pill */}
                                         {active && (
                                             <motion.div
                                                 layoutId="mobile-tab-pill"
-                                                className="absolute inset-x-1 inset-y-0 bg-gray-100 rounded-xl z-0"
+                                                className="absolute inset-x-1 inset-y-0 bg-chefie-yellow/15 border border-chefie-yellow/30 rounded-xl z-0"
                                                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                                             />
                                         )}
@@ -115,14 +117,14 @@ const MobileTabBar = () => {
                                 to={tab.path}
                                 className="relative flex flex-col items-center justify-center w-12 h-10 group"
                             >
-                                <div className={`relative z-10 transition-colors duration-300 ${active ? 'text-chefie-dark' : 'text-gray-400'}`}>
+                                <div className={`relative z-10 transition-colors duration-300 ${active ? 'text-chefie-yellow' : 'text-gray-400'}`}>
                                     <Icon className="w-5 h-5 mx-auto mb-1" />
                                 </div>
                                 {/* Active background pill */}
                                 {active && (
                                     <motion.div
                                         layoutId="mobile-tab-pill"
-                                        className="absolute inset-x-1 inset-y-0 bg-gray-100 rounded-xl z-0"
+                                        className="absolute inset-x-1 inset-y-0 bg-chefie-yellow/15 border border-chefie-yellow/30 rounded-xl z-0"
                                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
                                     />
                                 )}

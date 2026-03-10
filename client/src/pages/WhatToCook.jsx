@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +9,7 @@ import API_BASE from '../utils/api';
 const apiBase = API_BASE;
 
 const WhatToCook = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [allRecipes, setAllRecipes] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -85,11 +87,11 @@ const WhatToCook = () => {
     };
 
     const timeOptions = [
-        { label: '15 dk', value: 15 },
-        { label: '30 dk', value: 30 },
-        { label: '45 dk', value: 45 },
-        { label: '60 dk', value: 60 },
-        { label: '90+ dk', value: 999 },
+        { label: `15 ${t('common.minutes')}`, value: 15 },
+        { label: `30 ${t('common.minutes')}`, value: 30 },
+        { label: `45 ${t('common.minutes')}`, value: 45 },
+        { label: `60 ${t('common.minutes')}`, value: 60 },
+        { label: `90+ ${t('common.minutes')}`, value: 999 },
     ];
 
     const servingsOptions = [
@@ -117,21 +119,21 @@ const WhatToCook = () => {
                 <header className="py-10 max-w-5xl mx-auto">
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
                         <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
-                            <Link to="/" className="hover:text-chefie-yellow transition-colors">ANASAYFA</Link>
+                            <Link to="/" className="hover:text-chefie-yellow transition-colors">{t('recipes.breadcrumb.home')}</Link>
                             <ChevronRight className="w-3 h-3" />
-                            <span className="text-chefie-dark">NE PİŞİRSEM</span>
+                            <span className="text-chefie-dark">{t('what_to_cook.breadcrumb')}</span>
                         </div>
                         <h1 className="text-4xl md:text-6xl font-black text-chefie-dark leading-tight">
-                            Bugün Ne <br className="hidden sm:block" />
+                            {t('what_to_cook.header.title_1')} <br className="hidden sm:block" />
                             <span className="text-chefie-yellow relative inline-block">
-                                Pişirsem?
+                                {t('what_to_cook.header.title_2')}
                                 <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 100 8" preserveAspectRatio="none">
                                     <path d="M0 7C20 7 30 1 50 1C70 1 80 7 100 7" stroke="#FFC107" strokeWidth="2" fill="none" />
                                 </svg>
                             </span>
                         </h1>
                         <p className="text-gray-400 text-lg md:text-xl max-w-xl mx-auto mt-5">
-                            Karar veremiyorsan bırak biz seçelim! Filtrele ve çarkı çevir.
+                            {t('what_to_cook.header.description')}
                         </p>
                     </motion.div>
                 </header>
@@ -149,7 +151,7 @@ const WhatToCook = () => {
                             className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-500 hover:border-chefie-yellow hover:text-chefie-yellow transition-all shadow-md w-full sm:w-auto justify-center"
                         >
                             <Filter className="w-4 h-4" />
-                            {showFilters ? 'Filtreleri Gizle' : 'Filtrele'}
+                            {showFilters ? t('what_to_cook.filters.hide') : t('what_to_cook.filters.show')}
                             {(selectedCategory || maxTime || servingsFilter) && (
                                 <span className="w-2 h-2 bg-chefie-yellow rounded-full"></span>
                             )}
@@ -163,19 +165,19 @@ const WhatToCook = () => {
                             {isSpinning ? (
                                 <>
                                     <RefreshCw className="w-5 h-5 animate-spin" />
-                                    Seçiliyor...
+                                    {t('what_to_cook.actions.spinning')}
                                 </>
                             ) : (
                                 <>
                                     <Shuffle className="w-5 h-5" />
-                                    {hasSpun ? 'BİR DAHA ÇEVİR' : 'ÇARKI ÇEVİR'}
+                                    {hasSpun ? t('what_to_cook.actions.spin_again') : t('what_to_cook.actions.spin')}
                                 </>
                             )}
                         </button>
 
                         <div className="inline-flex items-center gap-2 px-5 py-3 bg-white rounded-2xl border border-gray-100 text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
                             <Utensils className="w-4 h-4 text-chefie-yellow" />
-                            {filteredRecipes.length} TARİF UYGUN
+                            {filteredRecipes.length} {t('what_to_cook.actions.recipes_fit')}
                         </div>
                     </motion.div>
 
@@ -191,24 +193,24 @@ const WhatToCook = () => {
                                 <div className="bg-white rounded-[2.5rem] border border-gray-50 shadow-xl shadow-gray-100/50 p-6 md:p-8">
                                     <div className="flex items-center justify-between mb-6">
                                         <h3 className="text-sm font-black text-chefie-dark tracking-widest uppercase flex items-center gap-2">
-                                            <Sparkles className="w-4 h-4 text-chefie-yellow" /> Filtreler
+                                            <Sparkles className="w-4 h-4 text-chefie-yellow" /> {t('what_to_cook.filters.title')}
                                         </h3>
                                         {(selectedCategory || maxTime || servingsFilter) && (
                                             <button onClick={resetFilters} className="text-xs font-bold text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors">
-                                                <X className="w-3 h-3" /> Temizle
+                                                <X className="w-3 h-3" /> {t('what_to_cook.filters.clear')}
                                             </button>
                                         )}
                                     </div>
 
                                     {/* Category */}
                                     <div className="mb-6">
-                                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-300 mb-3">KATEGORİ</div>
+                                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-300 mb-3">{t('what_to_cook.filters.category')}</div>
                                         <div className="flex flex-wrap gap-2">
                                             <button
                                                 onClick={() => setSelectedCategory(null)}
                                                 className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!selectedCategory ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                                             >
-                                                Tümü
+                                                {t('search.by_ingredient.categories.all')}
                                             </button>
                                             {categories.map(cat => (
                                                 <button
@@ -226,14 +228,14 @@ const WhatToCook = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <div className="text-[10px] font-black tracking-widest uppercase text-gray-300 mb-3 flex items-center gap-1.5">
-                                                <Clock className="w-3 h-3" /> MAKSİMUM SÜRE
+                                                <Clock className="w-3 h-3" /> {t('what_to_cook.filters.max_time')}
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => setMaxTime(null)}
                                                     className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!maxTime ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                                                 >
-                                                    Farketmez
+                                                    {t('what_to_cook.filters.any')}
                                                 </button>
                                                 {timeOptions.map(opt => (
                                                     <button
@@ -248,14 +250,14 @@ const WhatToCook = () => {
                                         </div>
                                         <div>
                                             <div className="text-[10px] font-black tracking-widest uppercase text-gray-300 mb-3 flex items-center gap-1.5">
-                                                <Users className="w-3 h-3" /> KİŞİ SAYISI
+                                                <Users className="w-3 h-3" /> {t('what_to_cook.filters.servings')}
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => setServingsFilter(null)}
                                                     className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!servingsFilter ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                                                 >
-                                                    Farketmez
+                                                    {t('what_to_cook.filters.any')}
                                                 </button>
                                                 {servingsOptions.map(opt => (
                                                     <button
@@ -263,7 +265,7 @@ const WhatToCook = () => {
                                                         onClick={() => setServingsFilter(opt.value)}
                                                         className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${servingsFilter === opt.value ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                                                     >
-                                                        {opt.label} Kişi
+                                                        {opt.label} {t('what_to_cook.filters.person')}
                                                     </button>
                                                 ))}
                                             </div>
@@ -284,9 +286,9 @@ const WhatToCook = () => {
                             <div className="bg-white w-32 h-32 md:w-36 md:h-36 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gray-100 border border-gray-50">
                                 <Shuffle className="w-14 h-14 md:w-16 md:h-16 text-gray-200" />
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-black text-chefie-dark mb-3">Çarkı Çevir!</h2>
+                            <h2 className="text-2xl md:text-3xl font-black text-chefie-dark mb-3">{t('what_to_cook.empty.title')}</h2>
                             <p className="text-gray-400 font-medium max-w-sm mx-auto">
-                                Yukarıdaki butona tıklayarak sana özel bir tarif önerisi al. İstersen önce filtrele!
+                                {t('what_to_cook.empty.description')}
                             </p>
                         </motion.div>
                     )}
@@ -294,7 +296,7 @@ const WhatToCook = () => {
                     {loading && (
                         <div className="text-center py-24">
                             <div className="w-16 h-16 border-4 border-gray-100 border-t-chefie-yellow rounded-full animate-spin mx-auto mb-6"></div>
-                            <p className="text-gray-400 font-bold">Tarifler yükleniyor...</p>
+                            <p className="text-gray-400 font-bold">{t('what_to_cook.loading')}</p>
                         </div>
                     )}
 
@@ -311,7 +313,7 @@ const WhatToCook = () => {
                             >
                                 <div className="text-center mb-6">
                                     <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-chefie-yellow/10 rounded-full text-chefie-yellow text-[11px] font-black tracking-widest uppercase">
-                                        <Sparkles className="w-4 h-4" /> SANA ÖZEL ÖNERİ
+                                        <Sparkles className="w-4 h-4" /> {t('what_to_cook.suggestion.tag')}
                                     </div>
                                 </div>
 
@@ -340,7 +342,7 @@ const WhatToCook = () => {
                                         <div className="absolute top-5 right-5 bg-chefie-dark/90 backdrop-blur-md px-3 py-2 rounded-2xl flex items-center gap-2 shadow-xl">
                                             <Star className="w-3 h-3 text-chefie-yellow fill-current" />
                                             <span className="text-white text-xs font-black">
-                                                {suggestion.avg_rating ? Number(suggestion.avg_rating).toFixed(1) : 'YENİ'}
+                                                {suggestion.avg_rating ? Number(suggestion.avg_rating).toFixed(1) : t('common.new_tag')}
                                             </span>
                                         </div>
                                     </div>
@@ -357,15 +359,15 @@ const WhatToCook = () => {
                                         <div className="flex flex-wrap items-center gap-3 mb-6">
                                             <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-2xl text-xs font-bold text-gray-500">
                                                 <Clock className="w-4 h-4 text-chefie-yellow" />
-                                                {suggestion.prep_time || '30'} dk Hazırlık
+                                                {suggestion.prep_time || '30'} {t('common.minutes')} {t('what_to_cook.suggestion.prep')}
                                             </div>
                                             <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-2xl text-xs font-bold text-gray-500">
                                                 <Flame className="w-4 h-4 text-orange-400" />
-                                                {suggestion.cook_time || '20'} dk Pişirme
+                                                {suggestion.cook_time || '20'} {t('common.minutes')} {t('what_to_cook.suggestion.cook')}
                                             </div>
                                             <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-2xl text-xs font-bold text-gray-500">
                                                 <Users className="w-4 h-4 text-blue-400" />
-                                                {suggestion.servings || '4'} Kişilik
+                                                {suggestion.servings || '4'} {t('what_to_cook.suggestion.servings')}
                                             </div>
                                         </div>
 
@@ -383,14 +385,14 @@ const WhatToCook = () => {
                                                     </div>
                                                 )}
                                                 <div className="flex flex-col">
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Şef</span>
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('common.chef')}</span>
                                                     <span className="text-xs font-bold text-gray-700">{suggestion.chef_name}</span>
                                                 </div>
                                             </div>
                                         )}
 
                                         <div className="group/btn inline-flex items-center justify-center gap-3 w-full py-4 bg-chefie-dark text-white font-black text-[11px] tracking-widest rounded-[1.5rem] hover:bg-chefie-yellow transition-all duration-500 shadow-lg">
-                                            TARİFE GİT
+                                            {t('what_to_cook.suggestion.button')}
                                             <div className="w-6 h-6 bg-chefie-yellow group-hover/btn:bg-white/20 rounded-lg flex items-center justify-center group-hover/btn:translate-x-1 transition-all">
                                                 <ArrowRight className="w-3 h-3 text-white" />
                                             </div>

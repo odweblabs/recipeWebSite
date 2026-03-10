@@ -15,6 +15,11 @@ import Calories from './pages/Calories';
 import Trend from './pages/Trend';
 import WhatToCook from './pages/WhatToCook';
 import Lists from './pages/Lists';
+import Settings from './pages/Settings';
+import EditProfile from './pages/EditProfile';
+import FAQ from './pages/FAQ';
+import Terms from './pages/Terms';
+import Policy from './pages/Policy';
 import PlaceholderPage from './pages/placeholders/PlaceholderPage';
 
 // Layouts
@@ -26,9 +31,13 @@ import Heartbeat from './components/Heartbeat';
 // Auth
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
+// Theme
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
-    <Router>
+    <ThemeProvider>
+      <Router>
       <ScrollToTop />
       <Heartbeat />
       <Routes>
@@ -48,6 +57,19 @@ function App() {
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/calories" element={<Calories />} />
           <Route path="/lists" element={<Lists />} />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
+          <Route path="/edit-profile" element={
+            <ProtectedRoute>
+              <EditProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/policy" element={<Policy />} />
           <Route path="/favorites" element={<PlaceholderPage />} />
           <Route path="/courses" element={<PlaceholderPage />} />
           <Route path="/community" element={<PlaceholderPage />} />
@@ -78,8 +100,9 @@ function App() {
           </ProtectedRoute>
         } />
       </Routes>
-      <MobileTabBar />
-    </Router>
+        <MobileTabBar />
+      </Router>
+    </ThemeProvider>
   );
 }
 

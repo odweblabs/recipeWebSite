@@ -2,19 +2,53 @@
 @import "tailwindcss";
 
 @theme {
-    --color-chefie-cream: #FFFBF2;
+    --color-chefie-cream: var(--bg-primary);
     --color-chefie-yellow: #FFC107;
     --color-chefie-green: #10B981;
     --color-chefie-dark: #1F2937;
+    --color-chefie-card: var(--bg-card);
+    --color-chefie-border: var(--border-color);
+    --color-chefie-text: var(--text-primary);
+    --color-chefie-secondary: var(--text-secondary);
+
+    --shadow-sm: var(--shadow-sm);
+    --shadow-md: var(--shadow-md);
+    --shadow-lg: var(--shadow-lg);
 
     --font-serif: 'DM Serif Display', serif;
     --font-sans: 'Poppins', sans-serif;
 }
 
+:root {
+    --bg-primary: #FFFBF2;
+    --bg-card: #FFFFFF;
+    --bg-cream: #FFFBF2;
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --border-color: #F3F4F6;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.dark {
+    --bg-primary: #0F172A;
+    --bg-card: #1E293B;
+    --bg-cream: #1e293b;
+    /* Slightly lighter than primary in dark mode to distinguish sections */
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --border-color: #334155;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: var(--color-chefie-cream);
-    color: var(--color-chefie-dark);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1,
@@ -33,6 +67,8 @@ h6 {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }

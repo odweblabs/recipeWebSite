@@ -84,7 +84,7 @@ router.post('/register', upload.single('profile_image'), async (req, res) => {
 // Get current user info
 router.get('/me', authenticateToken, async (req, res) => {
     try {
-        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, country, created_at FROM users WHERE id = $1', [req.user.id]);
+        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, country, email, phone_number, created_at FROM users WHERE id = $1', [req.user.id]);
         const user = users[0];
         res.json(user);
     } catch (err) {
@@ -102,8 +102,21 @@ router.put('/profile', authenticateToken, upload.single('profile_image'), async 
         profile_image = `data:${req.file.mimetype};base64,${base64Image}`;
     }
     try {
-        await executeQuery('UPDATE users SET full_name = $1, profile_image = $2, country = $3 WHERE id = $4', [full_name, profile_image, country || null, req.user.id]);
+        await executeQuery(
+            'UPDATE users SET full_name = $1, profile_image = $2, country = $3 WHERE id = $4',
+            [full_name, profile_image, country || null, req.user.id]
+        );
         res.json({ message: 'Profil güncellendi' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete own account
+router.delete('/account', authenticateToken, async (req, res) => {
+    try {
+        await executeQuery('DELETE FROM users WHERE id = $1', [req.user.id]);
+        res.json({ message: 'Hesabınız başarıyla silindi.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -112,7 +125,13 @@ router.put('/profile', authenticateToken, upload.single('profile_image'), async 
 // Get Public User Profile
 router.get('/users/:id/profile', async (req, res) => {
     try {
-        const users = await executeQuery('SELECT id, username, full_name, profile_image, country, created_at FROM users WHERE id = $1', [req.params.id]);
+        const users = await executeQuery(`
+            SELECT 
+                id, username, full_name, profile_image, country, created_at,
+                (SELECT COUNT(*) FROM friendships WHERE addressee_id = $1 AND status = 'accepted') as follower_count,
+                (SELECT COUNT(*) FROM friendships WHERE requester_id = $2 AND status = 'accepted') as following_count
+            FROM users WHERE id = $3
+        `, [req.params.id, req.params.id, req.params.id]);
         const user = users[0];
         if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
         res.json(user);

@@ -460,7 +460,9 @@ router.get('/users/:id/recipes', async (req, res) => {
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                users.profile_image as chef_image
+                users.profile_image as chef_image,
+                (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count,
+                (SELECT COUNT(*) FROM favorites WHERE recipe_id = recipes.id) as favorite_count
             FROM recipes 
             LEFT JOIN categories ON recipes.category_id = categories.id
             LEFT JOIN users ON recipes.user_id = users.id

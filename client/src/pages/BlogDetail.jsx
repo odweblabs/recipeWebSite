@@ -20,6 +20,29 @@ const BlogDetail = () => {
         }
     }, [id, navigate]);
 
+    const handleShare = async () => {
+        const shareData = {
+            title: post.title,
+            text: post.title,
+            url: window.location.href,
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error('Share failed', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                alert('Bağlantı kopyalandı!');
+            } catch (err) {
+                console.error('Clipboard failed', err);
+            }
+        }
+    };
+
     if (!post) return null;
 
     return (
@@ -36,7 +59,7 @@ const BlogDetail = () => {
                 <div className="absolute top-8 left-4 md:left-8 z-20">
                     <button
                         onClick={() => navigate('/blog')}
-                        className="p-3 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white rounded-full transition-all flex items-center gap-2 font-bold"
+                        className="p-3 bg-chefie-card/20 backdrop-blur-md hover:bg-chefie-card/40 text-white rounded-full transition-all flex items-center gap-2 font-bold border border-white/10"
                     >
                         <ArrowLeft className="w-5 h-5" />
                         <span className="hidden md:inline">Geri Dön</span>
@@ -70,19 +93,23 @@ const BlogDetail = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-gray-200/50"
+                    className="bg-chefie-card rounded-[2.5rem] p-8 md:p-12 shadow-lg dark:shadow-none border border-chefie-border"
                 >
                     {/* Actions Bar */}
-                    <div className="flex justify-between items-center mb-10 pb-6 border-b border-gray-100">
+                    <div className="flex justify-between items-center mb-10 pb-6 border-b border-chefie-border">
                         <div className="flex items-center gap-2 text-gray-400 text-sm font-bold">
                             <Tag className="w-4 h-4" />
                             {post.category}
                         </div>
                         <div className="flex gap-2">
-                            <button className="p-2.5 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
+                            <button
+                                onClick={handleShare}
+                                className="p-2.5 rounded-xl hover:bg-chefie-cream text-gray-400 transition-colors"
+                                title="Paylaş"
+                            >
                                 <Share2 className="w-5 h-5" />
                             </button>
-                            <button className="p-2.5 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
+                            <button className="p-2.5 rounded-xl hover:bg-chefie-cream text-gray-400 transition-colors">
                                 <Printer className="w-5 h-5" />
                             </button>
                         </div>
@@ -90,18 +117,18 @@ const BlogDetail = () => {
 
                     {/* Blog Content */}
                     <article
-                        className="prose prose-lg prose-slate max-w-none prose-headings:font-black prose-headings:text-chefie-dark prose-p:text-gray-600 prose-p:leading-relaxed prose-a:text-chefie-yellow prose-img:rounded-[2rem] first-letter:text-5xl first-letter:font-black first-letter:text-chefie-yellow first-letter:mr-1 first-letter:float-left"
+                        className="prose prose-lg prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:text-chefie-text prose-p:text-gray-400 prose-p:leading-relaxed prose-a:text-chefie-yellow prose-img:rounded-[2rem] first-letter:text-5xl first-letter:font-black first-letter:text-chefie-yellow first-letter:mr-1 first-letter:float-left"
                         dangerouslySetInnerHTML={{ __html: post.content }}
                     />
 
                     {/* Author Box */}
-                    <div className="mt-16 bg-gray-50 rounded-3xl p-8 flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center text-2xl font-black text-chefie-yellow">
+                    <div className="mt-16 bg-chefie-cream/50 rounded-3xl p-8 flex items-center gap-6 border border-chefie-border">
+                        <div className="w-16 h-16 rounded-full bg-chefie-card shadow-sm dark:shadow-none flex items-center justify-center text-2xl font-black text-chefie-yellow border border-chefie-border">
                             {post.author.charAt(0)}
                         </div>
                         <div>
-                            <h4 className="font-black text-chefie-dark text-lg mb-1">Yazar Hakkında</h4>
-                            <p className="text-gray-500 text-sm">
+                            <h4 className="font-black text-chefie-text text-lg mb-1">Yazar Hakkında</h4>
+                            <p className="text-gray-400 text-sm">
                                 {post.author}, gastronomi dünyasındaki deneyimlerini ve mutfak sırlarını Lezzet Yolculuğu okurlarıyla paylaşıyor.
                             </p>
                         </div>

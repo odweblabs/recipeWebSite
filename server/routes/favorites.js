@@ -78,7 +78,11 @@ router.get('/user/:userId', async (req, res) => {
 
     try {
         const favorites = await executeQuery(`
-            SELECT recipes.*, categories.name as category_name
+            SELECT 
+                recipes.*, 
+                categories.name as category_name,
+                (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count,
+                (SELECT COUNT(*) FROM favorites WHERE recipe_id = recipes.id) as favorite_count
             FROM recipes
             JOIN favorites ON recipes.id = favorites.recipe_id
             LEFT JOIN categories ON recipes.category_id = categories.id
