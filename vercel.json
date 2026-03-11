@@ -27,11 +27,15 @@
       "dest": "client/images/$1"
     },
     {
+      "src": "/(.*\\.[a-zA-Z0-9]+)$",
+      "dest": "client/$1"
+    },
+    {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "client/dist/index.html"
+      "dest": "client/index.html"
     }
   ]
 }
