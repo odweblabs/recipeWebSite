@@ -339,11 +339,11 @@ const RecipeDetail = () => {
                                     {isFavorited ? t('recipe_detail.favorites.added') : t('recipe_detail.favorites.add')}
                                 </button>
                                 <div className="flex gap-2 w-full">
-                                    <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-2 py-3 bg-chefie-cream text-gray-400 rounded-xl hover:bg-chefie-card border border-transparent hover:border-chefie-border transition-all font-bold text-sm">
-                                        <Share2 className="w-4 h-4" /> {t('common.share')}
+                                    <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-1.5 py-3 px-2 bg-chefie-cream text-gray-400 rounded-xl hover:bg-chefie-card border border-transparent hover:border-chefie-border transition-all font-bold text-xs md:text-sm truncate">
+                                        <Share2 className="w-4 h-4 flex-shrink-0" /> <span className="truncate">{t('common.share')}</span>
                                     </button>
-                                    <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-2 py-3 bg-chefie-cream text-gray-400 rounded-xl hover:bg-chefie-card border border-transparent hover:border-chefie-border transition-all font-bold text-sm">
-                                        <Printer className="w-4 h-4" /> {t('common.print')}
+                                    <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-1.5 py-3 px-2 bg-chefie-cream text-gray-400 rounded-xl hover:bg-chefie-card border border-transparent hover:border-chefie-border transition-all font-bold text-xs md:text-sm truncate">
+                                        <Printer className="w-4 h-4 flex-shrink-0" /> <span className="truncate">{t('common.print')}</span>
                                     </button>
                                 </div>
                                 <button

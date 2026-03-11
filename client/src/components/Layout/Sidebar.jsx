@@ -1,4 +1,5 @@
 import API_BASE from '../../utils/api';
+import { getImageUrl } from '../../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { ChefHat, Heart, BookOpen, Users, Settings, LogOut, LayoutDashboard, UtensilsCrossed, ShoppingCart } from 'lucide-react';
@@ -41,7 +42,7 @@ const Sidebar = () => {
                     <div className="relative w-20 h-20 mx-auto mb-3">
                         <div className="absolute inset-0 bg-chefie-yellow rounded-full rotate-6 group-hover:rotate-12 transition-transform"></div>
                         <img
-                            src={user?.profile_image ? (user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`) : "https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png"}
+                            src={user?.profile_image ? getImageUrl(user.profile_image) : "https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png"}
                             alt="Profile"
                             className="relative w-20 h-20 rounded-full object-cover border-2 border-chefie-card shadow-md"
                         />

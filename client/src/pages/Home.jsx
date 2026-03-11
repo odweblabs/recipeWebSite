@@ -1,4 +1,5 @@
 import API_BASE from '../utils/api';
+import { getImageUrl } from '../utils/imageUtils';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -240,7 +241,7 @@ const Home = () => {
                                 <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full p-2 bg-chefie-card shadow-2xl z-10 transition-transform duration-300 ease-out group-hover/card:scale-105">
                                     <div className="w-full h-full rounded-full overflow-hidden relative">
                                         <img
-                                            src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                            src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
                                             alt={recipe.title}
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover/card:rotate-3"
                                         />
@@ -366,7 +367,7 @@ const Home = () => {
                             <div className="relative mb-6">
                                 <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden">
                                     {chef.profile_image ? (
-                                        <img src={chef.profile_image.startsWith('http') ? chef.profile_image : `${API_BASE}${chef.profile_image}`} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        <img src={getImageUrl(chef.profile_image)} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-3xl text-chefie-text">{(chef.full_name || chef.username).charAt(0)}</div>
                                     )}
@@ -465,7 +466,7 @@ const Home = () => {
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
                                     {comment.profile_image ? (
-                                        <img src={comment.profile_image.startsWith('http') ? comment.profile_image : `${API_BASE}${comment.profile_image}`} className="w-full h-full object-cover" />
+                                        <img src={getImageUrl(comment.profile_image)} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-bold text-chefie-dark text-xs">{(comment.full_name || comment.username).charAt(0)}</div>
                                     )}
@@ -532,7 +533,7 @@ const Home = () => {
                                 <div className="flex items-center gap-3 pl-2">
                                     <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden shadow-lg bg-white">
                                         {recommendation.chef_image ? (
-                                            <img src={recommendation.chef_image.startsWith('http') ? recommendation.chef_image : `${API_BASE}${recommendation.chef_image}`} alt={recommendation.chef_name} className="w-full h-full object-cover" />
+                                            <img src={getImageUrl(recommendation.chef_image)} alt={recommendation.chef_name} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-chefie-dark text-sm">{(recommendation.chef_name || recommendation.chef_username).charAt(0)}</div>
                                         )}
@@ -558,7 +559,7 @@ const Home = () => {
                             className="w-72 h-72 md:w-[450px] md:h-[450px] rounded-[4rem] overflow-hidden border-[12px] border-white shadow-2xl relative"
                         >
                             <img
-                                src={recommendation.image_url ? (recommendation.image_url.startsWith('/images/') ? recommendation.image_url : `${API_BASE}${recommendation.image_url}`) : '/default-recipe.png'}
+                                src={recommendation.image_url ? getImageUrl(recommendation.image_url) : '/default-recipe.png'}
                                 alt={recommendation.title}
                                 className="w-full h-full object-cover"
                             />

@@ -17,6 +17,7 @@ import {
     Check
 } from 'lucide-react';
 import API_BASE from '../utils/api';
+import { getImageUrl } from '../utils/imageUtils';
 import axios from 'axios';
 import { useTheme } from '../context/ThemeContext';
 
@@ -126,7 +127,7 @@ const Settings = () => {
                         <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-chefie-border relative group">
                             {user.profile_image ? (
                                 <img
-                                    src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`}
+                                    src={getImageUrl(user.profile_image)}
                                     alt={user.full_name}
                                     className="w-full h-full object-cover"
                                 />

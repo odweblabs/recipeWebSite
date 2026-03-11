@@ -1,4 +1,5 @@
 import API_BASE from '../utils/api';
+import { getImageUrl } from '../utils/imageUtils';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -212,7 +213,7 @@ const Recipes = () => {
                             >
                                 <div className="relative h-64 overflow-hidden">
                                     <img
-                                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                        src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
                                         alt={recipe.title}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
@@ -250,7 +251,7 @@ const Recipes = () => {
                                     <div className="flex items-center gap-3 mb-6 p-3 bg-chefie-cream rounded-2xl border border-chefie-border">
                                         {recipe.chef_image ? (
                                             <img
-                                                src={recipe.chef_image.startsWith('http') ? recipe.chef_image : `${API_BASE}${recipe.chef_image}`}
+                                                src={getImageUrl(recipe.chef_image)}
                                                 alt={recipe.chef_name}
                                                 className="w-8 h-8 rounded-full object-cover border-2 border-chefie-card shadow-sm"
                                             />

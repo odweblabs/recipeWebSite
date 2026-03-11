@@ -13,6 +13,7 @@ import {
     EyeOff
 } from 'lucide-react';
 import API_BASE from '../utils/api';
+import { getImageUrl } from '../utils/imageUtils';
 import axios from 'axios';
 
 const EditProfile = () => {
@@ -52,7 +53,7 @@ const EditProfile = () => {
             });
             setUser(res.data);
             setFullName(res.data.full_name || '');
-            setPreviewImage(res.data.profile_image ? (res.data.profile_image.startsWith('http') ? res.data.profile_image : `${API_BASE}${res.data.profile_image}`) : null);
+            setPreviewImage(res.data.profile_image ? getImageUrl(res.data.profile_image) : null);
             setLoading(false);
         } catch (err) {
             console.error('Error fetching user data:', err);

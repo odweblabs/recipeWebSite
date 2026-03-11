@@ -230,7 +230,9 @@ i18n
                         rating: "Puan",
                         recipe_count: "Tarif",
                         new_tag: "YENİ",
-                        general: "GENEL"
+                        general: "GENEL",
+                        share: "Paylaş",
+                        print: "Yazdır"
                     },
                     settings: {
                         title: "Ayarlar",
@@ -696,7 +698,9 @@ i18n
                         rating: "Rating",
                         recipe_count: "Recipe",
                         new_tag: "NEW",
-                        general: "GENERAL"
+                        general: "GENERAL",
+                        share: "Share",
+                        print: "Print"
                     },
                     settings: {
                         title: "Settings",

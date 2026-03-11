@@ -29,12 +29,12 @@ const Terms = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#FFFBF2] text-[#1F2937] pb-12">
+        <div className="min-h-screen bg-[#FFFBF2] dark:bg-chefie-dark text-[#1F2937] dark:text-white pb-12 transition-colors">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-[#FFFBF2]/80 backdrop-blur-md px-4 py-6 flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-[#FFFBF2]/80 dark:bg-chefie-dark/80 backdrop-blur-md px-4 py-6 flex items-center justify-between border-b border-chefie-border">
                 <button
                     onClick={() => navigate(-1)}
-                    className="p-2 hover:bg-white rounded-full transition-colors shadow-sm"
+                    className="p-2 hover:bg-white dark:hover:bg-gray-800 rounded-full transition-colors shadow-sm dark:text-gray-200"
                 >
                     <ChevronLeft className="w-6 h-6" />
                 </button>
@@ -47,18 +47,18 @@ const Terms = () => {
                     <div className="w-16 h-16 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-500 mb-4">
                         <FileText className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif text-center">Yasal Bildirimler</h2>
-                    <p className="text-gray-500 text-center mt-2">Son güncelleme: 10 Mart 2026</p>
+                    <h2 className="text-2xl font-bold font-serif text-center dark:text-white">Yasal Bildirimler</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">Son güncelleme: 10 Mart 2026</p>
                 </div>
 
-                <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 md:p-8 space-y-8">
+                <div className="bg-white dark:bg-chefie-card rounded-[32px] border border-gray-100 dark:border-chefie-border shadow-sm p-6 md:p-8 space-y-8">
                     {sections.map((section, index) => (
                         <div key={index} className="space-y-3">
-                            <h3 className="text-lg font-bold flex items-center gap-2">
+                            <h3 className="text-lg font-bold flex items-center gap-2 dark:text-white">
                                 <CheckCircle className="w-5 h-5 text-chefie-green shrink-0" />
                                 {section.title}
                             </h3>
-                            <p className="text-gray-600 text-[14px] leading-relaxed pl-7">
+                            <p className="text-gray-600 dark:text-gray-300 text-[14px] leading-relaxed pl-7">
                                 {section.content}
                             </p>
                         </div>
@@ -66,7 +66,7 @@ const Terms = () => {
                 </div>
 
                 <div className="mt-12 text-center">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-400 dark:text-gray-500">
                         Bu belge Tarifo topluluk standartlarını korumak amacıyla hazırlanmıştır.
                     </p>
                 </div>

@@ -1,4 +1,5 @@
 import API_BASE from '../../utils/api';
+import { getImageUrl } from '../../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams, Link } from 'react-router-dom';
@@ -71,7 +72,7 @@ const RecipeForm = () => {
                         cook_time: recipe.cook_time || ''
                     });
                     if (recipe.image_url) {
-                        setPreviewImage(recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`);
+                        setPreviewImage(getImageUrl(recipe.image_url));
                     }
                 })
                 .catch(err => {
@@ -157,7 +158,7 @@ const RecipeForm = () => {
                     </button>
                     <Link to={user?.id ? `/profile/${user.id}` : '#'}>
                         {user.profile_image ? (
-                            <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
+                            <img src={getImageUrl(user.profile_image)} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
                         ) : (
                             <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border border-gray-100">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
                         )}
@@ -242,7 +243,7 @@ const RecipeForm = () => {
                         <Link to={user?.id ? `/profile/${user.id}` : '#'} className="flex items-center gap-3 pl-6 border-l border-gray-200 hover:opacity-80 transition-opacity">
                             {user.profile_image ? (
                                 <img
-                                    src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`}
+                                    src={getImageUrl(user.profile_image)}
                                     alt={user.full_name}
                                     className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                                 />

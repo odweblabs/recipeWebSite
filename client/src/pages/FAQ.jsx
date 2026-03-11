@@ -38,12 +38,12 @@ const FAQ = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FFFBF2] text-[#1F2937] pb-12">
+        <div className="min-h-screen bg-[#FFFBF2] dark:bg-chefie-dark text-[#1F2937] dark:text-white pb-12 transition-colors">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-[#FFFBF2]/80 backdrop-blur-md px-4 py-6 flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-[#FFFBF2]/80 dark:bg-chefie-dark/80 backdrop-blur-md px-4 py-6 flex items-center justify-between border-b border-chefie-border">
                 <button
                     onClick={() => navigate(-1)}
-                    className="p-2 hover:bg-white rounded-full transition-colors shadow-sm"
+                    className="p-2 hover:bg-white dark:hover:bg-gray-800 rounded-full transition-colors shadow-sm dark:text-gray-200"
                 >
                     <ChevronLeft className="w-6 h-6" />
                 </button>
@@ -56,21 +56,21 @@ const FAQ = () => {
                     <div className="w-16 h-16 bg-chefie-green/10 rounded-3xl flex items-center justify-center text-chefie-green mb-4">
                         <HelpCircle className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif">Size nasıl yardımcı olabiliriz?</h2>
-                    <p className="text-gray-500 text-center mt-2">Merak ettiğiniz konuların cevaplarını aşağıda bulabilirsiniz.</p>
+                    <h2 className="text-2xl font-bold font-serif dark:text-white">Size nasıl yardımcı olabiliriz?</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">Merak ettiğiniz konuların cevaplarını aşağıda bulabilirsiniz.</p>
                 </div>
 
                 <div className="space-y-4">
                     {faqs.map((faq, index) => (
                         <div
                             key={index}
-                            className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300"
+                            className="bg-white dark:bg-chefie-card rounded-2xl border border-gray-100 dark:border-chefie-border shadow-sm overflow-hidden transition-all duration-300"
                         >
                             <button
                                 onClick={() => toggleAccordion(index)}
-                                className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50/50 transition-colors"
+                                className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
                             >
-                                <span className="font-bold text-[15px] pr-4">{faq.question}</span>
+                                <span className="font-bold text-[15px] pr-4 dark:text-white">{faq.question}</span>
                                 {activeIndex === index ? (
                                     <ChevronUp className="w-5 h-5 text-chefie-green shrink-0" />
                                 ) : (
@@ -80,7 +80,7 @@ const FAQ = () => {
 
                             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${activeIndex === index ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <div className="p-5 pt-0 text-gray-600 text-[14px] leading-relaxed border-t border-gray-50">
+                                <div className="p-5 pt-0 text-gray-600 dark:text-gray-300 text-[14px] leading-relaxed border-t border-gray-50 dark:border-gray-800">
                                     {faq.answer}
                                 </div>
                             </div>
@@ -88,8 +88,8 @@ const FAQ = () => {
                     ))}
                 </div>
 
-                <div className="mt-12 p-6 bg-white rounded-3xl border border-dashed border-gray-200 text-center">
-                    <p className="text-sm text-gray-500">Aradığınız cevabı bulamadınız mı?</p>
+                <div className="mt-12 p-6 bg-white dark:bg-chefie-card rounded-3xl border border-dashed border-gray-200 dark:border-chefie-border text-center">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Aradığınız cevabı bulamadınız mı?</p>
                     <button className="mt-2 text-chefie-green font-bold hover:underline">
                         Bize e-posta gönderin
                     </button>

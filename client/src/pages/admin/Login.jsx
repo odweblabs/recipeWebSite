@@ -126,6 +126,9 @@ const Login = () => {
                                 className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700"
                                 required
                                 autoComplete="username"
+                                autoCapitalize="none"
+                                autoCorrect="off"
+                                spellCheck="false"
                             />
                         </div>
 

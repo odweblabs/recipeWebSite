@@ -24,12 +24,12 @@ const Policy = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#FFFBF2] text-[#1F2937] pb-12">
+        <div className="min-h-screen bg-[#FFFBF2] dark:bg-chefie-dark text-[#1F2937] dark:text-white pb-12 transition-colors">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-[#FFFBF2]/80 backdrop-blur-md px-4 py-6 flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-[#FFFBF2]/80 dark:bg-chefie-dark/80 backdrop-blur-md px-4 py-6 flex items-center justify-between border-b border-chefie-border">
                 <button
                     onClick={() => navigate(-1)}
-                    className="p-2 hover:bg-white rounded-full transition-colors shadow-sm"
+                    className="p-2 hover:bg-white dark:hover:bg-gray-800 rounded-full transition-colors shadow-sm dark:text-gray-200"
                 >
                     <ChevronLeft className="w-6 h-6" />
                 </button>
@@ -42,20 +42,20 @@ const Policy = () => {
                     <div className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-600 mb-4">
                         <ShieldCheck className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif">Güvenliğiniz Önceliğimiz</h2>
-                    <p className="text-gray-500 text-center mt-2">Tarifo platformunda verilerinizin nasıl yönetildiğini öğrenin.</p>
+                    <h2 className="text-2xl font-bold font-serif dark:text-white">Güvenliğiniz Önceliğimiz</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">Tarifo platformunda verilerinizin nasıl yönetildiğini öğrenin.</p>
                 </div>
 
                 <div className="grid gap-6">
                     {policies.map((policy, index) => (
-                        <div key={index} className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-8 group hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white dark:bg-chefie-card rounded-[32px] border border-gray-100 dark:border-chefie-border shadow-sm p-8 group hover:shadow-md transition-shadow">
                             <div className="flex items-start gap-4">
-                                <div className="p-3 bg-gray-50 rounded-2xl text-chefie-green group-hover:bg-chefie-green group-hover:text-white transition-colors duration-300">
+                                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-chefie-green group-hover:bg-chefie-green group-hover:text-white transition-colors duration-300">
                                     <policy.icon className="w-6 h-6" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold">{policy.title}</h3>
-                                    <p className="text-gray-600 text-[14px] leading-relaxed">
+                                    <h3 className="text-lg font-bold dark:text-white">{policy.title}</h3>
+                                    <p className="text-gray-600 dark:text-gray-300 text-[14px] leading-relaxed">
                                         {policy.content}
                                     </p>
                                 </div>

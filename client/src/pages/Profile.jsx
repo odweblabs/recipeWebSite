@@ -1,4 +1,5 @@
 import API_BASE from '../utils/api';
+import { getImageUrl } from '../utils/imageUtils';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -438,13 +439,13 @@ const Profile = () => {
                         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-chefie-card shadow-xl bg-chefie-card">
                             {profile.profile_image ? (
                                 <img
-                                    src={profile.profile_image.startsWith('http') ? profile.profile_image : `${API_BASE}${profile.profile_image}`}
+                                    src={getImageUrl(profile.profile_image)}
                                     alt={profile.full_name}
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-chefie-green to-emerald-700 flex items-center justify-center text-white text-4xl font-bold">
-                                    {(profile.full_name || profile.username).charAt(0).toUpperCase()}
+                                    {(profile.full_name || profile.username || 'A').charAt(0).toUpperCase()}
                                 </div>
                             )}
                         </div>
@@ -484,13 +485,13 @@ const Profile = () => {
                                         <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-card shadow-sm flex-shrink-0">
                                             {request.profile_image ? (
                                                 <img
-                                                    src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`}
+                                                    src={getImageUrl(request.profile_image)}
                                                     alt={request.username}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold text-sm">
-                                                    {request.username.charAt(0).toUpperCase()}
+                                                    {(request.username || 'U').charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
@@ -559,10 +560,10 @@ const Profile = () => {
                                             <Link to={`/profile/${profile.id}`} className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-border shadow-sm">
                                                     {profile.profile_image ? (
-                                                        <img src={profile.profile_image.startsWith('http') ? profile.profile_image : `${API_BASE}${profile.profile_image}`} className="w-full h-full object-cover" alt="" />
+                                                        <img src={getImageUrl(profile.profile_image)} className="w-full h-full object-cover" alt="" />
                                                     ) : (
                                                         <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-xs font-bold">
-                                                            {profile.username.charAt(0).toUpperCase()}
+                                                            {(profile.username || 'U').charAt(0).toUpperCase()}
                                                         </div>
                                                     )}
                                                 </div>
@@ -591,13 +592,13 @@ const Profile = () => {
                                         {/* Media */}
                                         <Link to={`/recipes/${recipe.id}`} className="block relative aspect-[1.1] mx-5 rounded-[2rem] overflow-hidden group shadow-inner">
                                             <img
-                                                src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                                src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
                                                 alt={recipe.title}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                             />
                                             {recipe.prep_time && (
                                                 <div className="absolute top-4 right-4 bg-chefie-card/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-chefie-text flex items-center gap-1.5 border border-chefie-border shadow-md">
-                                                    <Clock className="w-3 h-3 text-chefie-yellow" /> {recipe.prep_time.toUpperCase()}
+                                                    <Clock className="w-3 h-3 text-chefie-yellow" /> {recipe.prep_time.toString().toUpperCase()}
                                                 </div>
                                             )}
                                         </Link>
@@ -662,10 +663,10 @@ const Profile = () => {
                                     <div key={request.friendship_id} className="bg-chefie-card rounded-3xl border border-chefie-border p-5 flex items-center gap-4 animate-in fade-in duration-500 shadow-md">
                                         <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 shadow-sm">
                                             {request.profile_image ? (
-                                                <img src={request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`} className="w-full h-full object-cover" alt="" />
+                                                <img src={getImageUrl(request.profile_image)} className="w-full h-full object-cover" alt="" />
                                             ) : (
                                                 <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold">
-                                                    {request.username.charAt(0).toUpperCase()}
+                                                    {(request.username || 'U').charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
