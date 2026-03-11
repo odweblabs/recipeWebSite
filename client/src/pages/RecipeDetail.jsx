@@ -467,7 +467,7 @@ const RecipeDetail = () => {
                                                     <Link to={`/profile/${comment.user_id}`} className="font-bold text-chefie-text hover:text-chefie-yellow transition-colors">
                                                         {comment.full_name || comment.username}
                                                     </Link>
-                                                    <span className="text-xs text-gray-500">{new Date(comment.created_at).toLocaleDateString(t('common.locale'))}</span>
+                                                    <span className="text-xs text-gray-500">{new Date(comment.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US')}</span>
                                                 </div>
                                                 <p className="text-gray-400 text-sm leading-relaxed">{comment.content}</p>
                                             </div>
