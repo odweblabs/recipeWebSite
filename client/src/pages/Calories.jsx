@@ -62,7 +62,7 @@ const Calories = () => {
                 <motion.h1
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-4xl md:text-6xl font-black text-chefie-dark mb-6 leading-tight"
+                    className="text-4xl md:text-6xl font-black text-chefie-text mb-6 leading-tight"
                 >
                     {t('calories.header.title')} <br />
                     <span className="text-chefie-yellow relative">
@@ -79,7 +79,7 @@ const Calories = () => {
 
             {/* Tabs */}
             <div className="max-w-7xl mx-auto mb-12 flex justify-center">
-                <div className="bg-white p-2 rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none flex gap-2">
+                <div className="bg-white dark:bg-chefie-card p-2 rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none flex gap-2">
                     {[
                         { id: 'calculator', label: t('calories.tabs.calculate'), icon: Calculator },
                         { id: 'guide', label: t('calories.tabs.guide'), icon: Apple },
@@ -90,7 +90,7 @@ const Calories = () => {
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm uppercase tracking-wider transition-all ${activeTab === tab.id
                                 ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-200 dark:shadow-none'
-                                : 'text-gray-400 hover:text-chefie-dark'
+                                : 'text-gray-400 hover:text-chefie-text'
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />
@@ -111,23 +111,23 @@ const Calories = () => {
                             className="grid grid-cols-1 lg:grid-cols-2 gap-10"
                         >
                             {/* Form Card */}
-                            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-gray-100 border border-gray-50 dark:shadow-none">
-                                <h3 className="text-2xl font-black text-chefie-dark mb-8 flex items-center gap-3">
+                            <div className="bg-white dark:bg-chefie-card rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-gray-100 border border-gray-50 dark:border-chefie-border dark:shadow-none">
+                                <h3 className="text-2xl font-black text-chefie-text mb-8 flex items-center gap-3">
                                     <Activity className="text-chefie-yellow" /> {t('calories.tabs.calculate')}
                                 </h3>
 
                                 <div className="space-y-6">
                                     {/* Gender Toggle */}
-                                    <div className="flex gap-4 p-1 bg-gray-50 rounded-2xl">
+                                    <div className="flex gap-4 p-1 bg-gray-50 dark:bg-chefie-dark rounded-2xl border border-transparent dark:border-chefie-border">
                                         <button
                                             onClick={() => setGender('female')}
-                                            className={`flex-1 py-3 rounded-xl font-bold transition-all ${gender === 'female' ? 'bg-white text-chefie-dark shadow-sm' : 'text-gray-400'}`}
+                                            className={`flex-1 py-3 rounded-xl font-bold transition-all ${gender === 'female' ? 'bg-white dark:bg-chefie-card text-chefie-text shadow-sm dark:shadow-none' : 'text-gray-400 hover:text-chefie-text'}`}
                                         >
                                             {t('calories.form.female')}
                                         </button>
                                         <button
                                             onClick={() => setGender('male')}
-                                            className={`flex-1 py-3 rounded-xl font-bold transition-all ${gender === 'male' ? 'bg-white text-chefie-dark shadow-sm' : 'text-gray-400'}`}
+                                            className={`flex-1 py-3 rounded-xl font-bold transition-all ${gender === 'male' ? 'bg-white dark:bg-chefie-card text-chefie-text shadow-sm dark:shadow-none' : 'text-gray-400 hover:text-chefie-text'}`}
                                         >
                                             {t('calories.form.male')}
                                         </button>
@@ -141,7 +141,7 @@ const Calories = () => {
                                                 value={weight}
                                                 onChange={(e) => setWeight(e.target.value)}
                                                 placeholder="70"
-                                                className="w-full bg-gray-50 border-0 rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6"
+                                                className="w-full bg-gray-50 dark:bg-chefie-dark border border-transparent dark:border-chefie-border text-chefie-text rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6 placeholder-gray-400"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -151,7 +151,7 @@ const Calories = () => {
                                                 value={height}
                                                 onChange={(e) => setHeight(e.target.value)}
                                                 placeholder="175"
-                                                className="w-full bg-gray-50 border-0 rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6"
+                                                className="w-full bg-gray-50 dark:bg-chefie-dark border border-transparent dark:border-chefie-border text-chefie-text rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6 placeholder-gray-400"
                                             />
                                         </div>
                                     </div>
@@ -163,7 +163,7 @@ const Calories = () => {
                                             value={age}
                                             onChange={(e) => setAge(e.target.value)}
                                             placeholder="25"
-                                            className="w-full bg-gray-50 border-0 rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6"
+                                            className="w-full bg-gray-50 dark:bg-chefie-dark border border-transparent dark:border-chefie-border text-chefie-text rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6 placeholder-gray-400"
                                         />
                                     </div>
 
@@ -172,7 +172,7 @@ const Calories = () => {
                                         <select
                                             value={activity}
                                             onChange={(e) => setActivity(e.target.value)}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6 appearance-none cursor-pointer"
+                                            className="w-full bg-gray-50 dark:bg-chefie-dark border border-transparent dark:border-chefie-border text-chefie-text rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6 appearance-none cursor-pointer"
                                         >
                                             <option value="1.2">{t('calories.form.activity_levels.level_1')}</option>
                                             <option value="1.375">{t('calories.form.activity_levels.level_2')}</option>
@@ -219,22 +219,22 @@ const Calories = () => {
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                            <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50">
+                                            <div className="bg-white dark:bg-chefie-card rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-chefie-border">
                                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{t('calories.results.lose_weight')}</p>
                                                 <h5 className="text-2xl font-black text-[#EF4444]">{result.lose} {t('calories.results.kcal')}</h5>
                                             </div>
-                                            <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50">
+                                            <div className="bg-white dark:bg-chefie-card rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-chefie-border">
                                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{t('calories.results.gain_weight')}</p>
                                                 <h5 className="text-2xl font-black text-[#3B82F6]">{result.gain} {t('calories.results.kcal')}</h5>
                                             </div>
                                         </div>
 
-                                        <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 flex items-center gap-6">
+                                        <div className="bg-white dark:bg-chefie-card rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-chefie-border flex items-center gap-6">
                                             <div className="w-12 h-12 bg-chefie-yellow/10 rounded-2xl flex items-center justify-center flex-shrink-0">
                                                 <Info className="w-6 h-6 text-chefie-yellow" />
                                             </div>
                                             <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                                                {t('calories.results.bmr')}: <span className="font-black text-chefie-dark">{result.bmr} {t('calories.results.kcal')}</span>. {t('calories.results.bmr_desc')}
+                                                {t('calories.results.bmr')}: <span className="font-black text-chefie-text">{result.bmr} {t('calories.results.kcal')}</span>. {t('calories.results.bmr_desc')}
                                             </p>
                                         </div>
                                     </motion.div>
@@ -251,18 +251,18 @@ const Calories = () => {
                             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                         >
                             {foodData.map((food, idx) => (
-                                <div key={idx} className="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 hover:shadow-2xl hover:shadow-chefie-yellow/10 dark:hover:shadow-none transition-all group">
+                                <div key={idx} className="bg-white dark:bg-chefie-card rounded-[2rem] p-6 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-chefie-border hover:shadow-2xl hover:shadow-chefie-yellow/10 dark:hover:shadow-none transition-all group">
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="text-[9px] font-black uppercase tracking-widest text-chefie-yellow bg-chefie-yellow/10 px-2 py-1 rounded-lg">
                                             {food.category}
                                         </span>
-                                        <Utensils className="w-4 h-4 text-gray-200 group-hover:text-chefie-yellow transition-colors" />
+                                        <Utensils className="w-4 h-4 text-gray-200 dark:text-gray-600 group-hover:text-chefie-yellow transition-colors" />
                                     </div>
-                                    <h4 className="font-black text-chefie-dark mb-4">{food.name}</h4>
+                                    <h4 className="font-black text-chefie-text mb-4">{food.name}</h4>
                                     <div className="flex items-center justify-between">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] text-gray-400 font-bold uppercase">Kalori</span>
-                                            <span className="text-xl font-black text-chefie-dark">{food.calories} kcal</span>
+                                            <span className="text-xl font-black text-chefie-text">{food.calories} kcal</span>
                                         </div>
                                         <div className="text-right">
                                             <span className="text-[10px] text-gray-400 font-bold uppercase">{food.protein ? 'Protein' : food.carbs ? 'Karbonhidrat' : 'Fiber'}</span>
@@ -287,24 +287,24 @@ const Calories = () => {
                                 { title: t('calories.tips.title_3'), text: t('calories.tips.desc_3'), color: "text-orange-500", bg: "bg-orange-50" },
                                 { title: t('calories.tips.title_4'), text: t('calories.tips.desc_4'), color: "text-purple-500", bg: "bg-purple-50" },
                             ].map((tip, idx) => (
-                                <div key={idx} className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 flex gap-6 items-start">
+                                <div key={idx} className="bg-white dark:bg-chefie-card rounded-[2rem] p-8 shadow-xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-chefie-border flex gap-6 items-start">
                                     <div className={`w-14 h-14 rounded-2xl ${tip.bg} flex items-center justify-center flex-shrink-0`}>
                                         <CheckCircle2 className={`w-6 h-6 ${tip.color}`} />
                                     </div>
                                     <div>
-                                        <h4 className="text-xl font-black text-chefie-dark mb-2">{tip.title}</h4>
+                                        <h4 className="text-xl font-black text-chefie-text mb-2">{tip.title}</h4>
                                         <p className="text-gray-500 leading-relaxed">{tip.text}</p>
                                     </div>
                                 </div>
                             ))}
 
-                            <div className="bg-red-50 rounded-[2.5rem] p-10 border border-red-100 flex flex-col md:flex-row items-center gap-8 mt-12">
-                                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl shadow-red-100 dark:shadow-none">
+                            <div className="bg-red-50 dark:bg-red-900/10 rounded-[2.5rem] p-10 border border-red-100 dark:border-red-900/30 flex flex-col md:flex-row items-center gap-8 mt-12">
+                                <div className="w-20 h-20 bg-white dark:bg-chefie-card rounded-full flex items-center justify-center shadow-xl shadow-red-100 dark:shadow-none">
                                     <AlertCircle className="w-10 h-10 text-red-500" />
                                 </div>
                                 <div className="text-center md:text-left flex-1">
-                                    <h4 className="text-2xl font-black text-red-900 mb-2">{t('calories.tips.warning_title')}</h4>
-                                    <p className="text-red-700 font-medium">{t('calories.tips.warning_desc')}</p>
+                                    <h4 className="text-2xl font-black text-red-900 dark:text-red-400 mb-2">{t('calories.tips.warning_title')}</h4>
+                                    <p className="text-red-700 dark:text-red-300 font-medium">{t('calories.tips.warning_desc')}</p>
                                 </div>
                             </div>
                         </motion.div>

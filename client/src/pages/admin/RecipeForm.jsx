@@ -254,7 +254,7 @@ const RecipeForm = () => {
                                 </div>
                             )}
                             <div className="hidden md:block text-right">
-                                <div className="text-sm font-bold text-gray-800">{user.full_name || user.username}</div>
+                                <div className="text-sm font-bold text-chefie-text">{user.full_name || user.username}</div>
                                 <div className="text-xs text-gray-500 uppercase">{user.role || 'User'}</div>
                             </div>
                         </Link>
@@ -268,7 +268,7 @@ const RecipeForm = () => {
 
                             {/* Temel Bilgiler Section */}
                             <div>
-                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-chefie-text mb-6 flex items-center gap-2">
                                     <span className="w-1 h-6 bg-[#10B981] rounded-full"></span>
                                     Temel Bilgiler
                                 </h3>
@@ -304,7 +304,7 @@ const RecipeForm = () => {
 
                             {/* Detaylar Section */}
                             <div>
-                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-chefie-text mb-6 flex items-center gap-2">
                                     <span className="w-1 h-6 bg-[#FFC107] rounded-full"></span>
                                     Detaylar & Görsel
                                 </h3>
@@ -405,7 +405,7 @@ const RecipeForm = () => {
 
                             {/* İçerik Section */}
                             <div>
-                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-chefie-text mb-6 flex items-center gap-2">
                                     <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
                                     Tarif İçeriği
                                 </h3>

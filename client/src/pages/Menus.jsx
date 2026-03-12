@@ -581,16 +581,16 @@ const Menus = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ duration: 0.25 }}
-              className="w-full max-w-3xl max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white flex flex-col"
+              className="w-full max-w-3xl max-h-[90vh] bg-white dark:bg-chefie-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-white dark:border-chefie-border flex flex-col"
             >
-              <div className="p-6 md:p-8 border-b border-gray-50 flex items-center justify-between gap-4 flex-shrink-0">
+              <div className="p-6 md:p-8 border-b border-gray-50 dark:border-chefie-border flex items-center justify-between gap-4 flex-shrink-0">
                 <div className="min-w-0">
-                  <div className="text-[10px] font-black tracking-widest uppercase text-gray-300">Menü</div>
-                  <h2 className="text-2xl md:text-3xl font-black text-chefie-dark line-clamp-1">{openMenu.title}</h2>
+                  <div className="text-[10px] font-black tracking-widest uppercase text-gray-400 dark:text-gray-500">Menü</div>
+                  <h2 className="text-2xl md:text-3xl font-black text-chefie-text line-clamp-1">{openMenu.title}</h2>
                 </div>
                 <button
                   onClick={closeMenu}
-                  className="p-3 rounded-2xl bg-gray-50 hover:bg-chefie-dark hover:text-white transition-all text-gray-400"
+                  className="p-3 rounded-2xl bg-gray-50 dark:bg-chefie-dark hover:bg-chefie-dark hover:text-white dark:hover:bg-chefie-text dark:hover:text-chefie-dark transition-all text-gray-400 dark:text-gray-300"
                   aria-label="Kapat"
                 >
                   <X className="w-5 h-5" />
@@ -658,10 +658,10 @@ const Menus = () => {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-300 line-clamp-1">
+                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-400 dark:text-gray-500 line-clamp-1">
                           {r.category_name || 'GENEL'}
                         </div>
-                        <div className="text-sm font-black text-chefie-dark line-clamp-1 group-hover:text-chefie-yellow transition-colors">
+                        <div className="text-sm font-black text-chefie-text line-clamp-1 group-hover:text-chefie-yellow transition-colors">
                           {r.title}
                         </div>
                       </div>
@@ -739,7 +739,7 @@ const Menus = () => {
                         className="w-full px-5 py-4 bg-chefie-card rounded-2xl border border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-chefie-text placeholder-chefie-secondary/30"
                       />
 
-                      <label className="block text-[10px] font-black tracking-widest uppercase text-gray-300 mb-2 mt-5">
+                      <label className="block text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50 mb-2 mt-5">
                         Açıklama (opsiyonel)
                       </label>
                       <textarea
@@ -747,7 +747,7 @@ const Menus = () => {
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Örn: Pazartesi–Cuma hızlı ve pratik tarifler"
                         rows={4}
-                        className="w-full px-5 py-4 bg-white rounded-2xl border border-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-gray-700 placeholder-gray-300 resize-none"
+                        className="w-full px-5 py-4 bg-chefie-card rounded-2xl border border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-chefie-text placeholder-chefie-secondary/30 resize-none"
                       />
                     </div>
 
@@ -762,23 +762,23 @@ const Menus = () => {
                       </div>
 
                       {selectedRecipes.length === 0 ? (
-                        <div className="text-gray-300 font-medium mt-5">Sağdan tarif seçerek menünü oluştur.</div>
+                        <div className="text-chefie-secondary/50 font-medium mt-5">Sağdan tarif seçerek menünü oluştur.</div>
                       ) : (
                         <div className="mt-5 space-y-3 max-h-80 overflow-auto pr-1 scrollbar-hide">
                           {selectedRecipes.map((r) => (
                             <div
                               key={r.id}
-                              className="flex items-center gap-3 px-4 py-3 rounded-[1.75rem] bg-white border border-gray-100 shadow-sm"
+                              className="flex items-center gap-3 px-4 py-3 rounded-[1.75rem] bg-chefie-card border border-chefie-border shadow-sm"
                             >
                               <div className="flex-1 min-w-0">
                                 <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-chefie-cream text-[10px] font-black tracking-widest uppercase text-chefie-dark/60 mb-1">
                                   {r.category_name || 'GENEL'}
                                 </div>
-                                <div className="text-sm font-black text-chefie-dark line-clamp-1">{r.title}</div>
+                                <div className="text-sm font-black text-chefie-text line-clamp-1">{r.title}</div>
                               </div>
                               <button
                                 onClick={() => toggleRecipe(r)}
-                                className="p-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-400 hover:bg-chefie-dark hover:text-white transition-all flex-shrink-0"
+                                className="p-2 rounded-xl bg-chefie-cream border border-chefie-border text-chefie-secondary hover:bg-red-500 hover:text-white transition-all flex-shrink-0"
                                 title="Çıkar"
                               >
                                 <X className="w-4 h-4" />
@@ -790,23 +790,23 @@ const Menus = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-[2rem] p-5 border border-gray-100">
+                  <div className="bg-chefie-cream rounded-[2rem] p-5 border border-chefie-border">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center">
                       <div className="relative flex-1">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 w-5 h-5" />
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-chefie-secondary/50 w-5 h-5" />
                         <input
                           value={recipeQuery}
                           onChange={(e) => setRecipeQuery(e.target.value)}
                           placeholder=""
                           aria-label="Tarif ara"
-                          className="w-full pl-14 pr-5 py-4 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-700 font-bold placeholder-gray-300 transition-all"
+                          className="w-full pl-14 pr-5 py-4 bg-chefie-card border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-chefie-text font-bold placeholder-chefie-secondary/50 transition-all"
                         />
                       </div>
                       <div className="md:w-56">
                         <select
                           value={selectedCategoryId}
                           onChange={(e) => setSelectedCategoryId(e.target.value)}
-                          className="w-full px-4 py-4 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-gray-600 font-bold text-sm cursor-pointer"
+                          className="w-full px-4 py-4 bg-chefie-card border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow/20 text-chefie-text font-bold text-sm cursor-pointer"
                         >
                           <option value="">Tüm Kategoriler</option>
                           {categories.map((cat) => (
@@ -826,7 +826,7 @@ const Menus = () => {
                       ) : loadingRecipes ? (
                         <div className="space-y-3">
                           {Array(6).fill(0).map((_, i) => (
-                            <div key={i} className="h-16 bg-white rounded-2xl animate-pulse border border-gray-100"></div>
+                            <div key={i} className="h-16 bg-chefie-card rounded-2xl animate-pulse border border-chefie-border"></div>
                           ))}
                         </div>
                       ) : (
@@ -839,7 +839,7 @@ const Menus = () => {
                                 onClick={() => toggleRecipe(r)}
                                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-[1.75rem] border transition-all text-left shadow-sm ${active
                                   ? 'bg-chefie-dark border-chefie-dark shadow-chefie-dark/30'
-                                  : 'bg-white border-gray-100 hover:border-chefie-yellow'
+                                  : 'bg-chefie-card border-chefie-border hover:border-chefie-yellow'
                                   }`}
                                 disabled={!active && selectedRecipes.length >= 20}
                                 title={!active && selectedRecipes.length >= 20 ? 'En fazla 20 tarif ekleyebilirsin' : undefined}
@@ -853,20 +853,20 @@ const Menus = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div
-                                    className={`text-[10px] font-black tracking-widest uppercase line-clamp-1 ${active ? 'text-white/70' : 'text-gray-300'
+                                    className={`text-[10px] font-black tracking-widest uppercase line-clamp-1 ${active ? 'text-white/70' : 'text-chefie-secondary/50'
                                       }`}
                                   >
                                     {r.category_name || 'GENEL'}
                                   </div>
                                   <div
-                                    className={`text-sm font-black line-clamp-1 ${active ? 'text-white' : 'text-chefie-dark'
+                                    className={`text-sm font-black line-clamp-1 ${active ? 'text-white' : 'text-chefie-text'
                                       }`}
                                   >
                                     {r.title}
                                   </div>
                                 </div>
                                 <div
-                                  className={`ml-2 flex items-center gap-1.5 text-[11px] font-black px-2.5 py-1 rounded-full ${active ? 'bg-chefie-yellow text-white' : 'bg-gray-50 text-gray-400'
+                                  className={`ml-2 flex items-center gap-1.5 text-[11px] font-black px-2.5 py-1 rounded-full ${active ? 'bg-chefie-yellow text-white' : 'bg-chefie-cream border border-chefie-border text-chefie-secondary'
                                     }`}
                                 >
                                   <Star className={`w-3.5 h-3.5 ${active ? 'fill-current' : 'text-chefie-yellow'}`} />
@@ -876,7 +876,7 @@ const Menus = () => {
                             );
                           })}
                           {filteredRecipes.length === 0 && (
-                            <div className="text-gray-300 font-medium p-6 text-center">Sonuç bulunamadı.</div>
+                            <div className="text-chefie-secondary/50 font-medium p-6 text-center">Sonuç bulunamadı.</div>
                           )}
                         </div>
                       )}
@@ -885,10 +885,10 @@ const Menus = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 border-t border-gray-50 flex flex-col sm:flex-row gap-4 items-center flex-shrink-0">
+              <div className="p-6 md:p-8 border-t border-chefie-border flex flex-col sm:flex-row gap-4 items-center flex-shrink-0">
                 <button
                   onClick={closeCreate}
-                  className="w-full sm:w-auto px-8 py-4 bg-gray-50 text-gray-500 font-black text-xs tracking-widest rounded-2xl hover:bg-chefie-dark hover:text-white transition-all"
+                  className="w-full sm:w-auto px-8 py-4 bg-chefie-cream text-chefie-secondary font-black text-xs tracking-widest rounded-2xl hover:bg-red-500 hover:text-white transition-all border border-chefie-border"
                 >
                   VAZGEÇ
                 </button>

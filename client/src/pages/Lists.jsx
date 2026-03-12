@@ -504,10 +504,10 @@ const Lists = () => {
                 {/* Lists Grid */}
                 {lists.length === 0 ? (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
-                        <div className="bg-white w-28 h-28 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gray-100 border border-gray-50">
-                            <ShoppingCart className="w-12 h-12 text-gray-200" />
+                        <div className="bg-white dark:bg-chefie-card w-28 h-28 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-chefie-border">
+                            <ShoppingCart className="w-12 h-12 text-gray-200 dark:text-gray-600" />
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-black text-chefie-dark mb-3">{t('lists.empty.title')}</h2>
+                        <h2 className="text-2xl md:text-3xl font-black text-chefie-text mb-3">{t('lists.empty.title')}</h2>
                         <button
                             onClick={() => setIsCreateOpen(true)}
                             className="mt-10 px-8 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all"
@@ -529,7 +529,7 @@ const Lists = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: idx * 0.05 }}
                                     onClick={() => setOpenListId(list.id)}
-                                    className="bg-white rounded-[2rem] border border-gray-50 shadow-xl shadow-gray-200/30 overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                                    className="bg-white dark:bg-chefie-card rounded-[2rem] border border-gray-50 dark:border-chefie-border shadow-xl shadow-gray-200/30 dark:shadow-none overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                                 >
                                     <div className="p-6">
                                         <div className="flex items-start justify-between mb-4">
@@ -540,11 +540,11 @@ const Lists = () => {
                                                     </span>
                                                     {list.is_public && <Share2 className="w-3 h-3 text-chefie-yellow" />}
                                                 </div>
-                                                <h3 className="text-lg font-black text-chefie-dark group-hover:text-chefie-yellow transition-colors">
+                                                <h3 className="text-lg font-black text-chefie-text group-hover:text-chefie-yellow transition-colors">
                                                     {list.name}
                                                 </h3>
                                                 {list.market_name && (
-                                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-lg mt-1 inline-block">
+                                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-50 dark:bg-chefie-dark px-2 py-0.5 rounded-lg mt-1 inline-block border border-transparent dark:border-chefie-border">
                                                         {list.market_name}
                                                     </span>
                                                 )}
@@ -560,10 +560,10 @@ const Lists = () => {
                                         <div className="space-y-1.5 mb-5 min-h-[3rem]">
                                             {list.items?.slice(0, 3).map(item => (
                                                 <div key={item.id} className="flex items-center gap-2">
-                                                    <div className={`w-3.5 h-3.5 rounded flex items-center justify-center ${item.checked ? 'bg-chefie-yellow' : 'border border-gray-200'}`}>
+                                                    <div className={`w-3.5 h-3.5 rounded flex items-center justify-center ${item.checked ? 'bg-chefie-yellow' : 'border border-gray-200 dark:border-gray-600'}`}>
                                                         {item.checked && <Check className="w-2 h-2 text-white" />}
                                                     </div>
-                                                    <span className={`text-[11px] font-medium line-clamp-1 ${item.checked ? 'text-gray-300 line-through' : 'text-gray-600'}`}>
+                                                    <span className={`text-[11px] font-medium line-clamp-1 ${item.checked ? 'text-gray-300 line-through' : 'text-gray-600 dark:text-gray-300'}`}>
                                                         {item.text}
                                                     </span>
                                                 </div>

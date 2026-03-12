@@ -131,7 +131,7 @@ const WhatToCook = () => {
                             <ChevronRight className="w-3 h-3" />
                             <span className="text-chefie-dark">{t('what_to_cook.breadcrumb')}</span>
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black text-chefie-dark leading-tight">
+                        <h1 className="text-4xl md:text-6xl font-black text-chefie-text leading-tight">
                             {t('what_to_cook.header.title_1')} <br className="hidden sm:block" />
                             <span className="text-chefie-yellow relative inline-block">
                                 {t('what_to_cook.header.title_2')}
@@ -156,7 +156,7 @@ const WhatToCook = () => {
                     >
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-500 hover:border-chefie-yellow hover:text-chefie-yellow transition-all shadow-md w-full sm:w-auto justify-center"
+                            className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white dark:bg-chefie-card border border-gray-100 dark:border-chefie-border rounded-2xl text-sm font-bold text-gray-500 dark:text-gray-300 hover:border-chefie-yellow hover:text-chefie-yellow transition-all shadow-md w-full sm:w-auto justify-center"
                         >
                             <Filter className="w-4 h-4" />
                             {showFilters ? t('what_to_cook.filters.hide') : t('what_to_cook.filters.show')}
@@ -183,7 +183,7 @@ const WhatToCook = () => {
                             )}
                         </button>
 
-                        <div className="inline-flex items-center gap-2 px-5 py-3 bg-white rounded-2xl border border-gray-100 text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
+                        <div className="inline-flex items-center gap-2 px-5 py-3 bg-white dark:bg-chefie-card rounded-2xl border border-gray-100 dark:border-chefie-border text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
                             <Utensils className="w-4 h-4 text-chefie-yellow" />
                             {filteredRecipes.length} {t('what_to_cook.actions.recipes_fit')}
                         </div>
@@ -198,9 +198,9 @@ const WhatToCook = () => {
                                 exit={{ opacity: 0, height: 0 }}
                                 className="overflow-hidden mb-10"
                             >
-                                <div className="bg-white rounded-[2.5rem] border border-gray-50 shadow-xl shadow-gray-100/50 p-6 md:p-8">
+                                <div className="bg-white dark:bg-chefie-card rounded-[2.5rem] border border-gray-50 dark:border-chefie-border shadow-xl shadow-gray-100/50 dark:shadow-none p-6 md:p-8">
                                     <div className="flex items-center justify-between mb-6">
-                                        <h3 className="text-sm font-black text-chefie-dark tracking-widest uppercase flex items-center gap-2">
+                                        <h3 className="text-sm font-black text-chefie-text tracking-widest uppercase flex items-center gap-2">
                                             <Sparkles className="w-4 h-4 text-chefie-yellow" /> {t('what_to_cook.filters.title')}
                                         </h3>
                                         {(selectedCategory || maxTime || servingsFilter) && (
@@ -216,7 +216,7 @@ const WhatToCook = () => {
                                         <div className="flex flex-wrap gap-2">
                                             <button
                                                 onClick={() => setSelectedCategory(null)}
-                                                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!selectedCategory ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!selectedCategory ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 dark:bg-chefie-dark text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-chefie-dark/80'}`}
                                             >
                                                 {t('search.by_ingredient.categories.all')}
                                             </button>
@@ -224,7 +224,7 @@ const WhatToCook = () => {
                                                 <button
                                                     key={cat.id}
                                                     onClick={() => setSelectedCategory(cat.id)}
-                                                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${selectedCategory === cat.id ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${selectedCategory === cat.id ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 dark:shadow-none' : 'bg-gray-50 dark:bg-chefie-dark text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-chefie-dark/80'}`}
                                                 >
                                                     {cat.name}
                                                 </button>
@@ -241,7 +241,7 @@ const WhatToCook = () => {
                                             <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => setMaxTime(null)}
-                                                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!maxTime ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!maxTime ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 dark:bg-chefie-dark text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-chefie-dark/80'}`}
                                                 >
                                                     {t('what_to_cook.filters.any')}
                                                 </button>
@@ -249,7 +249,7 @@ const WhatToCook = () => {
                                                     <button
                                                         key={opt.value}
                                                         onClick={() => setMaxTime(opt.value)}
-                                                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${maxTime === opt.value ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${maxTime === opt.value ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 dark:shadow-none' : 'bg-gray-50 dark:bg-chefie-dark text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-chefie-dark/80'}`}
                                                     >
                                                         {opt.label}
                                                     </button>
@@ -263,7 +263,7 @@ const WhatToCook = () => {
                                             <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => setServingsFilter(null)}
-                                                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!servingsFilter ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${!servingsFilter ? 'bg-chefie-dark text-white shadow-lg' : 'bg-gray-50 dark:bg-chefie-dark text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-chefie-dark/80'}`}
                                                 >
                                                     {t('what_to_cook.filters.any')}
                                                 </button>
@@ -271,7 +271,7 @@ const WhatToCook = () => {
                                                     <button
                                                         key={opt.value}
                                                         onClick={() => setServingsFilter(opt.value)}
-                                                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${servingsFilter === opt.value ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${servingsFilter === opt.value ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 dark:shadow-none' : 'bg-gray-50 dark:bg-chefie-dark text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-chefie-dark/80'}`}
                                                     >
                                                         {opt.label} {t('what_to_cook.filters.person')}
                                                     </button>
@@ -291,10 +291,10 @@ const WhatToCook = () => {
                             animate={{ opacity: 1 }}
                             className="text-center py-16 md:py-24"
                         >
-                            <div className="bg-white w-32 h-32 md:w-36 md:h-36 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gray-100 border border-gray-50">
-                                <Shuffle className="w-14 h-14 md:w-16 md:h-16 text-gray-200" />
+                            <div className="bg-white dark:bg-chefie-card w-32 h-32 md:w-36 md:h-36 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gray-100 dark:shadow-none border border-gray-50 dark:border-chefie-border">
+                                <Shuffle className="w-14 h-14 md:w-16 md:h-16 text-gray-200 dark:text-gray-600" />
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-black text-chefie-dark mb-3">{t('what_to_cook.empty.title')}</h2>
+                            <h2 className="text-2xl md:text-3xl font-black text-chefie-text mb-3">{t('what_to_cook.empty.title')}</h2>
                             <p className="text-gray-400 font-medium max-w-sm mx-auto">
                                 {t('what_to_cook.empty.description')}
                             </p>
@@ -327,7 +327,7 @@ const WhatToCook = () => {
 
                                 <div
                                     onClick={() => navigate(`/recipes/${suggestion.id}`)}
-                                    className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden cursor-pointer group"
+                                    className="bg-white dark:bg-chefie-card rounded-[2.5rem] shadow-2xl shadow-gray-200/40 dark:shadow-none border border-gray-50 dark:border-chefie-border overflow-hidden cursor-pointer group"
                                 >
                                     <div className="relative h-56 md:h-72 overflow-hidden">
                                         {suggestion.image_url ? (
@@ -356,7 +356,7 @@ const WhatToCook = () => {
                                     </div>
 
                                     <div className="p-6 md:p-8">
-                                        <h3 className="text-2xl md:text-3xl font-black text-chefie-dark mb-4 group-hover:text-chefie-yellow transition-colors leading-tight">
+                                        <h3 className="text-2xl md:text-3xl font-black text-chefie-text mb-4 group-hover:text-chefie-yellow transition-colors leading-tight">
                                             {suggestion.title}
                                         </h3>
 
@@ -365,22 +365,22 @@ const WhatToCook = () => {
                                         )}
 
                                         <div className="flex flex-wrap items-center gap-3 mb-6">
-                                            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-2xl text-xs font-bold text-gray-500">
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-chefie-dark rounded-2xl text-xs font-bold text-gray-500 dark:text-gray-300 border border-transparent dark:border-chefie-border">
                                                 <Clock className="w-4 h-4 text-chefie-yellow" />
                                                 {suggestion.prep_time || '30'} {t('common.minutes')} {t('what_to_cook.suggestion.prep')}
                                             </div>
-                                            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-2xl text-xs font-bold text-gray-500">
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-chefie-dark rounded-2xl text-xs font-bold text-gray-500 dark:text-gray-300 border border-transparent dark:border-chefie-border">
                                                 <Flame className="w-4 h-4 text-orange-400" />
                                                 {suggestion.cook_time || '20'} {t('common.minutes')} {t('what_to_cook.suggestion.cook')}
                                             </div>
-                                            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-2xl text-xs font-bold text-gray-500">
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-chefie-dark rounded-2xl text-xs font-bold text-gray-500 dark:text-gray-300 border border-transparent dark:border-chefie-border">
                                                 <Users className="w-4 h-4 text-blue-400" />
                                                 {suggestion.servings || '4'} {t('what_to_cook.suggestion.servings')}
                                             </div>
                                         </div>
 
                                         {suggestion.chef_name && (
-                                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl mb-6">
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-chefie-dark rounded-2xl mb-6 border border-transparent dark:border-chefie-border">
                                                 {suggestion.chef_image ? (
                                                     <img
                                                         src={suggestion.chef_image.startsWith('http') ? suggestion.chef_image : `${apiBase}${suggestion.chef_image}`}
@@ -388,13 +388,13 @@ const WhatToCook = () => {
                                                         className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                                                     />
                                                 ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border-2 border-white shadow-sm">
+                                                    <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark dark:bg-chefie-dark dark:text-chefie-text flex items-center justify-center font-bold text-xs border-2 border-white dark:border-chefie-border shadow-sm">
                                                         {(suggestion.chef_name || 'Ş').charAt(0).toUpperCase()}
                                                     </div>
                                                 )}
                                                 <div className="flex flex-col">
                                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('common.chef')}</span>
-                                                    <span className="text-xs font-bold text-gray-700">{suggestion.chef_name}</span>
+                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{suggestion.chef_name}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -419,7 +419,7 @@ const WhatToCook = () => {
                             transition={{ delay: 0.2 }}
                         >
                             <div className="flex items-center justify-between mb-6 px-2">
-                                <h3 className="text-lg md:text-xl font-black text-chefie-dark flex items-center gap-2">
+                                <h3 className="text-lg md:text-xl font-black text-chefie-text flex items-center gap-2">
                                     {t('what_to_cook.others')} <Salad className="text-green-500 w-5 h-5" />
                                 </h3>
                             </div>
@@ -432,7 +432,7 @@ const WhatToCook = () => {
                                         <div
                                             key={recipe.id}
                                             onClick={() => navigate(`/recipes/${recipe.id}`)}
-                                            className="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-md shadow-gray-100/50 border border-gray-50 overflow-hidden group cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                                            className="bg-white dark:bg-chefie-card rounded-[1.5rem] md:rounded-[2rem] shadow-md shadow-gray-100/50 dark:shadow-none border border-gray-50 dark:border-chefie-border overflow-hidden group cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                                         >
                                             <div className="relative h-28 md:h-36 overflow-hidden">
                                                 <img
@@ -451,7 +451,7 @@ const WhatToCook = () => {
                                                 <div className="text-[9px] font-black tracking-widest uppercase text-gray-300 mb-1">
                                                     {recipe.category_name || 'GENEL'}
                                                 </div>
-                                                <h4 className="text-xs md:text-sm font-black text-chefie-dark line-clamp-2 leading-snug group-hover:text-chefie-yellow transition-colors min-h-[2rem] md:min-h-[2.5rem]">
+                                                <h4 className="text-xs md:text-sm font-black text-chefie-text line-clamp-2 leading-snug group-hover:text-chefie-yellow transition-colors min-h-[2rem] md:min-h-[2.5rem]">
                                                     {recipe.title}
                                                 </h4>
                                                 <div className="flex items-center gap-1.5 mt-2 text-[10px] text-gray-400 font-bold">
@@ -468,10 +468,10 @@ const WhatToCook = () => {
                     {/* No results message */}
                     {hasSpun && filteredRecipes.length === 0 && !loading && (
                         <div className="text-center py-16">
-                            <div className="bg-white w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl border border-gray-50">
-                                <X className="w-10 h-10 text-gray-200" />
+                            <div className="bg-white dark:bg-chefie-card w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl dark:shadow-none border border-gray-50 dark:border-chefie-border">
+                                <X className="w-10 h-10 text-gray-200 dark:text-gray-600" />
                             </div>
-                            <h3 className="text-xl font-black text-chefie-dark mb-2">{t('what_to_cook.not_found.title')}</h3>
+                            <h3 className="text-xl font-black text-chefie-text mb-2">{t('what_to_cook.not_found.title')}</h3>
                             <p className="text-gray-400 font-medium mb-6">{t('what_to_cook.not_found.description')}</p>
                             <button onClick={resetFilters} className="px-6 py-3 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all">
                                 {t('what_to_cook.not_found.button')}

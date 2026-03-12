@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Poppins:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
     --color-chefie-cream: var(--bg-primary);
     --color-chefie-yellow: #FFC107;
@@ -42,6 +44,11 @@
     --shadow-sm: none;
     --shadow-md: none;
     --shadow-lg: none;
+}
+
+/* Koyu moddayken tüm sitedeki gölgelendirmeleri tamamen kapatır */
+.dark * {
+    box-shadow: none !important;
 }
 
 body {
