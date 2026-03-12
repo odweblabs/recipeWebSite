@@ -90,21 +90,15 @@ const Trend = () => {
                             onClick={() => navigate(`/recipes/${heroRecipe.id}`)}
                             className="relative rounded-[3rem] overflow-hidden min-h-[380px] md:min-h-[440px] cursor-pointer group shadow-2xl shadow-gray-200/40 dark:shadow-none"
                         >
-                            {heroRecipe.image_url ? (
-                                <img
-                                    src={heroRecipe.image_url.startsWith('/images/') ? heroRecipe.image_url : `${apiBase}${heroRecipe.image_url}`}
-                                    alt={heroRecipe.title}
-                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                />
-                            ) : (
-                                <div className="absolute inset-0 bg-chefie-cream flex items-center justify-center">
-                                    <Utensils className="w-20 h-20 text-chefie-yellow/20" />
-                                </div>
-                            )}
+                            <img
+                                src={heroRecipe.image_url ? (heroRecipe.image_url.startsWith('/images/') ? heroRecipe.image_url : `${apiBase}${heroRecipe.image_url}`) : '/default-recipe.png'}
+                                alt={heroRecipe.title}
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
                             <div className="absolute inset-0 bg-gradient-to-t from-chefie-dark via-chefie-dark/40 to-transparent"></div>
 
                             <div className="absolute top-6 left-6 flex items-center gap-3">
-                                <div className="px-5 py-2.5 bg-chefie-yellow text-white text-[11px] font-black tracking-widest uppercase rounded-2xl shadow-xl shadow-yellow-200/50 flex items-center gap-2">
+                                <div className="px-5 py-2.5 bg-chefie-yellow text-white text-[11px] font-black tracking-widest uppercase rounded-2xl shadow-xl shadow-yellow-200/50 dark:shadow-none flex items-center gap-2">
                                     <Crown className="w-4 h-4" /> {t('trend.sections.top_trend')}
                                 </div>
                                 <div className="px-4 py-2.5 bg-white/90 backdrop-blur-md text-chefie-dark text-[11px] font-black tracking-widest uppercase rounded-2xl shadow-xl">
@@ -175,9 +169,9 @@ const Trend = () => {
                             {topRated.slice(0, 6).map((recipe, idx) => (
                                 <RecipeCard key={recipe.id} recipe={recipe} index={idx} navigate={navigate} t={t} badge={
                                     idx < 3 ? (
-                                        <div className={`absolute top-5 left-5 z-10 px-4 py-2 rounded-2xl text-[10px] font-black tracking-widest uppercase shadow-xl flex items-center gap-1.5 ${idx === 0 ? 'bg-chefie-yellow text-white shadow-yellow-200/50' :
-                                            idx === 1 ? 'bg-white/90 backdrop-blur-md text-chefie-dark shadow-black/5' :
-                                                'bg-white/90 backdrop-blur-md text-chefie-dark shadow-black/5'
+                                        <div className={`absolute top-5 left-5 z-10 px-4 py-2 rounded-2xl text-[10px] font-black tracking-widest uppercase shadow-xl flex items-center gap-1.5 ${idx === 0 ? 'bg-chefie-yellow text-white shadow-yellow-200/50 dark:shadow-none' :
+                                            idx === 1 ? 'bg-white/90 backdrop-blur-md text-chefie-dark shadow-black/5 dark:shadow-none' :
+                                                'bg-white/90 backdrop-blur-md text-chefie-dark shadow-black/5 dark:shadow-none'
                                             }`}>
                                             {idx === 0 ? <Crown className="w-3.5 h-3.5" /> : <Award className="w-3.5 h-3.5 text-chefie-yellow" />}
                                             #{idx + 1}

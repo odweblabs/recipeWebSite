@@ -66,6 +66,10 @@ const Profile = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
     const [friendActionLoading, setFriendActionLoading] = useState(false);
 
+    // Follower / Following Modal States
+    const [showFollowers, setShowFollowers] = useState(false);
+    const [showFollowing, setShowFollowing] = useState(false);
+
     const token = safeGetToken();
     const currentUser = JSON.parse(safeGetSessionStorage('user') || '{}');
     const isOwner = currentUser.id === parseInt(id);
@@ -413,9 +417,119 @@ const Profile = () => {
     if (loading) return <div className="min-h-screen flex items-center justify-center bg-chefie-cream text-chefie-text">{t('profile.loading')}</div>;
     if (!profile) return <div className="min-h-screen flex items-center justify-center bg-chefie-cream text-chefie-text">{t('profile.not_found')}</div>;
 
+    const followersList = friends.filter(f => f.addressee_id === parseInt(id));
+    const followingList = friends.filter(f => f.requester_id === parseInt(id));
+
     return (
-        <div className="min-h-screen bg-chefie-cream text-chefie-text pt-12 pb-24 px-4 overflow-x-hidden">
+        <div className="min-h-screen bg-chefie-cream text-chefie-text pt-12 pb-24 px-4 overflow-x-hidden relative">
             <style>{friendStyles}</style>
+
+            {/* Followers Modal */}
+            <AnimatePresence>
+                {showFollowers && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-chefie-dark/60 backdrop-blur-sm"
+                        onClick={() => setShowFollowers(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-chefie-cream w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
+                                <h3 className="font-bold text-lg text-chefie-text">{t('profile.followers') || 'Takipçiler'}</h3>
+                                <button onClick={() => setShowFollowers(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-4 overflow-y-auto w-full flex-1">
+                                {followersList.length === 0 ? (
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz takipçi yok.</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {followersList.map(user => (
+                                            <div key={user.id} onClick={() => { setShowFollowers(false); navigate(`/profile/${user.id}`); }} className="flex items-center gap-3 p-2 hover:bg-chefie-card rounded-2xl transition-colors cursor-pointer">
+                                                <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
+                                                    {user.profile_image ? (
+                                                        <img src={getImageUrl(user.profile_image)} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold text-lg">
+                                                            {(user.username || 'U').charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="font-bold text-sm text-chefie-text truncate">{user.full_name || user.username}</div>
+                                                    <div className="text-xs text-chefie-secondary truncate">@{user.username}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Following Modal */}
+            <AnimatePresence>
+                {showFollowing && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-chefie-dark/60 backdrop-blur-sm"
+                        onClick={() => setShowFollowing(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-chefie-cream w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
+                                <h3 className="font-bold text-lg text-chefie-text">{t('profile.following_count') || 'Takip Edilenler'}</h3>
+                                <button onClick={() => setShowFollowing(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-4 overflow-y-auto w-full flex-1">
+                                {followingList.length === 0 ? (
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz kimseyi takip etmiyor.</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {followingList.map(user => (
+                                            <div key={user.id} onClick={() => { setShowFollowing(false); navigate(`/profile/${user.id}`); }} className="flex items-center gap-3 p-2 hover:bg-chefie-card rounded-2xl transition-colors cursor-pointer">
+                                                <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
+                                                    {user.profile_image ? (
+                                                        <img src={getImageUrl(user.profile_image)} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold text-lg">
+                                                            {(user.username || 'U').charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="font-bold text-sm text-chefie-text truncate">{user.full_name || user.username}</div>
+                                                    <div className="text-xs text-chefie-secondary truncate">@{user.username}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="max-w-xl mx-auto">
                 {/* Header Navigation */}
                 <div className="flex items-center justify-between mb-8">
@@ -458,9 +572,13 @@ const Profile = () => {
                     </div>
 
                     <div className="flex items-center gap-2 text-chefie-secondary text-sm font-medium">
-                        <span>{profile.follower_count || 0} {t('profile.followers')}</span>
+                        <button onClick={() => setShowFollowers(true)} className="hover:text-chefie-text transition-colors">
+                            <span className="font-bold text-chefie-text">{profile.follower_count || 0}</span> {t('profile.followers')}
+                        </button>
                         <span className="w-1.5 h-1.5 bg-chefie-border rounded-full"></span>
-                        <span>{profile.following_count || 0} {t('profile.following_count')}</span>
+                        <button onClick={() => setShowFollowing(true)} className="hover:text-chefie-text transition-colors">
+                            <span className="font-bold text-chefie-text">{profile.following_count || 0}</span> {t('profile.following_count') || 'Takip'}
+                        </button>
                     </div>
 
                     {!isOwner && (

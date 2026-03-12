@@ -92,7 +92,8 @@ router.get('/:userId', async (req, res) => {
         const friends = await executeQuery(`
             SELECT 
                 u.id, u.username, u.full_name, u.profile_image, u.created_at,
-                f.id as friendship_id, f.created_at as friends_since
+                f.id as friendship_id, f.created_at as friends_since,
+                f.requester_id, f.addressee_id
             FROM friendships f
             JOIN users u ON (
                 CASE 

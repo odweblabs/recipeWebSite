@@ -147,7 +147,6 @@ const Menus = () => {
   }, []);
 
   useEffect(() => {
-    if (!isCreateOpen) return;
     let cancelled = false;
 
     const fetchRecipes = async () => {
@@ -173,7 +172,7 @@ const Menus = () => {
     return () => {
       cancelled = true;
     };
-  }, [isCreateOpen]);
+  }, []);
 
   const filteredRecipes = useMemo(() => {
     const q = recipeQuery.trim().toLowerCase();
@@ -296,7 +295,7 @@ const Menus = () => {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={openCreate}
-              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-chefie-card text-chefie-text border border-chefie-border font-black rounded-2xl hover:bg-chefie-yellow hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-chefie-card text-chefie-text border border-chefie-border font-black rounded-2xl hover:bg-chefie-yellow hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl dark:shadow-none w-full sm:w-auto"
             >
               <Plus className="w-5 h-5" />
               YENİ MENÜ OLUŞTUR
@@ -423,7 +422,7 @@ const Menus = () => {
             </p>
             <button
               onClick={openCreate}
-              className="mt-10 px-8 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 hover:scale-105 active:scale-95 transition-all"
+              className="mt-10 px-8 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 dark:shadow-none hover:scale-105 active:scale-95 transition-all"
             >
               MENÜ OLUŞTUR
             </button>
@@ -689,7 +688,7 @@ const Menus = () => {
                     setDescription(openMenu.description || '');
                     setSelectedRecipes(openMenu.recipes || []);
                   }}
-                  className="w-full sm:w-auto ml-auto px-10 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 hover:scale-105 active:scale-95 transition-all"
+                  className="w-full sm:w-auto ml-auto px-10 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 dark:shadow-none hover:scale-105 active:scale-95 transition-all"
                 >
                   DÜZENLE (KOPYA)
                 </button>
@@ -896,7 +895,7 @@ const Menus = () => {
                 <button
                   onClick={createMenu}
                   disabled={!title.trim()}
-                  className="w-full sm:w-auto ml-auto px-10 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                  className="w-full sm:w-auto ml-auto px-10 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 dark:shadow-none hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
                 >
                   MENÜYÜ KAYDET
                 </button>

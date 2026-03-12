@@ -200,17 +200,17 @@ const RecipeForm = () => {
                         Panele Dön
                     </Link>
 
-                    <a href="#" className="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                    <Link to="/admin/dashboard?tab=all" className="flex items-center px-4 py-3 text-chefie-secondary hover:bg-chefie-cream hover:text-chefie-text rounded-xl font-medium transition-colors">
                         <Folder className="w-5 h-5 mr-3" />
                         Tüm Tarifler
-                    </a>
+                    </Link>
 
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
 
-                    <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-chefie-cream rounded-xl font-medium transition-colors border border-transparent hover:border-chefie-border">
+                    <Link to="/admin/dashboard?tab=settings" className="flex items-center px-4 py-3 text-chefie-secondary hover:bg-chefie-cream hover:text-chefie-text rounded-xl font-medium transition-colors border border-transparent hover:border-chefie-border">
                         <Settings className="w-5 h-5 mr-3" />
                         Ayarlar
-                    </a>
+                    </Link>
                 </nav>
 
                 <div className="p-4 border-t border-chefie-border">
@@ -282,7 +282,7 @@ const RecipeForm = () => {
                                             onChange={handleChange}
                                             required
                                             placeholder="Örn: Kremalı Mantar Çorbası"
-                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500"
+                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500 dark:placeholder-gray-400"
                                         />
                                     </div>
 
@@ -294,7 +294,7 @@ const RecipeForm = () => {
                                             onChange={handleChange}
                                             rows="3"
                                             placeholder="Tarif hakkında kısa, iştah açıcı bir açıklama..."
-                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500"
+                                            className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none transition-all placeholder-gray-500 dark:placeholder-gray-400"
                                         ></textarea>
                                     </div>
                                 </div>

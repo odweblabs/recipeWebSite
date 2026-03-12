@@ -46,7 +46,15 @@ const WhatToCook = () => {
 
     const filteredRecipes = useMemo(() => {
         return allRecipes.filter(r => {
-            if (selectedCategory && r.category_id !== selectedCategory) return false;
+            if (selectedCategory) {
+                if (r.category_id !== selectedCategory) return false;
+            } else {
+                // If no specific category is selected, exclude non-meal categories ("Tatlı", "İçecek" vs)
+                const catName = (r.category_name || '').toLowerCase();
+                if (catName.includes('tatlı') || catName.includes('tatli') || catName.includes('içecek') || catName.includes('icecek')) {
+                    return false;
+                }
+            }
             if (maxTime) {
                 const prep = parseInt(r.prep_time) || 0;
                 const cook = parseInt(r.cook_time) || 0;
