@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, User, Calendar, Share2, Printer, Tag } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { blogPosts } from '../data/blogData';
 
 const BlogDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [post, setPost] = useState(null);
 
     useEffect(() => {
@@ -36,7 +38,7 @@ const BlogDetail = () => {
         } else {
             try {
                 await navigator.clipboard.writeText(window.location.href);
-                alert('Bağlantı kopyalandı!');
+                alert(t('blog.share_success'));
             } catch (err) {
                 console.error('Clipboard failed', err);
             }
@@ -62,7 +64,7 @@ const BlogDetail = () => {
                         className="p-3 bg-chefie-card/20 backdrop-blur-md hover:bg-chefie-card/40 text-white rounded-full transition-all flex items-center gap-2 font-bold border border-white/10"
                     >
                         <ArrowLeft className="w-5 h-5" />
-                        <span className="hidden md:inline">Geri Dön</span>
+                        <span className="hidden md:inline">{t('blog.back')}</span>
                     </button>
                 </div>
 
@@ -105,11 +107,14 @@ const BlogDetail = () => {
                             <button
                                 onClick={handleShare}
                                 className="p-2.5 rounded-xl hover:bg-chefie-cream text-gray-400 transition-colors"
-                                title="Paylaş"
+                                title={t('common.share')}
                             >
                                 <Share2 className="w-5 h-5" />
                             </button>
-                            <button className="p-2.5 rounded-xl hover:bg-chefie-cream text-gray-400 transition-colors">
+                            <button
+                                className="p-2.5 rounded-xl hover:bg-chefie-cream text-gray-400 transition-colors"
+                                title={t('blog.print')}
+                            >
                                 <Printer className="w-5 h-5" />
                             </button>
                         </div>
@@ -127,9 +132,9 @@ const BlogDetail = () => {
                             {post.author.charAt(0)}
                         </div>
                         <div>
-                            <h4 className="font-black text-chefie-text text-lg mb-1">Yazar Hakkında</h4>
+                            <h4 className="font-black text-chefie-text text-lg mb-1">{t('blog.author_about')}</h4>
                             <p className="text-gray-400 text-sm">
-                                {post.author}, gastronomi dünyasındaki deneyimlerini ve mutfak sırlarını Lezzet Yolculuğu okurlarıyla paylaşıyor.
+                                {t('blog.author_desc_prefix')} {post.author} {t('blog.author_desc_suffix')}
                             </p>
                         </div>
                     </div>

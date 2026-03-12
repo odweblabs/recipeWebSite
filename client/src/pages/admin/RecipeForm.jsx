@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../../utils/storage';
 import API_BASE from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
@@ -24,7 +25,7 @@ import {
 const RecipeForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = safeGetToken();
     const user = JSON.parse(sessionStorage.getItem('user') || '{}');
 
     const [categories, setCategories] = useState([]);
@@ -96,7 +97,7 @@ const RecipeForm = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        safeClearAuth();
         sessionStorage.removeItem('token');
         navigate('/admin/login');
     };

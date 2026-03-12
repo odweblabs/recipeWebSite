@@ -1,8 +1,9 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../../utils/storage';
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
-    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const token = safeGetToken();
     const location = useLocation();
 
     if (!token) {

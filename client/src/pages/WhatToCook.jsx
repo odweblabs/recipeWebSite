@@ -412,7 +412,7 @@ const WhatToCook = () => {
                         >
                             <div className="flex items-center justify-between mb-6 px-2">
                                 <h3 className="text-lg md:text-xl font-black text-chefie-dark flex items-center gap-2">
-                                    Diğer Öneriler <Salad className="text-green-500 w-5 h-5" />
+                                    {t('what_to_cook.others')} <Salad className="text-green-500 w-5 h-5" />
                                 </h3>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -448,7 +448,7 @@ const WhatToCook = () => {
                                                 </h4>
                                                 <div className="flex items-center gap-1.5 mt-2 text-[10px] text-gray-400 font-bold">
                                                     <Clock className="w-3 h-3 text-gray-300" />
-                                                    {recipe.prep_time || '30'} dk
+                                                    {recipe.prep_time || '30'} {t('common.minutes')}
                                                 </div>
                                             </div>
                                         </div>
@@ -463,10 +463,10 @@ const WhatToCook = () => {
                             <div className="bg-white w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl border border-gray-50">
                                 <X className="w-10 h-10 text-gray-200" />
                             </div>
-                            <h3 className="text-xl font-black text-chefie-dark mb-2">Tarif Bulunamadı</h3>
-                            <p className="text-gray-400 font-medium mb-6">Bu filtrelere uygun tarif yok. Filtreleri değiştirmeyi dene.</p>
+                            <h3 className="text-xl font-black text-chefie-dark mb-2">{t('what_to_cook.not_found.title')}</h3>
+                            <p className="text-gray-400 font-medium mb-6">{t('what_to_cook.not_found.description')}</p>
                             <button onClick={resetFilters} className="px-6 py-3 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all">
-                                FİLTRELERİ SIFIRLA
+                                {t('what_to_cook.not_found.button')}
                             </button>
                         </div>
                     )}

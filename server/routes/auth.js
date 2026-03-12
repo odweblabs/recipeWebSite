@@ -84,7 +84,7 @@ router.post('/register', upload.single('profile_image'), async (req, res) => {
 // Get current user info
 router.get('/me', authenticateToken, async (req, res) => {
     try {
-        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, country, email, phone_number, created_at FROM users WHERE id = $1', [req.user.id]);
+        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, country, created_at FROM users WHERE id = $1', [req.user.id]);
         const user = users[0];
         res.json(user);
     } catch (err) {

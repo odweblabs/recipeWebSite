@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
 import React, { useEffect, useState } from 'react';
@@ -65,7 +66,7 @@ const Profile = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
     const [friendActionLoading, setFriendActionLoading] = useState(false);
 
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = safeGetToken();
     const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
     const isOwner = currentUser.id === parseInt(id);
     const isLoggedIn = !!token && !!currentUser.id;
@@ -147,7 +148,7 @@ const Profile = () => {
 
     const handleLogout = () => {
         if (!window.confirm(t('profile.logout_confirm'))) return;
-        localStorage.removeItem('token');
+        safeClearAuth();
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
         navigate('/');
@@ -196,7 +197,7 @@ const Profile = () => {
 
                 // Load menus from localStorage only for profile owner
                 try {
-                    const rawMenus = localStorage.getItem('chefie_menus_v1');
+                    const rawMenus = safeGetStorage('chefie_menus_v1', '[]');
                     if (rawMenus) {
                         const parsed = JSON.parse(rawMenus);
                         if (Array.isArray(parsed)) {

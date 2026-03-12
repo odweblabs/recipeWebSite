@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
 import API_BASE from '../utils/api';
 import { useEffect } from 'react';
 import axios from 'axios';
@@ -5,7 +6,7 @@ import axios from 'axios';
 const Heartbeat = () => {
     useEffect(() => {
         const sendHeartbeat = () => {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const token = safeGetToken();
             if (!token) return;
 
             axios.post(`${API_BASE}/api/auth/heartbeat`, {}, {

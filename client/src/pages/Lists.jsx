@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +7,7 @@ import {
     Edit3, ListChecks, Package, ArrowRight, Save, Share2
 } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 import API_BASE from '../utils/api';
 
@@ -42,6 +44,7 @@ const CATEGORIZED_INGREDIENTS = {
 };
 
 const Lists = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [lists, setLists] = useState([]);
@@ -57,7 +60,7 @@ const Lists = () => {
     const [isPublic, setIsPublic] = useState(false);
     const [activeCategory, setActiveCategory] = useState('Temel');
 
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = safeGetToken();
 
     useEffect(() => {
         if (!token) {
@@ -103,7 +106,7 @@ const Lists = () => {
     };
 
     const deleteList = async (id) => {
-        if (!window.confirm('Bu listeyi silmek istediğinize emin misiniz?')) return;
+        if (!window.confirm(t('lists.actions.delete_confirm') || 'Bu listeyi silmek istediğinize emin misiniz?')) return;
         try {
             await axios.delete(`${API_URL}/lists/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -174,7 +177,7 @@ const Lists = () => {
                 await navigator.share(shareData);
             } else {
                 await navigator.clipboard.writeText(shareData.url);
-                alert('Bağlantı kopyalandı!');
+                alert(t('lists.actions.copied') || 'Bağlantı kopyalandı!');
             }
         } catch (err) {
             console.error('Share failed', err);
@@ -221,7 +224,7 @@ const Lists = () => {
     const openList = lists.find(l => l.id === openListId);
     const totalItems = lists.reduce((sum, l) => sum + (l.items?.length || 0), 0);
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-chefie-dark">YÜKLENİYOR...</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-chefie-dark">{t('lists.loading')}</div>;
 
     return (
         <div className="min-h-screen pb-20 px-4 md:px-6">
@@ -229,21 +232,21 @@ const Lists = () => {
             <header className="py-10 max-w-5xl mx-auto">
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
                     <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
-                        <Link to="/" className="hover:text-chefie-yellow transition-colors">ANASAYFA</Link>
+                        <Link to="/" className="hover:text-chefie-yellow transition-colors">{t('lists.home')}</Link>
                         <ChevronRight className="w-3 h-3" />
-                        <span className="text-chefie-dark">LİSTELER</span>
+                        <span className="text-chefie-dark">{t('lists.title')}</span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black text-chefie-dark leading-tight">
-                        Alışveriş <br className="hidden sm:block" />
+                        {t('lists.header.title_1')} <br className="hidden sm:block" />
                         <span className="text-chefie-yellow relative inline-block">
-                            Listelerin
+                            {t('lists.header.title_2')}
                             <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 100 8" preserveAspectRatio="none">
                                 <path d="M0 7C20 7 30 1 50 1C70 1 80 7 100 7" stroke="#FFC107" strokeWidth="2" fill="none" />
                             </svg>
                         </span>
                     </h1>
                     <p className="text-gray-400 text-lg md:text-xl max-w-xl mx-auto mt-5">
-                        Sadece senin görebileceğin özel alışveriş listelerini oluştur ve yönet.
+                        {t('lists.header.desc')}
                     </p>
 
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -252,11 +255,11 @@ const Lists = () => {
                             className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-chefie-dark text-white font-black rounded-2xl hover:bg-chefie-yellow hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-gray-900/10 w-full sm:w-auto"
                         >
                             <Plus className="w-5 h-5" />
-                            YENİ LİSTE OLUŞTUR
+                            {t('lists.create_new')}
                         </button>
                         <div className="inline-flex items-center gap-2 px-5 py-3 bg-white rounded-2xl border border-gray-100 text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
                             <ListChecks className="w-4 h-4 text-chefie-yellow" />
-                            {lists.length} LİSTE · {totalItems} ÜRÜN
+                            {lists.length} {t('lists.header.lists_count') || "LİSTE"} · {totalItems} {t('lists.header.items_count') || "ÜRÜN"}
                         </div>
                     </div>
                 </motion.div>
@@ -280,8 +283,8 @@ const Lists = () => {
                             >
                                 <div className="flex items-center justify-between mb-6">
                                     <div>
-                                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-300">Yeni Liste</div>
-                                        <h2 className="text-xl font-black text-chefie-dark">Liste Oluştur</h2>
+                                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-300">{t('lists.modal.new_list') || 'Yeni Liste'}</div>
+                                        <h2 className="text-xl font-black text-chefie-dark">{t('lists.modal.title') || 'Liste Oluştur'}</h2>
                                     </div>
                                     <button onClick={() => setIsCreateOpen(false)} className="p-3 rounded-2xl bg-gray-50 hover:bg-chefie-dark hover:text-white transition-all text-gray-400">
                                         <X className="w-5 h-5" />
@@ -290,21 +293,21 @@ const Lists = () => {
 
                                 <div className="space-y-4 mb-6">
                                     <div>
-                                        <label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-2 mb-1 block">Liste Adı</label>
+                                        <label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-2 mb-1 block">{t('lists.modal.name_label')}</label>
                                         <input
                                             value={newListName}
                                             onChange={(e) => setNewListName(e.target.value)}
-                                            placeholder="Örn: Haftalık Market Listesi"
+                                            placeholder={t('lists.modal.name_placeholder')}
                                             className="w-full px-5 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-gray-700 placeholder-gray-300"
                                             autoFocus
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-2 mb-1 block">Market İsmi (İsteğe Bağlı)</label>
+                                        <label className="text-[10px] font-black tracking-widest uppercase text-gray-400 ml-2 mb-1 block">{t('lists.modal.store_label')}</label>
                                         <input
                                             value={newListMarket}
                                             onChange={(e) => setNewListMarket(e.target.value)}
-                                            placeholder="Örn: Migros, Şok..."
+                                            placeholder={t('lists.modal.store_placeholder')}
                                             className="w-full px-5 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-gray-700 placeholder-gray-300"
                                         />
                                     </div>
@@ -315,7 +318,7 @@ const Lists = () => {
                                     disabled={!newListName.trim()}
                                     className="w-full py-4 bg-chefie-dark text-white font-black text-xs tracking-widest rounded-2xl shadow-xl hover:bg-chefie-yellow transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
-                                    OLUŞTUR
+                                    {t('lists.modal.submit')}
                                 </button>
                             </motion.div>
                         </motion.div>
@@ -345,20 +348,20 @@ const Lists = () => {
                                                 <input
                                                     value={editingName}
                                                     onChange={(e) => setEditingName(e.target.value)}
-                                                    placeholder="Liste Adı"
+                                                    placeholder={t('lists.modal.name_label')}
                                                     className="w-full text-xl font-black text-chefie-dark bg-gray-50 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-chefie-yellow/20"
                                                 />
                                                 <input
                                                     value={editingMarket}
                                                     onChange={(e) => setEditingMarket(e.target.value)}
-                                                    placeholder="Market İsmi"
+                                                    placeholder={t('lists.modal.store_label')}
                                                     className="w-full text-sm font-bold text-gray-500 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200"
                                                 />
                                             </div>
                                         ) : (
                                             <div>
                                                 <div className="text-[10px] font-black tracking-widest uppercase text-gray-300">
-                                                    {openList.market_name ? `Market: ${openList.market_name}` : 'Liste'}
+                                                    {openList.market_name ? `${t('lists.stores.market')} ${openList.market_name}` : t('lists.items.list')}
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <h2 className="text-xl md:text-2xl font-black text-chefie-dark line-clamp-1">{openList.name}</h2>
@@ -390,7 +393,7 @@ const Lists = () => {
                                             value={newItem}
                                             onChange={(e) => setNewItem(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && addItem(openList.id)}
-                                            placeholder="Ürün ekle..."
+                                            placeholder={t('lists.items.add_placeholder')}
                                             className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-gray-700 placeholder-gray-300 text-sm"
                                         />
                                         <button
@@ -405,17 +408,27 @@ const Lists = () => {
                                     {/* Preset Ingredients (Quick Add) */}
                                     <div className="mb-6 bg-gray-50/50 p-4 rounded-3xl border border-gray-100">
                                         <div className="flex items-center justify-between mb-4 px-1">
-                                            <p className="text-[10px] font-black tracking-widest uppercase text-chefie-dark/40">Hızlı Ekle</p>
+                                            <p className="text-[10px] font-black tracking-widest uppercase text-chefie-dark/40">{t('lists.items.quick_add')}</p>
                                             <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-[75%]">
-                                                {Object.keys(CATEGORIZED_INGREDIENTS).map(cat => (
-                                                    <button
-                                                        key={cat}
-                                                        onClick={() => setActiveCategory(cat)}
-                                                        className={`text-[10px] font-black px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shadow-sm ${activeCategory === cat ? 'bg-chefie-yellow text-white shadow-chefie-yellow/20' : 'text-gray-400 bg-white hover:bg-gray-50'}`}
-                                                    >
-                                                        {cat.toUpperCase()}
-                                                    </button>
-                                                ))}
+                                                {Object.keys(CATEGORIZED_INGREDIENTS).map(cat => {
+                                                    const catKeys = {
+                                                        "Temel": "basic",
+                                                        "Manav": "greengrocer",
+                                                        "Kasap": "butcher",
+                                                        "Kiler": "pantry",
+                                                        "İçecek": "drinks",
+                                                        "Temizlik": "cleaning"
+                                                    };
+                                                    return (
+                                                        <button
+                                                            key={cat}
+                                                            onClick={() => setActiveCategory(cat)}
+                                                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shadow-sm ${activeCategory === cat ? 'bg-chefie-yellow text-white shadow-chefie-yellow/20' : 'text-gray-400 bg-white hover:bg-gray-50'}`}
+                                                        >
+                                                            {t(`lists.items.categories.${catKeys[cat]}`).toUpperCase()}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                         <div className="flex flex-wrap gap-2 py-1 max-h-[140px] overflow-y-auto scrollbar-hide">
@@ -435,7 +448,7 @@ const Lists = () => {
                                     {openList.items?.length === 0 ? (
                                         <div className="text-center py-12">
                                             <Package className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                                            <p className="text-gray-400 font-medium text-sm">Henüz ürün eklenmemiş.</p>
+                                            <p className="text-gray-400 font-medium text-sm">{t('lists.items.empty')}</p>
                                         </div>
                                     ) : (
                                         <div className="space-y-2">
@@ -465,7 +478,6 @@ const Lists = () => {
                                     )}
                                 </div>
 
-                                {/* Footer (Actions) */}
                                 <div className="p-6 md:p-8 bg-gray-50 border-t border-gray-100 flex flex-col gap-4">
                                     <div className="flex items-center justify-between">
                                         <button
@@ -473,14 +485,14 @@ const Lists = () => {
                                             className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl text-xs font-black hover:bg-blue-600 transition-all shadow-lg hover:scale-[1.02]"
                                         >
                                             <Share2 className="w-4 h-4" />
-                                            PAYLAŞ
+                                            {t('lists.actions.share')}
                                         </button>
                                         <button
                                             onClick={() => saveChanges(openList.id)}
                                             className="flex items-center gap-2 px-6 py-3 bg-chefie-dark text-white rounded-xl text-xs font-black hover:bg-chefie-yellow hover:scale-[1.02] transition-all shadow-lg"
                                         >
                                             <Save className="w-4 h-4" />
-                                            KAYDET
+                                            {t('lists.actions.save')}
                                         </button>
                                     </div>
                                 </div>
@@ -495,12 +507,12 @@ const Lists = () => {
                         <div className="bg-white w-28 h-28 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gray-100 border border-gray-50">
                             <ShoppingCart className="w-12 h-12 text-gray-200" />
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-black text-chefie-dark mb-3">Henüz listen yok</h2>
+                        <h2 className="text-2xl md:text-3xl font-black text-chefie-dark mb-3">{t('lists.empty.title')}</h2>
                         <button
                             onClick={() => setIsCreateOpen(true)}
                             className="mt-10 px-8 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all"
                         >
-                            LİSTE OLUŞTUR
+                            {t('lists.empty.button')}
                         </button>
                     </motion.div>
                 ) : (

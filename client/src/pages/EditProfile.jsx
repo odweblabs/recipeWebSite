@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +20,7 @@ import axios from 'axios';
 const EditProfile = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = safeGetToken();
     const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user') || '{}'));
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
@@ -139,7 +140,7 @@ const EditProfile = () => {
                 await axios.delete(`${API_BASE}/api/auth/account`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                localStorage.clear();
+                safeClearAuth();
                 sessionStorage.clear();
                 navigate('/admin/login');
             } catch (err) {

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calculator, Flame, Info, Apple, Utensils, Activity, ChevronRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Calories = () => {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('calculator'); // 'calculator' | 'guide' | 'tips'
 
     // Calculator State
@@ -54,7 +56,7 @@ const Calories = () => {
                     className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-chefie-yellow mb-4"
                 >
                     <Flame className="w-4 h-4" />
-                    <span>SAĞLIKLI YAŞAM REHBERİ</span>
+                    <span>{t('calories.header.badge')}</span>
                 </motion.div>
 
                 <motion.h1
@@ -62,16 +64,16 @@ const Calories = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-4xl md:text-6xl font-black text-chefie-dark mb-6 leading-tight"
                 >
-                    Kaç Kalori <br />
+                    {t('calories.header.title')} <br />
                     <span className="text-chefie-yellow relative">
-                        Biliyor musun?
+                        {t('calories.header.subtitle')}
                         <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 100 8" preserveAspectRatio="none">
                             <path d="M0 7C20 7 30 1 50 1C70 1 80 7 100 7" stroke="#FFC107" strokeWidth="2" fill="none" />
                         </svg>
                     </span>
                 </motion.h1>
                 <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-                    Vücudunun ihtiyacı olan enerjiyi hesapla, besinlerin değerlerini öğren ve daha sağlıklı bir hayata adım at.
+                    {t('calories.header.desc')}
                 </p>
             </header>
 
@@ -79,9 +81,9 @@ const Calories = () => {
             <div className="max-w-7xl mx-auto mb-12 flex justify-center">
                 <div className="bg-white p-2 rounded-3xl shadow-xl shadow-gray-200/50 flex gap-2">
                     {[
-                        { id: 'calculator', label: 'Hesapla', icon: Calculator },
-                        { id: 'guide', label: 'Besin Rehberi', icon: Apple },
-                        { id: 'tips', label: 'Öneriler', icon: Info },
+                        { id: 'calculator', label: t('calories.tabs.calculate'), icon: Calculator },
+                        { id: 'guide', label: t('calories.tabs.guide'), icon: Apple },
+                        { id: 'tips', label: t('calories.tabs.tips'), icon: Info },
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -111,7 +113,7 @@ const Calories = () => {
                             {/* Form Card */}
                             <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-gray-100 border border-gray-50">
                                 <h3 className="text-2xl font-black text-chefie-dark mb-8 flex items-center gap-3">
-                                    <Activity className="text-chefie-yellow" /> Kalori Hesaplayıcı
+                                    <Activity className="text-chefie-yellow" /> {t('calories.tabs.calculate')}
                                 </h3>
 
                                 <div className="space-y-6">
@@ -121,19 +123,19 @@ const Calories = () => {
                                             onClick={() => setGender('female')}
                                             className={`flex-1 py-3 rounded-xl font-bold transition-all ${gender === 'female' ? 'bg-white text-chefie-dark shadow-sm' : 'text-gray-400'}`}
                                         >
-                                            Kadın
+                                            {t('calories.form.female')}
                                         </button>
                                         <button
                                             onClick={() => setGender('male')}
                                             className={`flex-1 py-3 rounded-xl font-bold transition-all ${gender === 'male' ? 'bg-white text-chefie-dark shadow-sm' : 'text-gray-400'}`}
                                         >
-                                            Erkek
+                                            {t('calories.form.male')}
                                         </button>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">KİLO (KG)</label>
+                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">{t('calories.form.weight')}</label>
                                             <input
                                                 type="number"
                                                 value={weight}
@@ -143,7 +145,7 @@ const Calories = () => {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">BOY (CM)</label>
+                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">{t('calories.form.height')}</label>
                                             <input
                                                 type="number"
                                                 value={height}
@@ -155,7 +157,7 @@ const Calories = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">YAŞ</label>
+                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">{t('calories.form.age')}</label>
                                         <input
                                             type="number"
                                             value={age}
@@ -166,17 +168,17 @@ const Calories = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">HAREKET SEVİYESİ</label>
+                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">{t('calories.form.activity')}</label>
                                         <select
                                             value={activity}
                                             onChange={(e) => setActivity(e.target.value)}
                                             className="w-full bg-gray-50 border-0 rounded-2xl py-4 flex-1 focus:ring-2 focus:ring-chefie-yellow/20 font-bold px-6 appearance-none cursor-pointer"
                                         >
-                                            <option value="1.2">Az Hareketli (Haftada 0-1 gün)</option>
-                                            <option value="1.375">Hafif Hareketli (Haftada 1-3 gün)</option>
-                                            <option value="1.55">Orta Hareketli (Haftada 3-5 gün)</option>
-                                            <option value="1.725">Çok Hareketli (Haftada 6-7 gün)</option>
-                                            <option value="1.9">Profesyonel Sporcu</option>
+                                            <option value="1.2">{t('calories.form.activity_levels.level_1')}</option>
+                                            <option value="1.375">{t('calories.form.activity_levels.level_2')}</option>
+                                            <option value="1.55">{t('calories.form.activity_levels.level_3')}</option>
+                                            <option value="1.725">{t('calories.form.activity_levels.level_4')}</option>
+                                            <option value="1.9">{t('calories.form.activity_levels.level_5')}</option>
                                         </select>
                                     </div>
 
@@ -184,7 +186,7 @@ const Calories = () => {
                                         onClick={calculateBMR}
                                         className="w-full py-5 bg-chefie-dark text-white font-black rounded-[1.5rem] hover:bg-chefie-yellow transition-all shadow-xl shadow-gray-200 mt-4 flex items-center justify-center gap-2"
                                     >
-                                        HESAPLA <ChevronRight className="w-5 h-5" />
+                                        {t('calories.form.submit')} <ChevronRight className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>
@@ -196,8 +198,8 @@ const Calories = () => {
                                         <div className="w-56 h-56 mb-6 flex items-center justify-center rounded-3xl overflow-hidden shadow-lg shadow-gray-100 group">
                                             <img src="/images/calorie-chef.svg" alt="Happy Chef" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                         </div>
-                                        <h4 className="text-xl font-black text-chefie-dark mb-2">Henüz Hesaplama Yapılmadı</h4>
-                                        <p className="text-gray-400 text-sm max-w-xs">Bilgilerini girerek günlük kalori ihtiyacını hemen öğren!</p>
+                                        <h4 className="text-xl font-black text-chefie-dark mb-2">{t('calories.results.not_calculated_yet')}</h4>
+                                        <p className="text-gray-400 text-sm max-w-xs">{t('calories.results.not_calculated_desc')}</p>
                                     </div>
                                 ) : (
                                     <motion.div
@@ -208,8 +210,8 @@ const Calories = () => {
                                         {/* Main Target */}
                                         <div className="bg-[#10B981] rounded-[2.5rem] p-10 text-white shadow-2xl shadow-green-100 flex items-center justify-between">
                                             <div>
-                                                <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">Günlük İhtiyacın</p>
-                                                <h4 className="text-4xl md:text-5xl font-black">{result.tdee} <span className="text-xl">kcal</span></h4>
+                                                <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">{t('calories.results.daily_needs')}</p>
+                                                <h4 className="text-4xl md:text-5xl font-black">{result.tdee} <span className="text-xl">{t('calories.results.kcal')}</span></h4>
                                             </div>
                                             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
                                                 <Flame className="w-8 h-8" />
@@ -218,12 +220,12 @@ const Calories = () => {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-100 border border-gray-50">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Kilo Vermek İçin</p>
-                                                <h5 className="text-2xl font-black text-[#EF4444]">{result.lose} kcal</h5>
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{t('calories.results.lose_weight')}</p>
+                                                <h5 className="text-2xl font-black text-[#EF4444]">{result.lose} {t('calories.results.kcal')}</h5>
                                             </div>
                                             <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-100 border border-gray-50">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Kilo Almak İçin</p>
-                                                <h5 className="text-2xl font-black text-[#3B82F6]">{result.gain} kcal</h5>
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{t('calories.results.gain_weight')}</p>
+                                                <h5 className="text-2xl font-black text-[#3B82F6]">{result.gain} {t('calories.results.kcal')}</h5>
                                             </div>
                                         </div>
 
@@ -232,7 +234,7 @@ const Calories = () => {
                                                 <Info className="w-6 h-6 text-chefie-yellow" />
                                             </div>
                                             <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                                                Basal Metabolizma Hızın (BMR): <span className="font-black text-chefie-dark">{result.bmr} kcal</span>. Bu kaloriyi vücudun hiçbir şey yapmasa bile harcar.
+                                                {t('calories.results.bmr')}: <span className="font-black text-chefie-dark">{result.bmr} {t('calories.results.kcal')}</span>. {t('calories.results.bmr_desc')}
                                             </p>
                                         </div>
                                     </motion.div>
@@ -280,10 +282,10 @@ const Calories = () => {
                             className="max-w-4xl mx-auto space-y-6"
                         >
                             {[
-                                { title: "Küçük Porsiyonlar Kullanın", text: "Tabağınızı küçültmek, porsiyon kontrolünü kolaylaştırır ve göz doyuruculuğunu artırır.", color: "text-blue-500", bg: "bg-blue-50" },
-                                { title: "Yavaş Çiğneyin", text: "Beyninize tokluk sinyalinin ulaşması yaklaşık 20 dakika sürer. Yavaş yemek daha az kalori almanızı sağlar.", color: "text-green-500", bg: "bg-green-50" },
-                                { title: "Su İçmeyi Unutmayın", text: "Bazen susuzluğu açlık ile karıştırabiliriz. Yemekten 30 dakika önce içilen su, tokluk hissini artırır.", color: "text-orange-500", bg: "bg-orange-50" },
-                                { title: "Etiket Okuma Alışkanlığı", text: "Marketten aldığınız ürünlerin 'porsiyon' başına değil '100g' başına kalori değerlerine dikkat edin.", color: "text-purple-500", bg: "bg-purple-50" },
+                                { title: t('calories.tips.title_1'), text: t('calories.tips.desc_1'), color: "text-blue-500", bg: "bg-blue-50" },
+                                { title: t('calories.tips.title_2'), text: t('calories.tips.desc_2'), color: "text-green-500", bg: "bg-green-50" },
+                                { title: t('calories.tips.title_3'), text: t('calories.tips.desc_3'), color: "text-orange-500", bg: "bg-orange-50" },
+                                { title: t('calories.tips.title_4'), text: t('calories.tips.desc_4'), color: "text-purple-500", bg: "bg-purple-50" },
                             ].map((tip, idx) => (
                                 <div key={idx} className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-100 border border-gray-50 flex gap-6 items-start">
                                     <div className={`w-14 h-14 rounded-2xl ${tip.bg} flex items-center justify-center flex-shrink-0`}>
@@ -301,8 +303,8 @@ const Calories = () => {
                                     <AlertCircle className="w-10 h-10 text-red-500" />
                                 </div>
                                 <div className="text-center md:text-left flex-1">
-                                    <h4 className="text-2xl font-black text-red-900 mb-2">Önemli Uyarı</h4>
-                                    <p className="text-red-700 font-medium">Bu hesaplamalar genel bilgilendirme amaçlıdır. Herhangi bir diyet programına başlamadan önce mutlaka bir uzman doktora veya diyetisyene danışınız.</p>
+                                    <h4 className="text-2xl font-black text-red-900 mb-2">{t('calories.tips.warning_title')}</h4>
+                                    <p className="text-red-700 font-medium">{t('calories.tips.warning_desc')}</p>
                                 </div>
                             </div>
                         </motion.div>

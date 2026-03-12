@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
 import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +21,7 @@ const RecipeDetail = () => {
     const [isFavorited, setIsFavorited] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [isScreenAwake, setIsScreenAwake] = useState(false);
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = safeGetToken();
     const user = JSON.parse(sessionStorage.getItem('user') || '{}');
 
     const fetchComments = async () => {

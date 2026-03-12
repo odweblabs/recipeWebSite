@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { safeGetStorage, safeSetStorage } from '../utils/storage';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [theme, setTheme] = useState(safeGetStorage('theme', 'light'));
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -12,7 +13,7 @@ export const ThemeProvider = ({ children }) => {
         } else {
             root.classList.remove('dark');
         }
-        localStorage.setItem('theme', theme);
+        safeSetStorage('theme', theme);
     }, [theme]);
 
     const toggleTheme = () => {

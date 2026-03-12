@@ -472,6 +472,112 @@ i18n
                             add_hint: "Eklemek için tıkla",
                             already_added: "Henüz menüye eklenmemiş."
                         }
+                    },
+                    blog: {
+                        read: "OKU",
+                        author_about: "Yazar Hakkında",
+                        author_desc_prefix: "",
+                        author_desc_suffix: "tarif yazarı",
+                        share_success: "Bağlantı kopyalandı!",
+                        back: "Geri Dön",
+                        print: "Yazdır"
+                    },
+                    calories: {
+                        header: {
+                            badge: "SAĞLIKLI YAŞAM REHBERİ",
+                            title: "Kaç Kalori",
+                            subtitle: "Biliyor musun?",
+                            desc: "Sağlıklı bir yaşam için günlük alman gereken kalori miktarını hesapla ve besinlerin kalori değerlerini öğren."
+                        },
+                        tabs: {
+                            calculate: "Hesapla",
+                            guide: "Besin Rehberi",
+                            tips: "Öneriler"
+                        },
+                        form: {
+                            weight: "KİLO (KG)",
+                            height: "BOY (CM)",
+                            age: "YAŞ",
+                            gender: "CİNSİYET",
+                            male: "Erkek",
+                            female: "Kadın",
+                            activity: "HAREKET SEVİYESİ",
+                            activity_levels: {
+                                level_1: "Az Hareketli (Haftada 0-1 gün)",
+                                level_2: "Hafif Hareketli (Haftada 1-3 gün)",
+                                level_3: "Orta Hareketli (Haftada 3-5 gün)",
+                                level_4: "Çok Hareketli (Haftada 6-7 gün)",
+                                level_5: "Profesyonel Sporcu"
+                            },
+                            submit: "HESAPLA"
+                        },
+                        results: {
+                            daily_needs: "Günlük İhtiyacın",
+                            kcal: "kcal",
+                            lose_weight: "Kilo Vermek İçin",
+                            gain_weight: "Kilo Almak İçin",
+                            bmr: "Basal Metabolizma Hızın (BMR)",
+                            bmr_desc: "Bu kaloriyi vücudun hiçbir şey yapmasa bile harcar.",
+                            not_calculated_yet: "Henüz Hesaplama Yapılmadı",
+                            not_calculated_desc: "Bilgilerini girerek günlük kalori ihtiyacını hemen öğren!"
+                        },
+                        tips: {
+                            title_1: "Küçük Porsiyonlar Kullanın",
+                            desc_1: "Tabağınızı küçültmek, porsiyon kontrolünü kolaylaştırır ve göz doyuruculuğunu artırır.",
+                            title_2: "Yavaş Çiğneyin",
+                            desc_2: "Beyninize tokluk sinyalinin ulaşması yaklaşık 20 dakika sürer. Yavaş yemek daha az kalori almanızı sağlar.",
+                            title_3: "Su İçmeyi Unutmayın",
+                            desc_3: "Bazen susuzluğu açlık ile karıştırabiliriz. Yemekten 30 dakika önce içilen su, tokluk hissini artırır.",
+                            title_4: "Etiket Okuma Alışkanlığı",
+                            desc_4: "Marketten aldığınız ürünlerin 'porsiyon' başına değil '100g' başına kalori değerlerine dikkat edin.",
+                            warning_title: "Önemli Uyarı",
+                            warning_desc: "Bu hesaplamalar genel bilgilendirme amaçlıdır. Herhangi bir diyet programına başlamadan önce mutlaka bir uzman doktora veya diyetisyene danışınız."
+                        }
+                    },
+                    lists: {
+                        loading: "YÜKLENİYOR...",
+                        home: "ANASAYFA",
+                        title: "LİSTELER",
+                        header: {
+                            title_1: "Alışveriş",
+                            title_2: "Listelerin",
+                            desc: "Sadece senin görebileceğin özel alışveriş listelerini oluştur ve yönet."
+                        },
+                        create_new: "YENİ LİSTE OLUŞTUR",
+                        create_button: "LİSTE OLUŞTUR",
+                        modal: {
+                            title: "LİSTE OLUŞTUR",
+                            name_label: "Liste Adı",
+                            name_placeholder: "Örn: Haftalık Market Listesi",
+                            store_label: "Market İsmi (İsteğe Bağlı)",
+                            store_placeholder: "Örn: Migros, Şok...",
+                            submit: "OLUŞTUR"
+                        },
+                        stores: {
+                            market: "Market: "
+                        },
+                        items: {
+                            list: "Liste",
+                            add_placeholder: "Ürün ekle...",
+                            quick_add: "Hızlı Ekle",
+                            empty: "Henüz ürün eklenmemiş.",
+                            categories: {
+                                basic: "Temel",
+                                greengrocer: "Manav",
+                                butcher: "Kasap",
+                                pantry: "Kiler",
+                                drinks: "İçecek",
+                                cleaning: "Temizlik"
+                            }
+                        },
+                        actions: {
+                            share: "PAYLAŞ",
+                            save: "KAYDET"
+                        },
+                        empty: {
+                            title: "Henüz listen yok",
+                            button: "LİSTE OLUŞTUR"
+                        }
                     }
                 }
             },
@@ -940,9 +1046,119 @@ i18n
                             add_hint: "Click to add",
                             already_added: "Not added to menu yet."
                         }
+                    },
+                    blog: {
+                        read: "READ",
+                        author_about: "About the Author",
+                        author_desc_prefix: "",
+                        author_desc_suffix: "recipe author",
+                        share_success: "Link copied!",
+                        back: "Go Back",
+                        print: "Print"
+                    },
+                    calories: {
+                        header: {
+                            badge: "HEALTHY LIVING GUIDE",
+                            title: "How Many Calories",
+                            subtitle: "Did you know?",
+                            desc: "Calculate the daily calories you need for a healthy life and learn the calorie values of foods."
+                        },
+                        tabs: {
+                            calculate: "Calculate",
+                            guide: "Food Guide",
+                            tips: "Tips"
+                        },
+                        form: {
+                            weight: "WEIGHT (KG)",
+                            height: "HEIGHT (CM)",
+                            age: "AGE",
+                            gender: "GENDER",
+                            male: "Male",
+                            female: "Female",
+                            activity: "ACTIVITY LEVEL",
+                            activity_levels: {
+                                level_1: "Sedentary (0-1 days a week)",
+                                level_2: "Lightly Active (1-3 days a week)",
+                                level_3: "Moderately Active (3-5 days a week)",
+                                level_4: "Very Active (6-7 days a week)",
+                                level_5: "Professional Athlete"
+                            },
+                            submit: "CALCULATE"
+                        },
+                        results: {
+                            daily_needs: "Daily Needs",
+                            kcal: "kcal",
+                            lose_weight: "To Lose Weight",
+                            gain_weight: "To Gain Weight",
+                            bmr: "Basal Metabolic Rate (BMR)",
+                            bmr_desc: "Your body burns these calories even doing nothing.",
+                            not_calculated_yet: "Not Calculated Yet",
+                            not_calculated_desc: "Enter your information to find out your daily calorie needs immediately!"
+                        },
+                        tips: {
+                            title_1: "Use Small Portions",
+                            desc_1: "Shrinking your plate makes portion control easier and increases visual satisfaction.",
+                            title_2: "Chew Slowly",
+                            desc_2: "It takes about 20 minutes for the satiety signal to reach your brain. Eating slowly makes you consume fewer calories.",
+                            title_3: "Don't Forget to Drink Water",
+                            desc_3: "Sometimes we confuse thirst for hunger. Drinking water 30 minutes before a meal increases satiety.",
+                            title_4: "Label Reading Habit",
+                            desc_4: "Watch calorie values per '100g' rather than 'portion' on the packaged goods you buy.",
+                            warning_title: "Important Warning",
+                            warning_desc: "These calculations are for general information purposes only. Always consult a specialized doctor or dietitian before starting any diet program."
+                        }
+                    },
+                    lists: {
+                        loading: "LOADING...",
+                        home: "HOME",
+                        title: "LISTS",
+                        header: {
+                            title_1: "Your Shopping",
+                            title_2: "Lists",
+                            desc: "Create and manage custom shopping lists that only you can see."
+                        },
+                        create_new: "CREATE NEW LIST",
+                        create_button: "CREATE LIST",
+                        modal: {
+                            title: "CREATE LIST",
+                            name_label: "List Name",
+                            name_placeholder: "e.g., Weekly Grocery List",
+                            store_label: "Store Name (Optional)",
+                            store_placeholder: "e.g., Walmart, Target...",
+                            submit: "CREATE"
+                        },
+                        stores: {
+                            market: "Store: "
+                        },
+                        items: {
+                            list: "List",
+                            add_placeholder: "Add item...",
+                            quick_add: "Quick Add",
+                            empty: "No items added yet.",
+                            categories: {
+                                basic: "Basic",
+                                greengrocer: "Produce",
+                                butcher: "Butcher",
+                                pantry: "Pantry",
+                                drinks: "Drinks",
+                                cleaning: "Cleaning"
+                            }
+                        },
+                        actions: {
+                            share: "SHARE",
+                            save: "SAVE"
+                        },
+                        empty: {
+                            title: "You have no lists yet",
+                            button: "CREATE LIST"
+                        }
                     }
                 }
             }
+        },
+        detection: {
+            // Disable localStorage caching to prevent SecurityError
+            caches: ['cookie'],
         },
         fallbackLng: 'tr',
         interpolation: {

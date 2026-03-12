@@ -98,7 +98,7 @@ const Home = () => {
                 <Link to="/admin/recipes/new" className="h-[48px] md:h-auto px-5 md:px-8 py-0 md:py-4 bg-gradient-to-r from-chefie-yellow to-amber-500 text-white font-black text-[10px] sm:text-xs md:text-sm rounded-2xl shadow-lg shadow-amber-200/40 dark:shadow-amber-900/20 hover:shadow-xl hover:shadow-amber-300/50 dark:hover:shadow-amber-800/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shrink-0">
                     <ChefHat className="h-4 w-4 md:h-5 md:w-5" />
                     <span className="hidden sm:inline">{t('nav.share_recipe').toUpperCase()}</span>
-                    <span className="sm:hidden">PAYLAŞ</span>
+                    <span className="sm:hidden">{t('common.share').toUpperCase()}</span>
                 </Link>
             </header>
 
@@ -413,7 +413,7 @@ const Home = () => {
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{post.author}</span>
                                     <div className="flex items-center gap-1 text-chefie-yellow">
-                                        <span className="text-[10px] font-black">OKU</span>
+                                        <span className="text-[10px] font-black">{t('blog.read')}</span>
                                         <ArrowUpRight className="w-3 h-3" />
                                     </div>
                                 </div>

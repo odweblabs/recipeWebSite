@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +26,7 @@ const Settings = () => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
     const { theme, toggleTheme } = useTheme();
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = safeGetToken();
     const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user') || '{}'));
     const [loading, setLoading] = useState(true);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
@@ -62,7 +63,7 @@ const Settings = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        safeClearAuth();
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
         navigate('/admin/login');

@@ -1,3 +1,4 @@
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../../utils/storage';
 import API_BASE from '../../utils/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -71,7 +72,7 @@ const Dashboard = () => {
     const [isDesktopNotificationsOpen, setIsDesktopNotificationsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = safeGetToken();
     const user = JSON.parse(sessionStorage.getItem('user') || '{}');
 
     const [totalCount, setTotalCount] = useState(0);
@@ -381,7 +382,7 @@ const Dashboard = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        safeClearAuth();
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
         navigate('/admin/login');

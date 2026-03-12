@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import API_BASE from '../utils/api';
 import { useTranslation } from 'react-i18next';
+import { safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
 
 const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSearch, iconOnlyOnMobile = false, onOpenChange }) => {
     const { t, i18n } = useTranslation();
@@ -112,7 +113,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
         if (onOpenChange) {
             onOpenChange(isOpen);
         }
-        const stored = localStorage.getItem('chefie_recent_searches');
+        const stored = safeGetStorage('chefie_recent_searches');
         if (stored) {
             try {
                 setRecentSearches(JSON.parse(stored));
@@ -167,7 +168,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
 
         // Save to recent
         const newRecent = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
-        localStorage.setItem('chefie_recent_searches', JSON.stringify(newRecent));
+        safeSetStorage('chefie_recent_searches', JSON.stringify(newRecent));
         setRecentSearches(newRecent);
 
         setIsOpen(false);
@@ -186,7 +187,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
     };
 
     const clearRecent = () => {
-        localStorage.removeItem('chefie_recent_searches');
+        safeRemoveStorage('chefie_recent_searches');
         setRecentSearches([]);
     };
 
