@@ -22,7 +22,7 @@ const RecipeDetail = () => {
     const [wakeLock, setWakeLock] = useState(null);
     const [isScreenAwake, setIsScreenAwake] = useState(false);
     const token = safeGetToken();
-    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
 
     const fetchComments = async () => {
         try {

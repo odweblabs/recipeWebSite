@@ -1,3 +1,4 @@
+import { safeGetSessionStorage, safeSetSessionStorage, safeRemoveStorage, safeClearAuth } from '../utils/storage';
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Search, Heart, User, Plus, ShoppingCart } from 'lucide-react';
@@ -10,7 +11,7 @@ const MobileTabBar = () => {
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
-    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
 
     useEffect(() => {
         // Initial check on mount

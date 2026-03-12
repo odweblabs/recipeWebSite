@@ -1,3 +1,4 @@
+import { safeGetSessionStorage, safeSetSessionStorage, safeRemoveStorage, safeClearAuth } from '../../utils/storage';
 import API_BASE from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
@@ -11,15 +12,15 @@ const Sidebar = () => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const userData = sessionStorage.getItem('user');
+        const userData = safeGetSessionStorage('user');
         if (userData) {
             setUser(JSON.parse(userData));
         }
     }, []);
 
     const handleLogout = () => {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        safeClearAuth();
+        safeRemoveStorage('user');
         navigate('/admin/login');
     };
 

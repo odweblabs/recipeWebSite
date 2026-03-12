@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../../utils/storage';
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../../utils/storage';
 import API_BASE from '../../utils/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -53,7 +53,7 @@ const Login = () => {
                 const user = res.data.user;
                 // Kullanıcı isteği üzerine sadece oturum süresince (tab kapatılana kadar) geçerli
                 sessionStorage.setItem('token', token);
-                sessionStorage.setItem('user', JSON.stringify(user));
+                safeSetSessionStorage('user', JSON.stringify(user));
 
                 // Başarılı girişten sonra gidilecek yer (eğer bir yerden yönlendirilmişse oraya, yoksa dashboard'a)
                 const origin = location.state?.from?.pathname || '/admin/dashboard';

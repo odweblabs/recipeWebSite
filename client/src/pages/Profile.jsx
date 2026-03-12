@@ -67,7 +67,7 @@ const Profile = () => {
     const [friendActionLoading, setFriendActionLoading] = useState(false);
 
     const token = safeGetToken();
-    const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
+    const currentUser = JSON.parse(safeGetSessionStorage('user') || '{}');
     const isOwner = currentUser.id === parseInt(id);
     const isLoggedIn = !!token && !!currentUser.id;
 
@@ -149,8 +149,8 @@ const Profile = () => {
     const handleLogout = () => {
         if (!window.confirm(t('profile.logout_confirm'))) return;
         safeClearAuth();
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        safeClearAuth();
+        safeRemoveStorage('user');
         navigate('/');
         window.location.reload(); // Refresh to clear all states
     };

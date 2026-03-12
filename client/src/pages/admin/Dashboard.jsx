@@ -73,7 +73,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const token = safeGetToken();
-    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
 
     const [totalCount, setTotalCount] = useState(0);
     const [offset, setOffset] = useState(0);
@@ -372,7 +372,7 @@ const Dashboard = () => {
             const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            sessionStorage.setItem('user', JSON.stringify(userRes.data));
+            safeSetSessionStorage('user', JSON.stringify(userRes.data));
             window.location.reload();
         } catch (err) {
             alert('Profil güncelleme başarısız.');
@@ -383,8 +383,8 @@ const Dashboard = () => {
 
     const handleLogout = () => {
         safeClearAuth();
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        safeClearAuth();
+        safeRemoveStorage('user');
         navigate('/admin/login');
     };
 

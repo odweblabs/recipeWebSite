@@ -3,12 +3,13 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, X, Utensils, ArrowRight, Trash2, LayoutGrid, Star, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { safeGetStorage, safeSetStorage } from '../utils/storage';
 
 const MENUS_STORAGE_KEY = 'chefie_menus_v1';
 
 function loadMenus() {
   try {
-    const raw = localStorage.getItem(MENUS_STORAGE_KEY);
+    const raw = safeGetStorage(MENUS_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
@@ -18,7 +19,7 @@ function loadMenus() {
 }
 
 function saveMenus(nextMenus) {
-  localStorage.setItem(MENUS_STORAGE_KEY, JSON.stringify(nextMenus));
+  safeSetStorage(MENUS_STORAGE_KEY, JSON.stringify(nextMenus));
 }
 
 import API_BASE from '../utils/api';
@@ -49,7 +50,7 @@ const Menus = () => {
 
   useEffect(() => {
     try {
-      const raw = sessionStorage.getItem('user');
+      const raw = safeGetSessionStorage('user');
       if (!raw) return;
       const parsed = JSON.parse(raw);
       setCurrentUser(parsed || null);

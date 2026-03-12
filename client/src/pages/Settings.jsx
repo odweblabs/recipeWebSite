@@ -27,7 +27,7 @@ const Settings = () => {
     const { t, i18n } = useTranslation();
     const { theme, toggleTheme } = useTheme();
     const token = safeGetToken();
-    const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user') || '{}'));
+    const [user, setUser] = useState(JSON.parse(safeGetSessionStorage('user') || '{}'));
     const [loading, setLoading] = useState(true);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
 
@@ -54,7 +54,7 @@ const Settings = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser(res.data);
-            sessionStorage.setItem('user', JSON.stringify(res.data));
+            safeSetSessionStorage('user', JSON.stringify(res.data));
             setLoading(false);
         } catch (err) {
             console.error('Error fetching user data:', err);
@@ -64,8 +64,8 @@ const Settings = () => {
 
     const handleLogout = () => {
         safeClearAuth();
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        safeClearAuth();
+        safeRemoveStorage('user');
         navigate('/admin/login');
     };
 

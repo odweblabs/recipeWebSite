@@ -21,7 +21,7 @@ const EditProfile = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const token = safeGetToken();
-    const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user') || '{}'));
+    const [user, setUser] = useState(JSON.parse(safeGetSessionStorage('user') || '{}'));
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
@@ -118,7 +118,7 @@ const EditProfile = () => {
             const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            sessionStorage.setItem('user', JSON.stringify(userRes.data));
+            safeSetSessionStorage('user', JSON.stringify(userRes.data));
 
             setTimeout(() => {
                 navigate('/settings');
@@ -141,7 +141,7 @@ const EditProfile = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 safeClearAuth();
-                sessionStorage.clear();
+                safeClearAuth();
                 navigate('/admin/login');
             } catch (err) {
                 alert(t('edit_profile.messages.error_delete'));

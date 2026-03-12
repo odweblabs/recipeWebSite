@@ -26,7 +26,7 @@ const RecipeForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const token = safeGetToken();
-    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
 
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
@@ -98,7 +98,7 @@ const RecipeForm = () => {
 
     const handleLogout = () => {
         safeClearAuth();
-        sessionStorage.removeItem('token');
+        safeClearAuth();
         navigate('/admin/login');
     };
 
