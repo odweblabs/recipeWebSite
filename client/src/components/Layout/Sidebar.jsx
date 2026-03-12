@@ -50,7 +50,7 @@ const Sidebar = () => {
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-chefie-green rounded-full border-2 border-chefie-card shadow-sm"></div>
                     </div>
                     <div className="text-center">
-                        <h2 className="font-bold text-chefie-dark text-sm line-clamp-1 group-hover:text-chefie-yellow transition-colors">{user?.full_name || user?.username || t('common.guest_chef')}</h2>
+                        <h2 className="font-bold text-chefie-text text-sm line-clamp-1 group-hover:text-chefie-yellow transition-colors">{user?.full_name || user?.username || t('common.guest_chef')}</h2>
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{user?.role === 'admin' ? t('common.master_chef') : t('common.gourme_chef')}</p>
                     </div>
                 </Link>

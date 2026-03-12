@@ -234,9 +234,9 @@ const Lists = () => {
                     <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
                         <Link to="/" className="hover:text-chefie-yellow transition-colors">{t('lists.home')}</Link>
                         <ChevronRight className="w-3 h-3" />
-                        <span className="text-chefie-dark">{t('lists.title')}</span>
+                        <span className="text-chefie-text">{t('lists.title')}</span>
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black text-chefie-dark leading-tight">
+                    <h1 className="text-4xl md:text-6xl font-black text-chefie-text leading-tight">
                         {t('lists.header.title_1')} <br className="hidden sm:block" />
                         <span className="text-chefie-yellow relative inline-block">
                             {t('lists.header.title_2')}
@@ -257,7 +257,7 @@ const Lists = () => {
                             <Plus className="w-5 h-5" />
                             {t('lists.create_new')}
                         </button>
-                        <div className="inline-flex items-center gap-2 px-5 py-3 bg-white rounded-2xl border border-gray-100 text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
+                        <div className="inline-flex items-center gap-2 px-5 py-3 bg-chefie-card rounded-2xl border border-chefie-border text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
                             <ListChecks className="w-4 h-4 text-chefie-yellow" />
                             {lists.length} {t('lists.header.lists_count') || "LİSTE"} · {totalItems} {t('lists.header.items_count') || "ÜRÜN"}
                         </div>
@@ -279,14 +279,14 @@ const Lists = () => {
                                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
-                                className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-8 border border-white"
+                                className="w-full max-w-md bg-chefie-card rounded-[2.5rem] shadow-2xl p-8 border border-chefie-border"
                             >
                                 <div className="flex items-center justify-between mb-6">
                                     <div>
-                                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-300">{t('lists.modal.new_list') || 'Yeni Liste'}</div>
-                                        <h2 className="text-xl font-black text-chefie-dark">{t('lists.modal.title') || 'Liste Oluştur'}</h2>
+                                        <div className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50">{t('lists.modal.new_list') || 'Yeni Liste'}</div>
+                                        <h2 className="text-xl font-black text-chefie-text">{t('lists.modal.title') || 'Liste Oluştur'}</h2>
                                     </div>
-                                    <button onClick={() => setIsCreateOpen(false)} className="p-3 rounded-2xl bg-gray-50 hover:bg-chefie-dark hover:text-white transition-all text-gray-400">
+                                    <button onClick={() => setIsCreateOpen(false)} className="p-3 rounded-2xl bg-chefie-cream hover:bg-chefie-border hover:text-chefie-text transition-all text-chefie-secondary">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -298,7 +298,7 @@ const Lists = () => {
                                             value={newListName}
                                             onChange={(e) => setNewListName(e.target.value)}
                                             placeholder={t('lists.modal.name_placeholder')}
-                                            className="w-full px-5 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-gray-700 placeholder-gray-300"
+                                            className="w-full px-5 py-4 bg-chefie-cream rounded-2xl border border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-chefie-text placeholder-chefie-secondary/50 transition-all outline-none"
                                             autoFocus
                                         />
                                     </div>
@@ -308,7 +308,7 @@ const Lists = () => {
                                             value={newListMarket}
                                             onChange={(e) => setNewListMarket(e.target.value)}
                                             placeholder={t('lists.modal.store_placeholder')}
-                                            className="w-full px-5 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-gray-700 placeholder-gray-300"
+                                            className="w-full px-5 py-4 bg-chefie-cream rounded-2xl border border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-chefie-text placeholder-chefie-secondary/50 transition-all outline-none"
                                         />
                                     </div>
                                 </div>
@@ -338,10 +338,10 @@ const Lists = () => {
                                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
-                                className="w-full max-w-lg max-h-[85vh] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white flex flex-col"
+                                className="w-full max-w-lg max-h-[85vh] bg-chefie-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-chefie-border flex flex-col"
                             >
                                 {/* Modal Header */}
-                                <div className="p-6 md:p-8 border-b border-gray-50 flex items-center justify-between gap-4 flex-shrink-0">
+                                <div className="p-6 md:p-8 border-b border-chefie-border flex items-center justify-between gap-4 flex-shrink-0">
                                     <div className="min-w-0 flex-1">
                                         {editingListId === openList.id ? (
                                             <div className="space-y-3">
@@ -349,13 +349,13 @@ const Lists = () => {
                                                     value={editingName}
                                                     onChange={(e) => setEditingName(e.target.value)}
                                                     placeholder={t('lists.modal.name_label')}
-                                                    className="w-full text-xl font-black text-chefie-dark bg-gray-50 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-chefie-yellow/20"
+                                                    className="w-full text-xl font-black text-chefie-text dark:text-chefie-text bg-chefie-cream dark:bg-chefie-card px-4 py-2 rounded-xl border border-chefie-border dark:border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 transition-all outline-none"
                                                 />
                                                 <input
                                                     value={editingMarket}
                                                     onChange={(e) => setEditingMarket(e.target.value)}
                                                     placeholder={t('lists.modal.store_label')}
-                                                    className="w-full text-sm font-bold text-gray-500 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200"
+                                                    className="w-full text-sm font-bold text-chefie-secondary dark:text-chefie-secondary bg-chefie-cream dark:bg-chefie-card px-4 py-2 rounded-xl border border-chefie-border dark:border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 transition-all outline-none"
                                                 />
                                             </div>
                                         ) : (
@@ -364,7 +364,7 @@ const Lists = () => {
                                                     {openList.market_name ? `${t('lists.stores.market')} ${openList.market_name}` : t('lists.items.list')}
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <h2 className="text-xl md:text-2xl font-black text-chefie-dark line-clamp-1">{openList.name}</h2>
+                                                    <h2 className="text-xl md:text-2xl font-black text-chefie-text dark:text-chefie-text line-clamp-1">{openList.name}</h2>
                                                     <button
                                                         onClick={() => {
                                                             setEditingListId(openList.id);
@@ -380,7 +380,7 @@ const Lists = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <button onClick={() => setOpenListId(null)} className="p-3 rounded-2xl bg-gray-50 hover:bg-chefie-dark hover:text-white transition-all text-gray-400 flex-shrink-0">
+                                    <button onClick={() => setOpenListId(null)} className="p-3 rounded-2xl bg-chefie-cream dark:bg-chefie-card hover:bg-chefie-dark hover:text-white transition-all text-chefie-secondary dark:text-chefie-secondary flex-shrink-0">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -394,7 +394,7 @@ const Lists = () => {
                                             onChange={(e) => setNewItem(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && addItem(openList.id)}
                                             placeholder={t('lists.items.add_placeholder')}
-                                            className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-gray-700 placeholder-gray-300 text-sm"
+                                            className="flex-1 px-4 py-3 bg-chefie-cream dark:bg-chefie-card rounded-xl border border-chefie-border dark:border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-chefie-text dark:text-chefie-text placeholder-chefie-secondary/50 transition-all outline-none text-sm"
                                         />
                                         <button
                                             onClick={() => addItem(openList.id)}
@@ -406,7 +406,7 @@ const Lists = () => {
                                     </div>
 
                                     {/* Preset Ingredients (Quick Add) */}
-                                    <div className="mb-6 bg-gray-50/50 p-4 rounded-3xl border border-gray-100">
+                                    <div className="mb-6 bg-chefie-cream/50 dark:bg-chefie-card/50 p-4 rounded-3xl border border-chefie-border dark:border-chefie-border">
                                         <div className="flex items-center justify-between mb-4 px-1">
                                             <p className="text-[10px] font-black tracking-widest uppercase text-chefie-dark/40">{t('lists.items.quick_add')}</p>
                                             <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-[75%]">
@@ -423,7 +423,7 @@ const Lists = () => {
                                                         <button
                                                             key={cat}
                                                             onClick={() => setActiveCategory(cat)}
-                                                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shadow-sm ${activeCategory === cat ? 'bg-chefie-yellow text-white shadow-chefie-yellow/20' : 'text-gray-400 bg-white hover:bg-gray-50'}`}
+                                                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shadow-sm ${activeCategory === cat ? 'bg-chefie-yellow text-white shadow-chefie-yellow/20' : 'text-chefie-secondary dark:text-chefie-secondary bg-chefie-cream dark:bg-chefie-card hover:bg-chefie-border dark:hover:bg-chefie-border'}`}
                                                         >
                                                             {t(`lists.items.categories.${catKeys[cat]}`).toUpperCase()}
                                                         </button>
@@ -436,7 +436,7 @@ const Lists = () => {
                                                 <button
                                                     key={idx}
                                                     onClick={() => addItem(openList.id, item.name)}
-                                                    className="px-3 py-2 bg-white border border-gray-100 rounded-xl text-[12px] font-bold text-gray-600 hover:border-chefie-yellow hover:text-chefie-yellow transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 flex items-center gap-1.5"
+                                                    className="px-3 py-2 bg-chefie-cream dark:bg-chefie-card border border-chefie-border dark:border-chefie-border rounded-xl text-[12px] font-bold text-chefie-secondary dark:text-chefie-secondary hover:border-chefie-yellow hover:text-chefie-yellow transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 flex items-center gap-1.5"
                                                 >
                                                     <span className="text-base leading-none">{item.emoji}</span>
                                                     <span>{item.name}</span>
@@ -455,15 +455,15 @@ const Lists = () => {
                                             {openList.items.map(item => (
                                                 <motion.div
                                                     key={item.id}
-                                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all group ${item.checked ? 'bg-gray-50 border-gray-50' : 'bg-white border-gray-100'}`}
+                                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all group ${item.checked ? 'bg-chefie-cream dark:bg-chefie-card border-chefie-border dark:border-chefie-border' : 'bg-chefie-cream dark:bg-chefie-card border-chefie-border dark:border-chefie-border'}`}
                                                 >
                                                     <button
                                                         onClick={() => toggleItem(openList.id, item.id)}
-                                                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.checked ? 'bg-chefie-yellow border-chefie-yellow' : 'border-gray-200'}`}
+                                                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.checked ? 'bg-chefie-yellow border-chefie-yellow' : 'border-chefie-border dark:border-chefie-border'}`}
                                                     >
                                                         {item.checked && <Check className="w-3.5 h-3.5 text-white" />}
                                                     </button>
-                                                    <span className={`flex-1 text-sm font-bold transition-all ${item.checked ? 'text-gray-300 line-through' : 'text-gray-700'}`}>
+                                                    <span className={`flex-1 text-sm font-bold transition-all ${item.checked ? 'text-chefie-secondary/50 dark:text-chefie-secondary/50 line-through' : 'text-chefie-text dark:text-chefie-text'}`}>
                                                         {item.text}
                                                     </span>
                                                     <button
@@ -478,8 +478,14 @@ const Lists = () => {
                                     )}
                                 </div>
 
-                                <div className="p-6 md:p-8 bg-gray-50 border-t border-gray-100 flex flex-col gap-4">
-                                    <div className="flex items-center justify-between">
+                                <div className="p-6 md:p-8 bg-chefie-cream dark:bg-chefie-card border-t border-chefie-border dark:border-chefie-border flex flex-col gap-4">
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <button
+                                            onClick={() => setIsCreateOpen(false)}
+                                            className="w-full px-6 py-4 bg-chefie-cream text-chefie-secondary font-black text-xs tracking-widest rounded-2xl hover:bg-chefie-border hover:text-chefie-text transition-all"
+                                        >
+                                            VAZGEÇ
+                                        </button>
                                         <button
                                             onClick={() => handleShare(openList)}
                                             className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl text-xs font-black hover:bg-blue-600 transition-all shadow-lg hover:scale-[1.02]"

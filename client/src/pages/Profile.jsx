@@ -530,63 +530,129 @@ const Profile = () => {
                 )}
             </AnimatePresence>
 
-            <div className="max-w-xl mx-auto">
-                {/* Header Navigation */}
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-2xl font-bold font-sans text-chefie-text">{t('profile.title')}</h1>
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1.5 bg-chefie-card px-3 py-1.5 rounded-full border border-chefie-border shadow-sm">
-                            <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
-                            <span className="font-bold text-sm text-chefie-text">5</span>
-                        </div>
-                        <button
-                            onClick={() => isOwner && navigate('/settings')}
-                            className="p-2 bg-chefie-card rounded-full border border-chefie-border shadow-sm hover:bg-chefie-cream transition-colors text-chefie-secondary"
-                        >
-                            <Settings className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
+            <div className="relative w-full">
+                {/* Desktop Cover Background (Hidden on mobile) */}
+                <div className="hidden md:block absolute top-0 left-0 w-full h-[320px] bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 rounded-b-[4rem] -z-10"></div>
 
-                {/* Profile Info Section */}
-                <div className="flex flex-col items-center text-center mb-10">
-                    <div className="relative mb-6">
-                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-chefie-card shadow-xl bg-chefie-card">
-                            {profile.profile_image ? (
-                                <img
-                                    src={getImageUrl(profile.profile_image)}
-                                    alt={profile.full_name}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-chefie-green to-emerald-700 flex items-center justify-center text-white text-4xl font-bold">
-                                    {(profile.full_name || profile.username || 'A').charAt(0).toUpperCase()}
+                <div className="max-w-6xl mx-auto md:px-8">
+                    {/* Header Navigation */}
+                    <div className="flex items-center justify-between mb-8 md:mb-16 relative z-10 md:pt-10">
+                        <h1 className="text-2xl font-bold font-sans text-chefie-text md:hidden">{t('profile.title')}</h1>
+                        <div className="hidden md:flex items-center gap-1.5 text-chefie-text font-black text-xl italic tracking-tighter">
+                            Tarifo<span className="text-chefie-yellow">.</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 bg-chefie-card md:bg-white/50 md:dark:bg-chefie-dark/50 md:backdrop-blur-md px-3 py-1.5 rounded-full border border-chefie-border shadow-sm">
+                                <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
+                                <span className="font-bold text-sm text-chefie-text">5</span>
+                            </div>
+                            <button
+                                onClick={() => isOwner && navigate('/settings')}
+                                className="p-2 bg-chefie-card md:bg-white/50 md:dark:bg-chefie-dark/50 md:backdrop-blur-md rounded-full border border-chefie-border shadow-sm hover:bg-chefie-cream transition-colors text-chefie-secondary"
+                            >
+                                <Settings className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Profile Info Section */}
+                    <div className="flex flex-col items-center text-center mb-10 md:flex-row md:items-start md:text-left md:gap-12 md:mb-16 relative z-10">
+                        
+                        <div className="relative mb-6 md:mb-0 md:flex-shrink-0">
+                            <div className="w-32 h-32 md:w-64 md:h-64 rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-chefie-cream dark:border-chefie-dark shadow-xl md:shadow-2xl bg-chefie-card md:bg-white md:dark:bg-chefie-dark transition-all">
+                                {profile.profile_image ? (
+                                    <img
+                                        src={getImageUrl(profile.profile_image)}
+                                        alt={profile.full_name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-chefie-green to-emerald-700 flex items-center justify-center text-white text-4xl md:text-6xl font-bold">
+                                        {(profile.full_name || profile.username || 'A').charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex-1 w-full flex flex-col md:flex-row md:justify-between pt-2">
+                            {/* Left Side Info */}
+                            <div>
+                                <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
+                                    <h2 className="text-2xl md:text-[2.5rem] font-bold font-sans text-chefie-text tracking-tight mb-0 md:-mt-2">{profile.full_name || profile.username}</h2>
+                                    <div className="hidden md:flex items-center px-1.5 py-0.5 bg-blue-500 text-white text-[10px] font-black rounded-r-md rounded-l font-sans">
+                                        PRO <Flame className="w-3 h-3 ml-1 fill-white" />
+                                    </div>
+                                    <BadgeCheck className="w-6 h-6 md:hidden text-chefie-yellow fill-chefie-yellow text-black" />
                                 </div>
-                            )}
+
+                                <div className="text-chefie-secondary text-sm md:text-base mb-6 max-w-sm mx-auto md:mx-0 font-medium">
+                                    <span className="md:hidden">@{profile.username}</span>
+                                    <div className="hidden md:block">
+                                        <div className="text-chefie-text font-bold mb-1">Usta Şef & Tarif Yaratıcısı</div>
+                                        <div className="text-chefie-secondary opacity-70">İstanbul, Türkiye</div>
+                                    </div>
+                                </div>
+
+                                <div className="md:hidden flex items-center justify-center gap-4 text-chefie-secondary text-sm font-medium mb-6">
+                                    <button onClick={() => setShowFollowers(true)} className="hover:text-chefie-text transition-colors">
+                                        <span className="font-bold text-chefie-text">{profile.follower_count || 0}</span> {t('profile.followers')}
+                                    </button>
+                                    <span className="w-1.5 h-1.5 bg-chefie-border rounded-full"></span>
+                                    <button onClick={() => setShowFollowing(true)} className="hover:text-chefie-text transition-colors">
+                                        <span className="font-bold text-chefie-text">{profile.following_count || 0}</span> {t('profile.following_count') || 'Takip'}
+                                    </button>
+                                </div>
+
+                                <div className="mt-2 w-full flex items-center justify-center md:justify-start gap-3 md:mt-6">
+                                    {!isOwner ? (
+                                        <>
+                                            {renderFriendButton()}
+                                            <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-chefie-dark border border-chefie-border text-chefie-text font-bold rounded-xl hover:bg-chefie-cream transition-all shadow-sm">
+                                                İletişime Geç
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button 
+                                            onClick={() => navigate('/settings')}
+                                            className="hidden md:flex items-center gap-2 px-8 py-3 bg-chefie-text text-white dark:bg-white dark:text-chefie-dark font-bold rounded-xl hover:scale-105 transition-all shadow-lg"
+                                        >
+                                            Profili Düzenle
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right Side Stats (Desktop Only) */}
+                            <div className="hidden md:flex flex-col items-end">
+                                <div className="flex items-center gap-2 mb-6 pointer-events-none">
+                                    <div className="w-10 h-10 rounded-[1.2rem] bg-[#FF7F50] text-white flex items-center justify-center font-bold text-sm shadow-[0_4px_10px_rgba(255,127,80,0.3)] border-2 border-white dark:border-chefie-dark z-30">
+                                        26
+                                    </div>
+                                    <div className="w-10 h-10 rounded-[1.2rem] bg-[#6B46C1] text-white flex items-center justify-center font-bold text-sm shadow-[0_4px_10px_rgba(107,70,193,0.3)] border-2 border-white dark:border-chefie-dark -ml-5 z-20 relative">
+                                        6
+                                    </div>
+                                    <div className="w-10 h-10 rounded-[1.2rem] bg-gray-900 dark:bg-gray-100 dark:text-gray-900 text-white flex items-center justify-center font-bold text-sm shadow-[0_4px_10px_rgba(0,0,0,0.2)] border-2 border-white dark:border-chefie-dark -ml-5 z-10 relative">
+                                        12
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-10">
+                                    <div className="text-center group cursor-pointer" onClick={() => setShowFollowers(true)}>
+                                        <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.followers')}</div>
+                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{profile.follower_count || 0}</div>
+                                    </div>
+                                    <div className="text-center group cursor-pointer" onClick={() => setShowFollowing(true)}>
+                                        <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.following_count') || 'Takip'}</div>
+                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{profile.following_count || 0}</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-[13px] text-chefie-text/60 font-medium mb-0">Beğeniler</div>
+                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{profile.likes_count || 0}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div className="flex items-center gap-2 mb-2">
-                        <h2 className="text-2xl font-bold font-sans text-chefie-text">{profile.full_name || profile.username}</h2>
-                        <BadgeCheck className="w-6 h-6 text-chefie-yellow fill-chefie-yellow text-black" />
-                    </div>
-
-                    <div className="flex items-center gap-2 text-chefie-secondary text-sm font-medium">
-                        <button onClick={() => setShowFollowers(true)} className="hover:text-chefie-text transition-colors">
-                            <span className="font-bold text-chefie-text">{profile.follower_count || 0}</span> {t('profile.followers')}
-                        </button>
-                        <span className="w-1.5 h-1.5 bg-chefie-border rounded-full"></span>
-                        <button onClick={() => setShowFollowing(true)} className="hover:text-chefie-text transition-colors">
-                            <span className="font-bold text-chefie-text">{profile.following_count || 0}</span> {t('profile.following_count') || 'Takip'}
-                        </button>
-                    </div>
-
-                    {!isOwner && (
-                        <div className="mt-6 w-full px-8">
-                            {renderFriendButton()}
-                        </div>
-                    )}
-                </div>
 
                 {/* Pending Friend Requests (owner only) */}
                 {isOwner && pendingRequests.length > 0 && (
@@ -633,189 +699,227 @@ const Profile = () => {
                     </div>
                 )}
 
-                {/* New Tab System */}
-                <div className="flex items-center gap-2 mb-8 bg-chefie-card/50 p-1 rounded-full border border-chefie-border shadow-md">
-                    <button
-                        onClick={() => setActiveTab('recipes')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'recipes'
-                            ? 'bg-chefie-yellow text-white shadow-md'
-                            : 'text-chefie-secondary hover:text-chefie-text'
-                            }`}
-                    >
-                        <ChefHat className="w-4 h-4" />
-                        <span className="hidden min-[380px]:inline">{t('profile.tabs.recipes')}</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('favorites')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'favorites'
-                            ? 'bg-chefie-yellow text-white shadow-md'
-                            : 'text-chefie-secondary hover:text-chefie-text'
-                            }`}
-                    >
-                        <Flame className="w-4 h-4" />
-                        <span className="hidden min-[380px]:inline">{t('profile.tabs.favorites')}</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('notifications')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'notifications'
-                            ? 'bg-chefie-yellow text-white shadow-md'
-                            : 'text-chefie-secondary hover:text-chefie-text'
-                            }`}
-                    >
-                        <Bell className="w-4 h-4" />
-                        <span className="hidden min-[380px]:inline">{t('profile.tabs.notifications')}</span>
-                    </button>
+                {/* Tab System Mobile vs Desktop */}
+                <div className="md:border-b md:border-chefie-border mb-8 md:mb-12 w-full overflow-x-auto hide-scrollbar">
+                    {/* Mobile Tabs */}
+                    <div className="md:hidden flex items-center gap-2 bg-chefie-card/50 p-1 rounded-full border border-chefie-border shadow-md">
+                        <button
+                            onClick={() => setActiveTab('recipes')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'recipes'
+                                ? 'bg-chefie-yellow text-white shadow-md'
+                                : 'text-chefie-secondary hover:text-chefie-text'
+                                }`}
+                        >
+                            <ChefHat className="w-4 h-4" />
+                            <span>{t('profile.tabs.recipes')}</span>
+                            {profile?.recipe_count > 0 && (
+                                <span className="text-[10px] opacity-70 ml-1">({profile.recipe_count})</span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('favorites')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'favorites'
+                                ? 'bg-chefie-yellow text-white shadow-md'
+                                : 'text-chefie-secondary hover:text-chefie-text'
+                                }`}
+                        >
+                            <Heart className="w-4 h-4" />
+                            <span>{t('profile.tabs.favorites')}</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('notifications')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all relative ${activeTab === 'notifications'
+                                ? 'bg-chefie-yellow text-white shadow-md'
+                                : 'text-chefie-secondary hover:text-chefie-text'
+                                }`}
+                        >
+                            <div className="relative">
+                                <Bell className="w-4 h-4" />
+                                {pendingRequests.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                )}
+                            </div>
+                            <span>{t('profile.tabs.notifications')}</span>
+                        </button>
+                    </div>
+
+                    {/* Desktop Tabs */}
+                    <div className="hidden md:flex items-center gap-8 md:px-2">
+                        <button
+                            onClick={() => setActiveTab('recipes')}
+                            className={`pb-4 font-bold text-base transition-all border-b-[3px] relative top-[3px] flex items-center gap-2 ${activeTab === 'recipes'
+                                    ? 'text-chefie-text border-chefie-text dark:border-white'
+                                    : 'text-chefie-secondary border-transparent hover:text-chefie-text hover:border-chefie-border'
+                                }`}
+                        >
+                            Tarifler
+                            <div className="text-[10px] font-black px-1.5 py-0.5 bg-chefie-card border border-chefie-border rounded-md text-chefie-secondary -mt-1">
+                                {profile?.recipe_count || recipes.length}
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('favorites')}
+                            className={`pb-4 font-bold text-base transition-all border-b-[3px] relative top-[3px] ${activeTab === 'favorites'
+                                    ? 'text-chefie-text border-chefie-text dark:border-white'
+                                    : 'text-chefie-secondary border-transparent hover:text-chefie-text hover:border-chefie-border'
+                                }`}
+                        >
+                            Beğenilenler
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('notifications')}
+                            className={`pb-4 font-bold text-base transition-all border-b-[3px] relative top-[3px] ${activeTab === 'notifications'
+                                    ? 'text-chefie-text border-chefie-text dark:border-white'
+                                    : 'text-chefie-secondary border-transparent hover:text-chefie-text hover:border-chefie-border'
+                                }`}
+                        >
+                            {t('profile.tabs.notifications')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Content Area */}
-                <div className="space-y-8">
+                <div className="w-full">
                     {(activeTab === 'recipes' || activeTab === 'favorites') && (
-                        <>
-                            {(activeTab === 'recipes' ? recipes : userFavorites).length > 0 ? (
-                                (activeTab === 'recipes' ? recipes : userFavorites).map(recipe => (
-                                    <div key={recipe.id} className="bg-chefie-card rounded-[2.5rem] border border-chefie-border overflow-hidden shadow-md hover:shadow-xl transition-shadow">
-                                        {/* Card Header */}
-                                        <div className="p-5 flex items-center justify-between">
-                                            <Link to={`/profile/${profile.id}`} className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-border shadow-sm">
-                                                    {profile.profile_image ? (
-                                                        <img src={getImageUrl(profile.profile_image)} className="w-full h-full object-cover" alt="" />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-xs font-bold">
-                                                            {(profile.username || 'U').charAt(0).toUpperCase()}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-sm text-chefie-text">{profile.full_name || profile.username}</div>
-                                                    <div className="text-[10px] text-chefie-secondary font-medium tracking-wide">
-                                                        {new Date(recipe.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'long' }).toUpperCase()}
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                            <button className="p-2 text-chefie-secondary/50 hover:text-chefie-text transition-colors">
-                                                <Globe className="w-4 h-4" />
-                                            </button>
-                                        </div>
-
-                                        {/* Content Text */}
-                                        <div className="px-6 pb-4">
-                                            <h3 className="font-bold text-lg mb-1.5 hover:text-chefie-green transition-colors leading-tight text-chefie-text">
-                                                <Link to={`/recipes/${recipe.id}`}>{recipe.title}</Link>
-                                            </h3>
-                                            <p className="text-chefie-secondary text-sm line-clamp-2 leading-relaxed">
-                                                {recipe.description}
-                                            </p>
-                                        </div>
-
+                        (activeTab === 'recipes' ? recipes : userFavorites).length > 0 ? (
+                            <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-8">
+                                {(activeTab === 'recipes' ? recipes : userFavorites).map(recipe => (
+                                    <div key={recipe.id} className="bg-chefie-card rounded-[2rem] border border-chefie-border overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col h-full">
                                         {/* Media */}
-                                        <Link to={`/recipes/${recipe.id}`} className="block relative aspect-[1.1] mx-5 rounded-[2rem] overflow-hidden group shadow-inner">
+                                        <Link to={`/recipes/${recipe.id}`} className="block relative aspect-[4/3] overflow-hidden group">
                                             <img
                                                 src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
                                                 alt={recipe.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
                                             {recipe.prep_time && (
-                                                <div className="absolute top-4 right-4 bg-chefie-card/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-chefie-text flex items-center gap-1.5 border border-chefie-border shadow-md">
+                                                <div className="absolute top-3 right-3 bg-chefie-card/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-black text-chefie-text flex items-center gap-1.5 border border-chefie-border shadow-sm">
                                                     <Clock className="w-3 h-3 text-chefie-yellow" /> {recipe.prep_time.toString().toUpperCase()}
                                                 </div>
                                             )}
                                         </Link>
 
-                                        {/* Engagement Footer */}
-                                        <div className="p-5 flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex items-center gap-2 bg-chefie-cream px-4 py-2.5 rounded-full border border-chefie-border hover:bg-chefie-cream/80 transition-colors cursor-pointer group">
-                                                    <MessageCircle className="w-4 h-4 text-chefie-secondary/50 group-hover:text-chefie-green" />
-                                                    <span className="text-xs font-bold text-chefie-text">{recipe.comment_count || 0}</span>
+                                        {/* Content Area */}
+                                        <div className="p-4 flex-1 flex flex-col">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="text-[10px] text-chefie-secondary font-bold uppercase tracking-wider">
+                                                    {new Date(recipe.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                                                 </div>
-                                                <div className="flex items-center gap-2 bg-chefie-cream px-4 py-2.5 rounded-full border border-chefie-border hover:bg-chefie-cream/80 transition-colors cursor-pointer group">
-                                                    <Heart className="w-4 h-4 text-chefie-secondary/50 group-hover:text-rose-500" />
-                                                    <span className="text-xs font-bold text-chefie-text">{recipe.favorite_count || 0}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-chefie-text">
+                                                        <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
+                                                        {recipe.favorite_count || 0}
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {isLoggedIn && currentUser.id === recipe.author_id && (
+                                            <h3 className="font-bold text-base mb-2 hover:text-chefie-green transition-colors line-clamp-1 leading-tight text-chefie-text">
+                                                <Link to={`/recipes/${recipe.id}`}>{recipe.title}</Link>
+                                            </h3>
+                                            
+                                            <p className="text-chefie-secondary text-xs line-clamp-2 leading-relaxed mb-4">
+                                                {recipe.description}
+                                            </p>
+
+                                            <div className="mt-auto flex items-center justify-between pt-4 border-t border-chefie-border">
                                                 <div className="flex items-center gap-2">
-                                                    <Link to={`/admin/recipes/edit/${recipe.id}`} className="p-2.5 text-chefie-yellow hover:text-chefie-yellow/80 transition-colors hover:bg-chefie-yellow/5 rounded-full">
+                                                    <div className="w-6 h-6 rounded-full overflow-hidden border border-chefie-border">
+                                                        {profile.profile_image ? (
+                                                            <img src={getImageUrl(profile.profile_image)} className="w-full h-full object-cover" alt="" />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-[10px] font-black">
+                                                                {(profile.username || 'U').charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[11px] font-bold text-chefie-text">@{profile.username}</span>
+                                                </div>
+
+                                                {isLoggedIn && currentUser.id === recipe.author_id && (
+                                                    <Link to={`/admin/recipes/edit/${recipe.id}`} className="text-chefie-yellow hover:scale-110 transition-transform">
                                                         <Edit className="w-4 h-4" />
                                                     </Link>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))
-                            ) : (
-                                <div className="py-24 text-center">
-                                    <div className="w-20 h-20 bg-chefie-green/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-chefie-green/20">
-                                        <ChefHat className="w-10 h-10 text-chefie-green" />
-                                    </div>
-                                    <p className="text-chefie-secondary font-medium text-lg">{t('profile.no_posts')}</p>
+                            }</div>
+                        ) : (
+                            <div className="py-32 text-center w-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                <div className="w-24 h-24 bg-chefie-green/10 rounded-full flex items-center justify-center mb-6 border border-chefie-green/20 shadow-inner">
+                                    <ChefHat className="w-12 h-12 text-chefie-green" />
                                 </div>
-                            )}
+                                <h3 className="text-chefie-text font-bold text-xl mb-2">{activeTab === 'recipes' ? 'Henüz Paylaşım Yok' : 'Henüz Beğeni Yok'}</h3>
+                                <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_posts')}</p>
+                            </div>
+                        )
+                    )}
 
-                            {hasMore && activeTab === 'recipes' && (
-                                <div className="pt-8 text-center pb-8">
-                                    <button
-                                        onClick={() => fetchRecipes(true)}
-                                        className="px-10 py-3.5 bg-chefie-card border border-chefie-border text-chefie-secondary font-bold rounded-full hover:bg-chefie-cream transition-all text-sm shadow-md hover:shadow-xl"
-                                        disabled={loading}
-                                    >
-                                        {loading ? t('profile.loading') : t('profile.show_more')}
-                                    </button>
-                                </div>
-                            )}
-                        </>
+                    {hasMore && activeTab === 'recipes' && (
+                        <div className="pt-12 pb-16 flex justify-center w-full">
+                            <button
+                                onClick={() => fetchRecipes(true)}
+                                className="px-12 py-4 bg-chefie-card/80 backdrop-blur-md border border-chefie-border text-chefie-secondary font-bold rounded-full hover:bg-chefie-cream hover:text-chefie-text transition-all text-sm shadow-md hover:shadow-xl"
+                                disabled={loading}
+                            >
+                                {loading ? t('profile.loading') : t('profile.show_more')}
+                            </button>
+                        </div>
                     )}
 
                     {activeTab === 'notifications' && (
-                        <div className="space-y-4">
+                        <div className="w-full">
                             {pendingRequests.length === 0 ? (
-                                <div className="py-24 text-center">
-                                    <div className="w-20 h-20 bg-chefie-yellow/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-chefie-yellow/20">
-                                        <Bell className="w-10 h-10 text-chefie-yellow" />
+                                <div className="py-32 text-center w-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                    <div className="w-24 h-24 bg-chefie-yellow/10 rounded-full flex items-center justify-center mb-6 border border-chefie-yellow/20 shadow-inner">
+                                        <Bell className="w-12 h-12 text-chefie-yellow" />
                                     </div>
-                                    <p className="text-chefie-secondary font-medium text-lg">{t('profile.no_notifications')}</p>
+                                    <h3 className="text-chefie-text font-bold text-xl mb-2">Bildirim Yok</h3>
+                                    <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_notifications')}</p>
                                 </div>
                             ) : (
-                                pendingRequests.map((request) => (
-                                    <div key={request.friendship_id} className="bg-chefie-card rounded-3xl border border-chefie-border p-5 flex items-center gap-4 animate-in fade-in duration-500 shadow-md">
-                                        <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 shadow-sm">
-                                            {request.profile_image ? (
-                                                <img src={getImageUrl(request.profile_image)} className="w-full h-full object-cover" alt="" />
-                                            ) : (
-                                                <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold">
-                                                    {(request.username || 'U').charAt(0).toUpperCase()}
-                                                </div>
-                                            )}
+                                <div className="space-y-4">
+                                    {pendingRequests.map((request) => (
+                                        <div key={request.friendship_id} className="bg-chefie-card rounded-3xl border border-chefie-border p-5 flex items-center gap-4 animate-in fade-in duration-500 shadow-md">
+                                            <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 shadow-sm">
+                                                {request.profile_image ? (
+                                                    <img src={getImageUrl(request.profile_image)} className="w-full h-full object-cover" alt="" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold">
+                                                        {(request.username || 'U').charAt(0).toUpperCase()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold truncate text-chefie-text">@{request.username}</p>
+                                                <p className="text-[11px] text-chefie-secondary font-medium">{t('profile.wants_to_follow')}</p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => acceptRequest(request.friendship_id)}
+                                                    className="w-10 h-10 bg-chefie-green rounded-full flex items-center justify-center text-white shadow-lg shadow-chefie-green/10 hover:scale-110 transition-transform"
+                                                >
+                                                    <Check className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => rejectRequest(request.friendship_id)}
+                                                    className="w-10 h-10 bg-chefie-cream rounded-full flex items-center justify-center text-chefie-secondary border border-chefie-border hover:bg-chefie-cream/80 transition-colors"
+                                                >
+                                                    <X className="w-5 h-5" />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold truncate text-chefie-text">@{request.username}</p>
-                                            <p className="text-[11px] text-chefie-secondary font-medium">{t('profile.wants_to_follow')}</p>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => acceptRequest(request.friendship_id)}
-                                                className="w-10 h-10 bg-chefie-green rounded-full flex items-center justify-center text-white shadow-lg shadow-chefie-green/10 hover:scale-110 transition-transform"
-                                            >
-                                                <Check className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => rejectRequest(request.friendship_id)}
-                                                className="w-10 h-10 bg-chefie-cream rounded-full flex items-center justify-center text-chefie-secondary border border-chefie-border hover:bg-chefie-cream/80 transition-colors"
-                                            >
-                                                <X className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             )}
                         </div>
                     )}
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 // Scoped CSS for friend system components
@@ -1081,6 +1185,17 @@ const friendStyles = `
         .friend-incoming-actions {
             flex-direction: row;
         }
+    }
+    /* Scrollbar Hidden Everywhere */
+    *::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        background: transparent !important;
+    }
+    * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
     }
 `;
 

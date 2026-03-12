@@ -129,7 +129,9 @@ router.get('/users/:id/profile', async (req, res) => {
             SELECT 
                 id, username, full_name, profile_image, country, created_at,
                 (SELECT COUNT(*) FROM friendships WHERE addressee_id = $1 AND status = 'accepted') as follower_count,
-                (SELECT COUNT(*) FROM friendships WHERE requester_id = $2 AND status = 'accepted') as following_count
+                (SELECT COUNT(*) FROM friendships WHERE requester_id = $2 AND status = 'accepted') as following_count,
+                (SELECT COUNT(*) FROM recipes WHERE user_id = $3) as recipe_count,
+                (SELECT COUNT(*) FROM favorites f JOIN recipes r ON f.recipe_id = r.id WHERE r.user_id = $3) as likes_count
             FROM users WHERE id = $3
         `, [req.params.id, req.params.id, req.params.id]);
         const user = users[0];
