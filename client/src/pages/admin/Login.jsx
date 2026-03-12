@@ -52,7 +52,7 @@ const Login = () => {
                 const token = res.data.token;
                 const user = res.data.user;
                 // Kullanıcı isteği üzerine sadece oturum süresince (tab kapatılana kadar) geçerli
-                sessionStorage.setItem('token', token);
+                safeSetSessionStorage('token', token);
                 safeSetSessionStorage('user', JSON.stringify(user));
 
                 // Başarılı girişten sonra gidilecek yer (eğer bir yerden yönlendirilmişse oraya, yoksa dashboard'a)

@@ -1157,8 +1157,11 @@ i18n
             }
         },
         detection: {
-            // Disable localStorage caching to prevent SecurityError
-            caches: ['cookie'],
+            // Tamamen kapatıyoruz çünkü Safari PWA / Gizli sekmelerde 
+            // cookie veya localStorage'a yazmaya çalışmak bile SecurityError fırlatıp
+            // sitenin beyaz ekranda kalmasına sebep oluyor.
+            order: ['navigator'], 
+            caches: [],
         },
         fallbackLng: 'tr',
         interpolation: {

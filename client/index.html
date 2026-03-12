@@ -2,6 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function() {
+        try {
+          var x = '__storage_test__';
+          window.localStorage.setItem(x, x);
+          window.localStorage.removeItem(x);
+        } catch (e) {
+          console.warn('Storage isolated. Using mock storage to prevent crashes.');
+          var memStorage = {};
+          var MemStorage = {
+            getItem: function(k) { return memStorage[k] || null; },
+            setItem: function(k, v) { memStorage[k] = v; },
+            removeItem: function(k) { delete memStorage[k]; },
+            clear: function() { memStorage = {}; }
+          };
+          Object.defineProperty(window, 'localStorage', { value: MemStorage, writable: false });
+          Object.defineProperty(window, 'sessionStorage', { value: Object.assign({}, MemStorage), writable: false });
+        }
+      })();
+    </script>
     <link rel="icon" type="image/png" href="/tarifo-icon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
