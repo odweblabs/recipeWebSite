@@ -7,7 +7,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, ArrowLeft, Printer, Share2, Heart, ChefHat, Star, MessageSquare, Send, Smartphone } from 'lucide-react';
 
 const RecipeDetail = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const [recipe, setRecipe] = useState(null);
