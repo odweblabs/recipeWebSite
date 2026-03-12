@@ -3,7 +3,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, X, Utensils, ArrowRight, Trash2, LayoutGrid, Star, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { safeGetStorage, safeSetStorage } from '../utils/storage';
+import { safeGetStorage, safeSetStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
 
 const MENUS_STORAGE_KEY = 'chefie_menus_v1';
 

@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage } from '../utils/storage';
+import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
 import React, { useEffect, useState } from 'react';
