@@ -18,7 +18,7 @@ i18n
                         blog: "Blog",
                         lists: "Listeler",
                         calories: "Kaç Kalori?",
-                        admin_panel: "Giriş Yap / Kaydol",
+                        admin_panel: "Yönetici Paneli",
                         login: "Giriş Yap",
                         logout: "Çıkış Yap",
                         share_recipe: "Tarif Paylaş"
@@ -611,7 +611,7 @@ i18n
                         blog: "Blog",
                         lists: "Lists",
                         calories: "Calories?",
-                        admin_panel: "Login / Register",
+                        admin_panel: "Admin Panel",
                         login: "Login",
                         logout: "Logout",
                         share_recipe: "Share Recipe"

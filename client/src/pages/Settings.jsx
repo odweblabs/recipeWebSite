@@ -10,6 +10,7 @@ import {
     Moon,
     Globe,
     Users,
+    LogOut,
     HelpCircle,
     Info,
     Check,

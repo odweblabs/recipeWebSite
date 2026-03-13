@@ -2,21 +2,24 @@ import { safeGetSessionStorage, safeSetSessionStorage, safeRemoveStorage, safeCl
 import API_BASE from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ChefHat, Heart, BookOpen, Users, Settings, LogOut, LayoutDashboard, UtensilsCrossed, ShoppingCart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const Sidebar = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const [user, setUser] = useState(null);
 
     useEffect(() => {
         const userData = safeGetSessionStorage('user');
         if (userData) {
             setUser(JSON.parse(userData));
+        } else {
+            setUser(null);
         }
-    }, []);
+    }, [location]);
 
     const handleLogout = () => {
         safeClearAuth();
