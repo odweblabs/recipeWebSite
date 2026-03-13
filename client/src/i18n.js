@@ -18,7 +18,7 @@ i18n
                         blog: "Blog",
                         lists: "Listeler",
                         calories: "Kaç Kalori?",
-                        admin_panel: "Yönetici Paneli",
+                        admin_panel: "Giriş Yap / Kaydol",
                         login: "Giriş Yap",
                         logout: "Çıkış Yap",
                         share_recipe: "Tarif Paylaş"
@@ -247,13 +247,30 @@ i18n
                         items: {
                             pause_notifications: "Bildirimleri duraklat",
                             general_settings: "Genel Ayarlar",
-                            dark_mode: "Karanlık Mod",
-                            language: "Dil Seçeneği",
+                            dark_mode: "Koyu Tema",
+                            language: "Dil",
                             contacts: "Kişilerim",
-                            faq: "SSS (Sıkça Sorulan Sorular)",
+                            share_app: "Uygulamayı Paylaş",
+                            send_suggestion: "Öneri Gönder",
+                            report_bug: "Hata Bildir",
+                            faq: "Sıkça Sorulan Sorular",
                             terms: "Kullanım Koşulları",
-                            policy: "Kullanıcı Politikası",
-                            logout: "Çıkış Yap"
+                            policy: "Gizlilik Politikası",
+                            logout: "Oturumu Kapat"
+                        },
+                        feedback: {
+                            suggestion_title: "Öneri Gönder",
+                            bug_title: "Hata Bildir",
+                            placeholder: "Mesajınız...",
+                            submit: "Gönder",
+                            success: "Geri bildiriminiz için teşekkürler!",
+                            error: "Bir hata oluştu, lütfen tekrar deneyin."
+                        },
+                        share: {
+                            title: "Tarifo - Mutfaktaki En İyi Yardımcın!",
+                            text: "Binlerce nefis tarife ulaşmak için Tarifo'yu dene!",
+                            success: "Paylaşıldı!",
+                            error: "Paylaşım başarısız."
                         }
                     },
                     edit_profile: {
@@ -262,7 +279,9 @@ i18n
                             full_name: "Ad Soyad",
                             current_password: "Mevcut Şifre",
                             new_password: "Yeni Şifre",
-                            confirm_password: "Yeni Şifre Tekrar"
+                            confirm_password: "Şifreyi Onayla",
+                            country: "Ülke",
+                            city: "Şehir"
                         },
                         buttons: {
                             save: "Değişiklikleri Kaydet",
@@ -592,7 +611,7 @@ i18n
                         blog: "Blog",
                         lists: "Lists",
                         calories: "Calories?",
-                        admin_panel: "Admin Panel",
+                        admin_panel: "Login / Register",
                         login: "Login",
                         logout: "Logout",
                         share_recipe: "Share Recipe"
@@ -836,7 +855,9 @@ i18n
                             full_name: "Full Name",
                             current_password: "Current Password",
                             new_password: "New Password",
-                            confirm_password: "Confirm New Password"
+                            confirm_password: "Confirm Password",
+                            country: "Country",
+                            city: "City"
                         },
                         buttons: {
                             save: "Save Changes",

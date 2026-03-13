@@ -47,7 +47,9 @@ router.post('/login', async (req, res) => {
                 role: user.role || 'user',
                 full_name: user.full_name,
                 profile_image: user.profile_image,
-                country: user.country || null
+                country: user.country || null,
+                city: user.city || null,
+                notifications_paused: user.notifications_paused || false
             }
         });
     } catch (err) {
@@ -72,8 +74,8 @@ router.post('/register', upload.single('profile_image'), async (req, res) => {
         const role = userCount === 0 ? 'admin' : 'user';
 
         const info = await executeQuery(
-            'INSERT INTO users (username, password, full_name, profile_image, role, country) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-            [username, hashedPassword, full_name || null, profile_image || null, role, country || null]
+            'INSERT INTO users (username, password, full_name, profile_image, role, country, city) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+            [username, hashedPassword, full_name || null, profile_image || null, role, country || null, req.body.city || null]
         );
         res.json({ id: info.lastInsertRowid });
     } catch (err) {
@@ -84,7 +86,7 @@ router.post('/register', upload.single('profile_image'), async (req, res) => {
 // Get current user info
 router.get('/me', authenticateToken, async (req, res) => {
     try {
-        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, country, created_at FROM users WHERE id = $1', [req.user.id]);
+        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, country, city, notifications_paused, created_at FROM users WHERE id = $1', [req.user.id]);
         const user = users[0];
         res.json(user);
     } catch (err) {
@@ -103,10 +105,24 @@ router.put('/profile', authenticateToken, upload.single('profile_image'), async 
     }
     try {
         await executeQuery(
-            'UPDATE users SET full_name = $1, profile_image = $2, country = $3 WHERE id = $4',
-            [full_name, profile_image, country || null, req.user.id]
+            'UPDATE users SET full_name = $1, profile_image = $2, country = $3, city = $4 WHERE id = $5',
+            [full_name, profile_image, country || null, req.body.city || null, req.user.id]
         );
         res.json({ message: 'Profil güncellendi' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Toggle notifications
+router.put('/notifications/toggle', authenticateToken, async (req, res) => {
+    const { paused } = req.body;
+    try {
+        await executeQuery(
+            'UPDATE users SET notifications_paused = $1 WHERE id = $2',
+            [paused, req.user.id]
+        );
+        res.json({ message: `Notifications ${paused ? 'paused' : 'resumed'}` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -127,7 +143,7 @@ router.get('/users/:id/profile', async (req, res) => {
     try {
         const users = await executeQuery(`
             SELECT 
-                id, username, full_name, profile_image, country, created_at,
+                id, username, full_name, profile_image, country, city, notifications_paused, created_at,
                 (SELECT COUNT(*) FROM friendships WHERE addressee_id = $1 AND status = 'accepted') as follower_count,
                 (SELECT COUNT(*) FROM friendships WHERE requester_id = $2 AND status = 'accepted') as following_count,
                 (SELECT COUNT(*) FROM recipes WHERE user_id = $3) as recipe_count,
@@ -145,7 +161,7 @@ router.get('/users/:id/profile', async (req, res) => {
 // Get all users (Admin only)
 router.get('/users', adminOnly, async (req, res) => {
     try {
-        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, can_comment, country, created_at FROM users ORDER BY created_at DESC');
+        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, can_comment, country, city, created_at FROM users ORDER BY created_at DESC');
         res.json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -269,7 +285,7 @@ router.get('/activity', adminOnly, async (req, res) => {
     try {
         const activities = await executeQuery(`
             SELECT ua.user_id, ua.total_seconds, ua.last_active,
-                   u.username, u.full_name, u.profile_image, u.role, u.country
+                   u.username, u.full_name, u.profile_image, u.role, u.country, u.city
             FROM user_activity ua
             LEFT JOIN users u ON ua.user_id = u.id
             ORDER BY ua.total_seconds DESC

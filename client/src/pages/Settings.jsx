@@ -12,10 +12,11 @@ import {
     Users,
     HelpCircle,
     Info,
-    Shield,
-    LogOut,
-    Camera,
-    Check
+    Check,
+    Share2,
+    MessageSquare,
+    AlertCircle,
+    X
 } from 'lucide-react';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
@@ -30,15 +31,23 @@ const Settings = () => {
     const [user, setUser] = useState(JSON.parse(safeGetSessionStorage('user') || '{}'));
     const [loading, setLoading] = useState(true);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [feedbackType, setFeedbackType] = useState('suggestion');
+    const [feedbackContent, setFeedbackContent] = useState('');
+    const [feedbackLoading, setFeedbackLoading] = useState(false);
 
     const [toggles, setToggles] = useState({
-        pauseNotifications: false,
+        pauseNotifications: user.notifications_paused || false,
         darkMode: theme === 'dark'
     });
 
     useEffect(() => {
-        setToggles(prev => ({ ...prev, darkMode: theme === 'dark' }));
-    }, [theme]);
+        setToggles(prev => ({ 
+            ...prev, 
+            darkMode: theme === 'dark',
+            pauseNotifications: user.notifications_paused || false
+        }));
+    }, [theme, user.notifications_paused]);
 
     useEffect(() => {
         if (!token) {
@@ -72,6 +81,62 @@ const Settings = () => {
     const changeLanguage = (lng) => {
         i18n.changeLanguage(lng);
         setShowLanguageModal(false);
+    };
+
+    const handleNotificationToggle = async () => {
+        const newValue = !toggles.pauseNotifications;
+        try {
+            await axios.put(`${API_BASE}/api/auth/notifications/toggle`, { paused: newValue }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setToggles(prev => ({ ...prev, pauseNotifications: newValue }));
+            const newUser = { ...user, notifications_paused: newValue };
+            setUser(newUser);
+            safeSetSessionStorage('user', JSON.stringify(newUser));
+        } catch (err) {
+            console.error('Error toggling notifications:', err);
+        }
+    };
+
+    const handleShare = async () => {
+        const shareData = {
+            title: t('settings.share.title'),
+            text: t('settings.share.text'),
+            url: window.location.origin
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(window.location.origin);
+                alert(t('settings.share.success'));
+            }
+        } catch (err) {
+            console.error('Error sharing:', err);
+        }
+    };
+
+    const handleFeedbackSubmit = async (e) => {
+        e.preventDefault();
+        if (!feedbackContent.trim()) return;
+
+        setFeedbackLoading(true);
+        try {
+            await axios.post(`${API_BASE}/api/feedback`, {
+                type: feedbackType,
+                content: feedbackContent
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert(t('settings.feedback.success'));
+            setFeedbackContent('');
+            setShowFeedbackModal(false);
+        } catch (err) {
+            alert(t('settings.feedback.error'));
+        } finally {
+            setFeedbackLoading(false);
+        }
     };
 
     const Toggle = ({ active, onToggle }) => (
@@ -161,7 +226,7 @@ const Settings = () => {
                                     active={toggles.pauseNotifications}
                                     onToggle={(e) => {
                                         e.stopPropagation();
-                                        setToggles(prev => ({ ...prev, pauseNotifications: !prev.pauseNotifications }));
+                                        handleNotificationToggle();
                                     }}
                                 />
                             }
@@ -205,11 +270,39 @@ const Settings = () => {
                             }
                         />
                         <div className="h-px bg-chefie-border mx-4" />
-                        <MenuItem icon={Users} title={t('settings.items.contacts')} />
+                        <MenuItem 
+                            icon={Share2} 
+                            title={t('settings.items.share_app')} 
+                            onClick={handleShare}
+                        />
                     </div>
                 </div>
 
-                {/* Group 3: Support & Legal */}
+                {/* Group 3: Feedback */}
+                <div className="space-y-2">
+                    <h3 className="text-[11px] font-black text-chefie-secondary uppercase tracking-[0.2em] ml-4">{t('settings.groups.support')}</h3>
+                    <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-sm overflow-hidden">
+                        <MenuItem 
+                            icon={MessageSquare} 
+                            title={t('settings.items.send_suggestion')} 
+                            onClick={() => {
+                                setFeedbackType('suggestion');
+                                setShowFeedbackModal(true);
+                            }}
+                        />
+                        <div className="h-px bg-chefie-border mx-4" />
+                        <MenuItem 
+                            icon={AlertCircle} 
+                            title={t('settings.items.report_bug')} 
+                            onClick={() => {
+                                setFeedbackType('bug_report');
+                                setShowFeedbackModal(true);
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Group 4: Support & Legal */}
                 <div className="space-y-2">
                     <h3 className="text-[11px] font-black text-chefie-secondary uppercase tracking-[0.2em] ml-4">{t('settings.groups.support')}</h3>
                     <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-sm overflow-hidden">
@@ -272,6 +365,41 @@ const Settings = () => {
                                 Kapat / Close
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Feedback Modal */}
+            {showFeedbackModal && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8 sm:items-center">
+                    <div
+                        className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+                        onClick={() => setShowFeedbackModal(false)}
+                    />
+                    <div className="relative w-full max-w-sm bg-chefie-card rounded-[32px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-300 border border-chefie-border">
+                        <div className="p-6 flex items-center justify-between border-b border-chefie-border">
+                            <h3 className="text-xl font-bold text-chefie-text">
+                                {feedbackType === 'suggestion' ? t('settings.feedback.suggestion_title') : t('settings.feedback.bug_title')}
+                            </h3>
+                            <button onClick={() => setShowFeedbackModal(false)} className="text-chefie-secondary">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleFeedbackSubmit} className="p-6 space-y-4">
+                            <textarea
+                                value={feedbackContent}
+                                onChange={(e) => setFeedbackContent(e.target.value)}
+                                placeholder={t('settings.feedback.placeholder')}
+                                className="w-full h-32 bg-chefie-cream border border-chefie-border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-chefie-green transition-all text-chefie-text resize-none"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                disabled={feedbackLoading}
+                                className="w-full py-4 bg-chefie-green text-white rounded-2xl font-bold shadow-lg shadow-chefie-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                            >
+                                {feedbackLoading ? '...' : t('settings.feedback.submit')}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}

@@ -20,7 +20,7 @@ const Login = () => {
     useEffect(() => {
         const token = safeGetToken();
         if (token) {
-            navigate('/admin/dashboard');
+            navigate('/');
         }
     }, [navigate]);
 
@@ -56,7 +56,7 @@ const Login = () => {
                 safeSetSessionStorage('user', JSON.stringify(user));
 
                 // Başarılı girişten sonra gidilecek yer (eğer bir yerden yönlendirilmişse oraya, yoksa dashboard'a)
-                const origin = location.state?.from?.pathname || '/admin/dashboard';
+                const origin = location.state?.from?.pathname || '/';
                 navigate(origin);
             } else {
                 setSuccess('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');

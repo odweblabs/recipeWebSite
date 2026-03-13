@@ -440,6 +440,14 @@ router.delete('/:id', authenticateToken, async (req, res) => {
             return res.status(403).json({ error: 'Bu işlemi yapmaya yetkiniz yok.' });
         }
 
+        // Cleanup: remove related records that might have FK constraints
+        await executeQuery('DELETE FROM comments WHERE recipe_id = $1', [recipeId]);
+        await executeQuery('DELETE FROM ratings WHERE recipe_id = $1', [recipeId]);
+        await executeQuery('DELETE FROM favorites WHERE recipe_id = $1', [recipeId]);
+        
+        // Remove from site_settings if it was the chef recommendation
+        await executeQuery("UPDATE site_settings SET value = NULL WHERE key = 'chef_recommendation_id' AND value = $1", [recipeId.toString()]);
+
         await executeQuery('DELETE FROM recipes WHERE id = $1', [recipeId]);
         res.json({ message: 'Recipe deleted' });
     } catch (err) {

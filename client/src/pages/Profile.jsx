@@ -544,7 +544,7 @@ const Profile = () => {
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1.5 bg-chefie-card md:bg-white/50 md:dark:bg-chefie-dark/50 md:backdrop-blur-md px-3 py-1.5 rounded-full border border-chefie-border shadow-sm">
                                 <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
-                                <span className="font-bold text-sm text-chefie-text">5</span>
+                                <span className="font-bold text-sm text-chefie-text">{profile?.likes_count || 0}</span>
                             </div>
                             <button
                                 onClick={() => isOwner && navigate('/settings')}
@@ -559,7 +559,7 @@ const Profile = () => {
                     <div className="flex flex-col items-center text-center mb-10 md:flex-row md:items-start md:text-left md:gap-12 md:mb-16 relative z-10">
                         
                         <div className="relative mb-6 md:mb-0 md:flex-shrink-0">
-                            <div className="w-32 h-32 md:w-64 md:h-64 rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-chefie-cream dark:border-chefie-dark shadow-xl md:shadow-2xl bg-chefie-card md:bg-white md:dark:bg-chefie-dark transition-all">
+                            <div className="w-32 h-32 md:w-64 md:h-64 rounded-full overflow-hidden border-4 md:border-8 border-chefie-cream dark:border-chefie-dark shadow-xl md:shadow-2xl bg-chefie-card md:bg-white md:dark:bg-chefie-dark transition-all">
                                 {profile.profile_image ? (
                                     <img
                                         src={getImageUrl(profile.profile_image)}
@@ -579,17 +579,26 @@ const Profile = () => {
                             <div>
                                 <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
                                     <h2 className="text-2xl md:text-[2.5rem] font-bold font-sans text-chefie-text tracking-tight mb-0 md:-mt-2">{profile.full_name || profile.username}</h2>
-                                    <div className="hidden md:flex items-center px-1.5 py-0.5 bg-blue-500 text-white text-[10px] font-black rounded-r-md rounded-l font-sans">
-                                        PRO <Flame className="w-3 h-3 ml-1 fill-white" />
-                                    </div>
-                                    <BadgeCheck className="w-6 h-6 md:hidden text-chefie-yellow fill-chefie-yellow text-black" />
+                                    {profile.recipe_count > 20 && (
+                                        <>
+                                            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-blue-500 text-white text-[11px] font-black rounded-full font-sans shadow-lg shadow-blue-500/30">
+                                                <span>PRO</span>
+                                                <Flame className="w-3.5 h-3.5 fill-white" />
+                                            </div>
+                                            <BadgeCheck className="w-6 h-6 md:hidden text-chefie-yellow fill-chefie-yellow text-black" />
+                                        </>
+                                    )}
                                 </div>
 
                                 <div className="text-chefie-secondary text-sm md:text-base mb-6 max-w-sm mx-auto md:mx-0 font-medium">
                                     <span className="md:hidden">@{profile.username}</span>
                                     <div className="hidden md:block">
                                         <div className="text-chefie-text font-bold mb-1">Usta Şef & Tarif Yaratıcısı</div>
-                                        <div className="text-chefie-secondary opacity-70">İstanbul, Türkiye</div>
+                                    {(profile.city || profile.country) && (
+                                        <div className="text-chefie-secondary opacity-70">
+                                            {[profile.city, profile.country].filter(Boolean).join(', ')}
+                                        </div>
+                                    )}
                                     </div>
                                 </div>
 
@@ -614,7 +623,7 @@ const Profile = () => {
                                     ) : (
                                         <button 
                                             onClick={() => navigate('/settings')}
-                                            className="hidden md:flex items-center gap-2 px-8 py-3 bg-chefie-text text-white dark:bg-white dark:text-chefie-dark font-bold rounded-xl hover:scale-105 transition-all shadow-lg"
+                                            className="hidden md:flex items-center gap-2 px-8 py-3 bg-chefie-yellow text-white font-bold rounded-xl hover:scale-105 transition-all shadow-lg"
                                         >
                                             Profili Düzenle
                                         </button>
@@ -623,19 +632,7 @@ const Profile = () => {
                             </div>
 
                             {/* Right Side Stats (Desktop Only) */}
-                            <div className="hidden md:flex flex-col items-end">
-                                <div className="flex items-center gap-2 mb-6 pointer-events-none">
-                                    <div className="w-10 h-10 rounded-[1.2rem] bg-[#FF7F50] text-white flex items-center justify-center font-bold text-sm shadow-[0_4px_10px_rgba(255,127,80,0.3)] border-2 border-white dark:border-chefie-dark z-30">
-                                        26
-                                    </div>
-                                    <div className="w-10 h-10 rounded-[1.2rem] bg-[#6B46C1] text-white flex items-center justify-center font-bold text-sm shadow-[0_4px_10px_rgba(107,70,193,0.3)] border-2 border-white dark:border-chefie-dark -ml-5 z-20 relative">
-                                        6
-                                    </div>
-                                    <div className="w-10 h-10 rounded-[1.2rem] bg-gray-900 dark:bg-gray-100 dark:text-gray-900 text-white flex items-center justify-center font-bold text-sm shadow-[0_4px_10px_rgba(0,0,0,0.2)] border-2 border-white dark:border-chefie-dark -ml-5 z-10 relative">
-                                        12
-                                    </div>
-                                </div>
-
+                            <div className="hidden md:flex flex-col items-end justify-start pt-1">
                                 <div className="flex items-center gap-10">
                                     <div className="text-center group cursor-pointer" onClick={() => setShowFollowers(true)}>
                                         <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.followers')}</div>
@@ -702,39 +699,39 @@ const Profile = () => {
                 {/* Tab System Mobile vs Desktop */}
                 <div className="md:border-b md:border-chefie-border mb-8 md:mb-12 w-full overflow-x-auto hide-scrollbar">
                     {/* Mobile Tabs */}
-                    <div className="md:hidden flex items-center gap-2 bg-chefie-card/50 p-1 rounded-full border border-chefie-border shadow-md">
+                    <div className="md:hidden flex items-center gap-1 bg-chefie-card/50 p-1 rounded-full border border-chefie-border shadow-md">
                         <button
                             onClick={() => setActiveTab('recipes')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'recipes'
+                            className={`flex-[1.2] flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all ${activeTab === 'recipes'
                                 ? 'bg-chefie-yellow text-white shadow-md'
                                 : 'text-chefie-secondary hover:text-chefie-text'
                                 }`}
                         >
-                            <ChefHat className="w-4 h-4" />
+                            <ChefHat className="w-3.5 h-3.5" />
                             <span>{t('profile.tabs.recipes')}</span>
                             {profile?.recipe_count > 0 && (
-                                <span className="text-[10px] opacity-70 ml-1">({profile.recipe_count})</span>
+                                <span className="text-[9px] opacity-70 ml-0.5">({profile.recipe_count})</span>
                             )}
                         </button>
                         <button
                             onClick={() => setActiveTab('favorites')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all ${activeTab === 'favorites'
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all ${activeTab === 'favorites'
                                 ? 'bg-chefie-yellow text-white shadow-md'
                                 : 'text-chefie-secondary hover:text-chefie-text'
                                 }`}
                         >
-                            <Heart className="w-4 h-4" />
+                            <Heart className="w-3.5 h-3.5" />
                             <span>{t('profile.tabs.favorites')}</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('notifications')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm transition-all relative ${activeTab === 'notifications'
+                            className={`flex-[1.1] flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all relative ${activeTab === 'notifications'
                                 ? 'bg-chefie-yellow text-white shadow-md'
                                 : 'text-chefie-secondary hover:text-chefie-text'
                                 }`}
                         >
                             <div className="relative">
-                                <Bell className="w-4 h-4" />
+                                <Bell className="w-3.5 h-3.5" />
                                 {pendingRequests.length > 0 && (
                                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                                 )}

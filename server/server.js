@@ -55,6 +55,7 @@ const authRoutes = require('./routes/auth');
 const favoritesRoutes = require('./routes/favorites');
 const friendsRoutes = require('./routes/friends');
 const listsRoutes = require('./routes/lists');
+const feedbackRoutes = require('./routes/feedback');
 
 app.use('/api/recipes', recipesRoutes);
 app.use('/api/categories', categoriesRoutes);
@@ -62,6 +63,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/lists', listsRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Health check endpoint with DB status
 app.get('/api/health', async (req, res) => {

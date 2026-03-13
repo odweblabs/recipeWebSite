@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { safeGetToken, safeGetSessionStorage } from '../../utils/storage';
 
 const Navbar = () => {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
+    const [token, setToken] = useState(null);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const storedToken = safeGetToken();
+        const storedUser = JSON.parse(safeGetSessionStorage('user') || '{}');
+        setToken(storedToken);
+        setUser(storedUser);
+    }, []);
 
     return (
         <nav className="bg-chefie-card/80 backdrop-blur-md shadow-sm border-b border-chefie-border sticky top-0 z-50 print:hidden">
@@ -27,7 +37,11 @@ const Navbar = () => {
                         <Link to="/trend" className="px-4 py-2 text-gray-500 hover:text-chefie-yellow font-bold transition-all text-xs tracking-widest">{t('nav.trend').toUpperCase()}</Link>
                         <Link to="/what-to-cook" className="px-4 py-2 text-gray-500 hover:text-chefie-yellow font-bold transition-all text-xs tracking-widest">{t('nav.what_to_cook').toUpperCase()}</Link>
                         <Link to="/lists" className="px-4 py-2 text-gray-500 hover:text-chefie-yellow font-bold transition-all text-xs tracking-widest">{t('nav.lists').toUpperCase()}</Link>
-                        <Link to="/admin/login" className="ml-4 px-6 py-2.5 bg-chefie-dark text-white rounded-2xl hover:bg-chefie-yellow transition-all text-xs font-black shadow-lg shadow-gray-100">{t('nav.login').toUpperCase()}</Link>
+                        {token && user?.id ? (
+                            <Link to={`/profile/${user.id}`} className="ml-4 px-6 py-2.5 bg-chefie-yellow text-white rounded-2xl hover:bg-chefie-dark transition-all text-xs font-black shadow-lg shadow-yellow-100">PROFİLİM</Link>
+                        ) : (
+                            <Link to="/admin/login" className="ml-4 px-6 py-2.5 bg-chefie-dark text-white rounded-2xl hover:bg-chefie-yellow transition-all text-xs font-black shadow-lg shadow-gray-100">{t('nav.login').toUpperCase()}</Link>
+                        )}
                     </div>
 
                     <div className="md:hidden flex items-center">
@@ -52,7 +66,11 @@ const Navbar = () => {
                         <Link to="/lists" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">{t('nav.lists').toUpperCase()}</Link>
                         <Link to="/blog" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">{t('nav.blog').toUpperCase()}</Link>
                         <div className="h-px bg-chefie-border my-4 mx-4"></div>
-                        <Link to="/admin/login" onClick={() => setIsOpen(false)} className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4">{t('nav.admin_panel').toUpperCase()} / {t('nav.login').toUpperCase()}</Link>
+                        {token && user?.id ? (
+                            <Link to={`/profile/${user.id}`} onClick={() => setIsOpen(false)} className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4">PROFİLİM</Link>
+                        ) : (
+                            <Link to="/admin/login" onClick={() => setIsOpen(false)} className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4">{t('nav.admin_panel').toUpperCase()}</Link>
+                        )}
                     </div>
                 </div>
             )}

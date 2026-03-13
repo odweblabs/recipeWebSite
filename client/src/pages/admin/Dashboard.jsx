@@ -111,6 +111,7 @@ const Dashboard = () => {
     // Pending Friends State
     const [pendingFriends, setPendingFriends] = useState([]);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [feedback, setFeedback] = useState([]);
 
     useEffect(() => {
         if (!token) {
@@ -130,6 +131,7 @@ const Dashboard = () => {
             const activityInterval = setInterval(() => {
                 fetchActivity();
                 fetchPendingFriends();
+                fetchFeedback();
             }, 60000);
             return () => clearInterval(activityInterval);
         }
@@ -138,7 +140,7 @@ const Dashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation'].includes(tab)) {
+        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback'].includes(tab)) {
             setActiveTab(tab);
         }
     }, [location.search]);
@@ -198,6 +200,17 @@ const Dashboard = () => {
         }
     };
 
+    const fetchFeedback = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/feedback`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setFeedback(res.data);
+        } catch (err) {
+            console.error('Error fetching feedback:', err);
+        }
+    };
+
     const fetchCategories = async () => {
         try {
             const res = await axios.get(`${API_BASE}/api/categories`);
@@ -252,6 +265,18 @@ const Dashboard = () => {
         }
     };
 
+    const handleUpdateFeedbackStatus = async (id, status) => {
+        try {
+            await axios.put(`${API_BASE}/api/feedback/${id}/status`, { status }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchFeedback();
+        } catch (err) {
+            console.error('Error updating feedback status:', err);
+            alert('Durum güncellenemedi.');
+        }
+    };
+
     const fetchRecipes = async (isLoadMore = false) => {
         try {
             const currentOffset = isLoadMore ? offset + LIMIT : 0;
@@ -277,7 +302,10 @@ const Dashboard = () => {
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
-            if (token) fetchRecipes();
+            if (token) {
+                fetchRecipes();
+                if (user.role === 'admin') fetchFeedback();
+            }
         }, 300);
         return () => clearTimeout(delayDebounceFn);
     }, [searchTerm, token, selectedCategory]);
@@ -296,7 +324,9 @@ const Dashboard = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Bu tarifi silmek istediğinize emin misiniz?')) {
             try {
-                await axios.delete(`${API_BASE}/api/recipes/${id}`);
+                await axios.delete(`${API_BASE}/api/recipes/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 fetchRecipes();
                 fetchFavorites();
                 fetchTotalCount();
@@ -477,7 +507,6 @@ const Dashboard = () => {
                 <tr>
                     <td colSpan="5" className="px-4 md:px-6 py-8">
                         <div className="space-y-8">
-
                             {/* Today's Activity */}
                             <div>
                                 <h3 className="font-bold text-chefie-secondary mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
@@ -508,14 +537,12 @@ const Dashboard = () => {
                                     <div className="space-y-3">
                                         {stats?.recentRecipes?.length > 0 ? stats.recentRecipes.map((r) => (
                                             <Link key={r.id} to={`/recipes/${r.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-chefie-cream transition-colors group">
-                                                <div className="w-11 h-11 rounded-xl overflow-hidden bg-chefie-cream border border-chefie-border flex-shrink-0">
-                                                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
-                                                        <img
-                                                            src={r.image_url ? (r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`) : '/default-recipe.png'}
-                                                            alt={r.title}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
+                                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
+                                                    <img
+                                                        src={r.image_url ? (r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`) : '/default-recipe.png'}
+                                                        alt={r.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="text-sm font-bold text-chefie-text line-clamp-1 group-hover:text-[#10B981] transition-colors">{r.title}</div>
@@ -561,100 +588,37 @@ const Dashboard = () => {
                                         )}
                                     </div>
                                 </div>
-
-                                {/* Recent Comments */}
-                                <div className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-md">
-                                    <h3 className="font-bold text-chefie-text mb-4 flex items-center gap-2">
-                                        <MessageSquare className="w-5 h-5 text-blue-500" /> Son Yapılan Yorumlar
-                                    </h3>
-                                    <div className="space-y-3">
-                                        {stats?.recentComments?.length > 0 ? stats.recentComments.map((c) => (
-                                            <Link key={c.id} to={`/recipes/${c.recipe_id}`} className="block p-3 rounded-xl hover:bg-chefie-cream transition-colors group">
-                                                <div className="flex items-center gap-2 mb-1.5">
-                                                    {c.profile_image ? (
-                                                        <img src={c.profile_image.startsWith('http') ? c.profile_image : `${API_BASE}${c.profile_image}`} alt={c.username} className="w-6 h-6 rounded-full object-cover border border-chefie-border" />
-                                                    ) : (
-                                                        <div className="w-6 h-6 rounded-full bg-chefie-cream flex items-center justify-center text-chefie-secondary text-[10px] font-bold uppercase">{(c.full_name || c.username || '?').charAt(0)}</div>
-                                                    )}
-                                                    <span className="text-xs font-bold text-chefie-text">{c.full_name || c.username}</span>
-                                                    <span className="text-[10px] text-chefie-secondary">·</span>
-                                                    <span className="text-[10px] text-chefie-secondary">{new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
-                                                </div>
-                                                <p className="text-sm text-chefie-secondary line-clamp-2 pl-8">"{c.content}"</p>
-                                                <div className="text-[10px] font-bold text-[#10B981] pl-8 mt-1 group-hover:underline">{c.recipe_title}</div>
-                                            </Link>
-                                        )) : (
-                                            <div className="text-sm text-gray-400 py-4 text-center">Henüz yorum yok.</div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Top Rated */}
-                                <div className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-md">
-                                    <h3 className="font-bold text-chefie-text mb-4 flex items-center gap-2">
-                                        <Star className="w-5 h-5 text-yellow-500" /> En Yüksek Puanlı Tarifler
-                                    </h3>
-                                    <div className="space-y-3">
-                                        {stats?.topRated?.length > 0 ? stats.topRated.map((r, i) => (
-                                            <Link key={r.id} to={`/recipes/${r.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-chefie-cream transition-colors group">
-                                                <div className="w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-600 font-black text-sm flex-shrink-0">#{i + 1}</div>
-                                                <div className="w-10 h-10 rounded-xl overflow-hidden bg-chefie-cream border border-chefie-border flex-shrink-0">
-                                                    {r.image_url ? (
-                                                        <img src={r.image_url.startsWith('/images/') ? r.image_url : `${API_BASE}${r.image_url}`} alt={r.title} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-300"><ChefHat className="w-4 h-4" /></div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="text-sm font-bold text-chefie-text line-clamp-1 group-hover:text-[#10B981] transition-colors">{r.title}</div>
-                                                    <div className="flex items-center gap-1 mt-0.5">
-                                                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                                                        <span className="text-xs font-bold text-yellow-600">{r.avg_rating}</span>
-                                                        <span className="text-[10px] text-gray-400">({r.rating_count} değerlendirme)</span>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        )) : (
-                                            <div className="text-sm text-gray-400 py-4 text-center">Henüz değerlendirme yok.</div>
-                                        )}
-                                    </div>
-                                </div>
                             </div>
 
-                            {/* Overall Totals */}
-                            <div>
-                                <h3 className="font-bold text-chefie-secondary mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                    <LayoutDashboard className="w-4 h-4 text-chefie-secondary" /> Genel Toplam
-                                </h3>
-                                <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                                    <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                        <div className="text-xl sm:text-2xl font-black text-blue-600 truncate px-1">{stats?.counts?.recipes || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-blue-500/60 mt-1 break-words">Tarif</div>
-                                    </div>
-                                    <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                        <div className="text-xl sm:text-2xl font-black text-green-600 truncate px-1">{stats?.counts?.users || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-green-500/60 mt-1 break-words">Üye</div>
-                                    </div>
-                                    <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                        <div className="text-xl sm:text-2xl font-black text-orange-600 truncate px-1">{stats?.counts?.categories || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-orange-500/60 mt-1 break-words">Kategori</div>
-                                    </div>
-                                    <div className="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                        <div className="text-xl sm:text-2xl font-black text-purple-600 truncate px-1">{stats?.counts?.comments || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-purple-500/60 mt-1 break-words">Yorum</div>
-                                    </div>
-                                    <div className="bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                        <div className="text-xl sm:text-2xl font-black text-rose-600 truncate px-1">{stats?.counts?.favorites || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-rose-500/60 mt-1 break-words">Favori</div>
-                                    </div>
-                                    <div className="bg-yellow-500/10 p-4 rounded-xl border border-yellow-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                        <div className="text-xl sm:text-2xl font-black text-yellow-600 truncate px-1">{stats?.counts?.ratings || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-600/60 mt-1 break-words">Puan</div>
-                                    </div>
-                                    <div className="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                        <div className="text-xl sm:text-2xl font-black text-indigo-600 truncate px-1">{stats?.counts?.friendships || 0}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-500/60 mt-1 break-words">Takip</div>
-                                    </div>
+                            {/* Totals Grid */}
+                            <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                                <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                    <div className="text-xl sm:text-2xl font-black text-blue-600 truncate px-1">{stats?.counts?.recipes || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-blue-500/60 mt-1 break-words">Tarif</div>
+                                </div>
+                                <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                    <div className="text-xl sm:text-2xl font-black text-green-600 truncate px-1">{stats?.counts?.users || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-green-500/60 mt-1 break-words">Üye</div>
+                                </div>
+                                <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                    <div className="text-xl sm:text-2xl font-black text-orange-600 truncate px-1">{stats?.counts?.categories || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-orange-500/60 mt-1 break-words">Kategori</div>
+                                </div>
+                                <div className="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                    <div className="text-xl sm:text-2xl font-black text-purple-600 truncate px-1">{stats?.counts?.comments || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-purple-500/60 mt-1 break-words">Yorum</div>
+                                </div>
+                                <div className="bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                    <div className="text-xl sm:text-2xl font-black text-rose-600 truncate px-1">{stats?.counts?.favorites || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-rose-500/60 mt-1 break-words">Favori</div>
+                                </div>
+                                <div className="bg-yellow-500/10 p-4 rounded-xl border border-yellow-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                    <div className="text-xl sm:text-2xl font-black text-yellow-600 truncate px-1">{stats?.counts?.ratings || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-600/60 mt-1 break-words">Puan</div>
+                                </div>
+                                <div className="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                    <div className="text-xl sm:text-2xl font-black text-indigo-600 truncate px-1">{stats?.counts?.friendships || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-500/60 mt-1 break-words">Takip</div>
                                 </div>
                             </div>
 
@@ -671,52 +635,29 @@ const Dashboard = () => {
                                 </div>
                                 <div className="space-y-2">
                                     {userActivity.activities?.length > 0 ? userActivity.activities.map((a) => {
-                                        const totalSec = a.total_seconds || 0;
-                                        const hours = Math.floor(totalSec / 3600);
-                                        const mins = Math.floor((totalSec % 3600) / 60);
-                                        const secs = totalSec % 60;
-                                        let timeStr = '';
-                                        if (hours > 0) timeStr += `${hours} saat `;
-                                        if (mins > 0) timeStr += `${mins} dk `;
-                                        if (hours === 0) timeStr += `${secs} sn`;
-                                        timeStr = timeStr.trim();
-
                                         const lastActive = a.last_active ? new Date(a.last_active) : null;
                                         const isOnline = lastActive && (Date.now() - lastActive.getTime()) < 2 * 60 * 1000;
-
                                         return (
-                                            <div key={a.user_id} className="flex flex-col min-[420px]:flex-row min-[420px]:items-center gap-4 p-4 rounded-2xl bg-chefie-cream hover:bg-chefie-cream/80 transition-all border border-chefie-border">
-                                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                    {a.profile_image ? (
-                                                        <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} alt={a.username} className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm" />
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-sm uppercase border border-gray-200">{(a.full_name || a.username || '?').charAt(0)}</div>
-                                                    )}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex flex-wrap items-center gap-1.5">
-                                                            <span className="text-sm font-bold text-chefie-text truncate">{a.full_name || a.username}</span>
-                                                            {isOnline && <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0 animate-pulse" />}
-                                                            {a.role === 'admin' && <span className="text-[8px] font-black bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md uppercase border border-amber-200 shadow-sm leading-none">Admin</span>}
-                                                            {a.country && (() => {
-                                                                const ci = getCountryInfo(a.country);
-                                                                return ci ? <span className="text-sm" title={ci.name}>{ci.flag}</span> : null;
-                                                            })()}
-                                                        </div>
-                                                        <div className="text-[10px] text-chefie-secondary truncate">@{a.username}</div>
+                                            <div key={a.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-cream border border-chefie-border">
+                                                {a.profile_image ? (
+                                                    <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-8 h-8 rounded-full object-cover" />
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xs uppercase">{(a.full_name || a.username).charAt(0)}</div>
+                                                )}
+                                                <div className="flex-1">
+                                                    <div className="text-sm font-bold text-chefie-text flex items-center gap-2">
+                                                        {a.full_name || a.username}
+                                                        {isOnline && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
                                                     </div>
-                                                </div>
-                                                <div className="text-left min-[420px]:text-right flex-shrink-0 pl-[52px] min-[420px]:pl-0 border-l-2 min-[420px]:border-l-0 border-cyan-100 min-[420px]:border-transparent">
-                                                    <div className="text-sm font-black text-cyan-600 leading-tight">{timeStr}</div>
-                                                    <div className="text-[10px] font-medium text-gray-400 mt-0.5">{isOnline ? 'Şu an aktif' : lastActive ? lastActive.toLocaleDateString('tr-TR') : ''}</div>
+                                                    <div className="text-[10px] text-chefie-secondary">@{a.username}</div>
                                                 </div>
                                             </div>
                                         );
                                     }) : (
-                                        <div className="text-sm text-gray-400 py-4 text-center">Henüz aktivite verisi yok.</div>
+                                        <div className="text-sm text-gray-400 py-4 text-center">Aktivite yok.</div>
                                     )}
                                 </div>
                             </div>
-
                         </div>
                     </td>
                 </tr>
@@ -726,8 +667,8 @@ const Dashboard = () => {
         if (activeTab === 'recommendation') {
             return (
                 <tr>
-                    <td colSpan="5" className="px-4 md:px-6 py-8">
-                        <div className="max-w-4xl mx-auto space-y-10">
+                    <td colSpan="5" className="px-6 py-8">
+                        <div className="space-y-8">
                             {/* Current Recommendation */}
                             <div className="bg-chefie-card p-8 rounded-[2.5rem] border border-chefie-border shadow-2xl">
                                 <div className="flex items-center justify-between mb-6">
@@ -830,6 +771,57 @@ const Dashboard = () => {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    </td>
+                </tr>
+            );
+        }
+
+        if (activeTab === 'feedback') {
+            return (
+                <tr>
+                    <td colSpan="5" className="px-6 py-8">
+                        <div className="space-y-6">
+                            {feedback.length > 0 ? feedback.map((item) => (
+                                <div key={item.id} className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${
+                                                item.type === 'bug' ? 'bg-red-50 text-red-500 border-red-100' : 'bg-blue-50 text-blue-500 border-blue-100'
+                                            }`}>
+                                                {item.type === 'bug' ? 'Hata Bildirimi' : 'Öneri'}
+                                            </span>
+                                            <span className="text-xs text-chefie-secondary font-bold">
+                                                {new Date(item.created_at).toLocaleDateString('tr-TR')}
+                                            </span>
+                                        </div>
+                                        <select
+                                            value={item.status}
+                                            onChange={(e) => handleUpdateFeedbackStatus(item.id, e.target.value)}
+                                            className="text-xs font-bold bg-chefie-cream border border-chefie-border rounded-lg px-2 py-1 outline-none"
+                                        >
+                                            <option value="pending">Beklemede</option>
+                                            <option value="reviewed">İncelendi</option>
+                                            <option value="resolved">Çözüldü</option>
+                                        </select>
+                                    </div>
+                                    <h4 className="text-sm font-bold text-chefie-text mb-2">{item.subject}</h4>
+                                    <p className="text-xs text-chefie-secondary font-medium leading-relaxed mb-4">{item.message}</p>
+                                    <div className="flex items-center gap-2 pt-4 border-t border-chefie-border">
+                                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden border border-gray-200">
+                                            {item.profile_image ? <img src={item.profile_image.startsWith('http') ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover" /> : (item.full_name || item.username).charAt(0)}
+                                        </div>
+                                        <span className="text-[10px] font-bold text-chefie-secondary">
+                                            {item.full_name || item.username} (@{item.username})
+                                        </span>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className="py-12 text-center">
+                                    <MessageSquare className="w-12 h-12 text-chefie-secondary/20 mx-auto mb-4" />
+                                    <p className="text-sm font-bold text-chefie-secondary">Henüz bir geri bildirim bulunmuyor.</p>
+                                </div>
+                            )}
                         </div>
                     </td>
                 </tr>
@@ -1165,6 +1157,7 @@ const Dashboard = () => {
                             <button onClick={() => { setActiveTab('stats'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'stats' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> İstatistikler</button>
                             <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
                             <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
+                            <button onClick={() => { setActiveTab('feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'feedback' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><MessageSquare className="w-5 h-5 mr-3" /> Öneriler & Hatalar</button>
                         </>
                     )}
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
@@ -1180,7 +1173,7 @@ const Dashboard = () => {
                 <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-10 gap-4">
                     <div className="flex items-center gap-4 w-full max-w-xl">
                         <h1 className="text-2xl font-bold text-chefie-text">
-                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : 'Ayarlar'}
+                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : 'Ayarlar'}
                         </h1>
                         <div className="relative flex-1 hidden md:block ml-8">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -1302,7 +1295,7 @@ const Dashboard = () => {
 
                 <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-hidden w-full max-w-[calc(100vw-2rem)] md:max-w-full">
                     <div className="p-4 md:p-6 border-b border-chefie-border flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : 'Ayarlar'}</h2>
+                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : 'Ayarlar'}</h2>
                         {activeTab === 'all' && (
                             <Link to="/admin/recipes/new" className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold rounded-xl flex items-center gap-2"><Plus className="w-4 h-4" /> Yeni Ekle</Link>
                         )}

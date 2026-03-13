@@ -16,6 +16,34 @@ import {
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
 import axios from 'axios';
+import { MapPin, Globe } from 'lucide-react';
+
+const FormInput = ({ label, placeholder, value, onChange, type = "text", icon: Icon, showToggle, onToggle, show }) => (
+    <div className="space-y-2">
+        <label className="text-sm font-bold text-chefie-secondary ml-1 uppercase tracking-wider">{label}</label>
+        <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-chefie-secondary group-focus-within:text-chefie-green transition-colors">
+                {Icon && <Icon className="w-5 h-5" />}
+            </div>
+            <input
+                type={showToggle ? (show ? "text" : "password") : type}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                className="w-full bg-chefie-card border border-chefie-border rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-chefie-green/20 focus:border-chefie-green transition-all shadow-sm text-chefie-text placeholder-chefie-secondary/50"
+            />
+            {showToggle && (
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-chefie-secondary hover:text-chefie-text p-1"
+                >
+                    {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+            )}
+        </div>
+    </div>
+);
 
 const EditProfile = () => {
     const navigate = useNavigate();
@@ -28,6 +56,8 @@ const EditProfile = () => {
 
     // State for inputs
     const [fullName, setFullName] = useState('');
+    const [country, setCountry] = useState('');
+    const [city, setCity] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -54,6 +84,8 @@ const EditProfile = () => {
             });
             setUser(res.data);
             setFullName(res.data.full_name || '');
+            setCountry(res.data.country || '');
+            setCity(res.data.city || '');
             setPreviewImage(res.data.profile_image ? getImageUrl(res.data.profile_image) : null);
             setLoading(false);
         } catch (err) {
@@ -76,10 +108,11 @@ const EditProfile = () => {
         setMessage({ type: '', text: '' });
 
         try {
-            // 1. Update Profile Info (Name & Image)
+            // 1. Update Profile Info (Name, Image, Location)
             const formData = new FormData();
             formData.append('full_name', fullName);
-            formData.append('country', user.country || ''); // Keep existing country
+            formData.append('country', country);
+            formData.append('city', city);
             if (profileImage) {
                 formData.append('profile_image', profileImage);
             }
@@ -149,32 +182,7 @@ const EditProfile = () => {
         }
     };
 
-    const FormInput = ({ label, placeholder, value, onChange, type = "text", icon: Icon, showToggle, onToggle, show }) => (
-        <div className="space-y-2">
-            <label className="text-sm font-bold text-chefie-secondary ml-1 uppercase tracking-wider">{label}</label>
-            <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-chefie-secondary group-focus-within:text-chefie-green transition-colors">
-                    {Icon && <Icon className="w-5 h-5" />}
-                </div>
-                <input
-                    type={showToggle ? (show ? "text" : "password") : type}
-                    value={value}
-                    onChange={onChange}
-                    placeholder={placeholder}
-                    className="w-full bg-chefie-card border border-chefie-border rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-chefie-green/20 focus:border-chefie-green transition-all shadow-sm text-chefie-text placeholder-chefie-secondary/50"
-                />
-                {showToggle && (
-                    <button
-                        type="button"
-                        onClick={onToggle}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-chefie-secondary hover:text-chefie-text p-1"
-                    >
-                        {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                )}
-            </div>
-        </div>
-    );
+
 
     if (loading) return (
         <div className="min-h-screen bg-chefie-cream flex items-center justify-center">
@@ -234,6 +242,23 @@ const EditProfile = () => {
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
                             icon={User}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormInput
+                            label={t('edit_profile.fields.country')}
+                            placeholder={t('edit_profile.fields.country')}
+                            value={country}
+                            onChange={(e) => setCountry(e.target.value)}
+                            icon={Globe}
+                        />
+                        <FormInput
+                            label={t('edit_profile.fields.city')}
+                            placeholder={t('edit_profile.fields.city')}
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            icon={MapPin}
                         />
                     </div>
 
