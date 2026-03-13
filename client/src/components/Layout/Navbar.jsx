@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { safeGetToken, safeGetSessionStorage } from '../../utils/storage';
 
 const Navbar = () => {
     const { t } = useTranslation();
+    const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [token, setToken] = useState(null);
     const [user, setUser] = useState(null);
@@ -15,7 +16,7 @@ const Navbar = () => {
         const storedUser = JSON.parse(safeGetSessionStorage('user') || '{}');
         setToken(storedToken);
         setUser(storedUser);
-    }, []);
+    }, [location]);
 
     return (
         <nav className="bg-chefie-card/80 backdrop-blur-md shadow-sm border-b border-chefie-border sticky top-0 z-50 print:hidden">

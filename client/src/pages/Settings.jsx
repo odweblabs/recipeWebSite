@@ -16,6 +16,7 @@ import {
     Share2,
     MessageSquare,
     AlertCircle,
+    Shield,
     X
 } from 'lucide-react';
 import API_BASE from '../utils/api';

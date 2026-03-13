@@ -635,21 +635,34 @@ const Dashboard = () => {
                                 </div>
                                 <div className="space-y-2">
                                     {userActivity.activities?.length > 0 ? userActivity.activities.map((a) => {
-                                        const lastActive = a.last_active ? new Date(a.last_active) : null;
-                                        const isOnline = lastActive && (Date.now() - lastActive.getTime()) < 2 * 60 * 1000;
+                                        const lastActiveTime = a.last_active ? new Date(a.last_active) : null;
+                                        const isOnline = lastActiveTime && (Date.now() - lastActiveTime.getTime()) < 2 * 60 * 1000;
+                                        const timeStr = lastActiveTime ? lastActiveTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '';
+                                        
                                         return (
-                                            <div key={a.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-cream border border-chefie-border">
-                                                {a.profile_image ? (
-                                                    <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-8 h-8 rounded-full object-cover" />
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xs uppercase">{(a.full_name || a.username).charAt(0)}</div>
-                                                )}
-                                                <div className="flex-1">
-                                                    <div className="text-sm font-bold text-chefie-text flex items-center gap-2">
+                                            <div key={a.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-cream border border-chefie-border group/activity hover:shadow-sm transition-all">
+                                                <div className="relative">
+                                                    {a.profile_image ? (
+                                                        <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-10 h-10 rounded-full object-cover border border-chefie-border" />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold text-sm uppercase border border-chefie-border">{(a.full_name || a.username).charAt(0)}</div>
+                                                    )}
+                                                    <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-chefie-card ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} title={isOnline ? 'Çevrimiçi' : 'Çevrimdışı'} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-sm font-bold text-chefie-text truncate">
                                                         {a.full_name || a.username}
-                                                        {isOnline && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
                                                     </div>
-                                                    <div className="text-[10px] text-chefie-secondary">@{a.username}</div>
+                                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                                        <span className={`text-[10px] font-black uppercase tracking-wider ${isOnline ? 'text-green-500' : 'text-chefie-secondary'}`}>
+                                                            {isOnline ? 'ÇEVRİMİÇİ' : 'GEÇMİŞTE AKTİF'}
+                                                        </span>
+                                                        {lastActiveTime && !isOnline && (
+                                                            <span className="text-[10px] text-chefie-secondary font-medium">
+                                                                · {timeStr}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
