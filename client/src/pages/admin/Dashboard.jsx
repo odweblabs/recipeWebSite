@@ -122,29 +122,49 @@ const Dashboard = () => {
     const [templateMessage, setTemplateMessage] = useState({ type: '', text: '' });
     const [feedback, setFeedback] = useState([]);
     const [notificationHistory, setNotificationHistory] = useState([]);
+    const [notifForm, setNotifForm] = useState({
+        target: 'all',
+        userIds: [],
+        title: '',
+        message: ''
+    });
 
     useEffect(() => {
         if (!token) {
             navigate('/admin/login');
             return;
         }
-        fetchTotalCount();
-        fetchFavorites();
-        fetchCategories();
-        fetchStats();
-        if (user.role === 'admin') {
-            fetchUsers();
-            fetchActivity();
-            fetchRecommendation();
-            fetchNotificationHistory();
-            // Refresh activity data every 60 seconds
-            const activityInterval = setInterval(() => {
+
+        const initDashboard = async () => {
+            const basicFetches = [
+                fetchTotalCount(),
+                fetchFavorites(),
+                fetchCategories(),
+                fetchStats()
+            ];
+
+            const adminFetches = user.role === 'admin' ? [
+                fetchUsers(),
+                fetchActivity(),
+                fetchRecommendation(),
+                fetchNotificationHistory()
+            ] : [];
+
+            await Promise.all([...basicFetches, ...adminFetches]);
+        };
+
+        initDashboard();
+
+        // Refresh activity data every 60 seconds
+        const activityInterval = setInterval(() => {
+            if (user.role === 'admin') {
                 fetchActivity();
                 fetchFeedback();
                 fetchNotificationHistory();
-            }, 60000);
-            return () => clearInterval(activityInterval);
-        }
+            }
+        }, 60000);
+
+        return () => clearInterval(activityInterval);
     }, [token, navigate, user.role]);
 
     useEffect(() => {

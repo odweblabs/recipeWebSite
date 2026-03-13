@@ -15,70 +15,81 @@ const upload = multer({
 // Admin Statistics
 router.get('/stats', adminOnly, async (req, res) => {
     try {
-        const recipeCount = (await executeQuery('SELECT COUNT(*) as count FROM recipes'))[0].count;
-        const userCount = (await executeQuery('SELECT COUNT(*) as count FROM users'))[0].count;
-        const categoryCount = (await executeQuery('SELECT COUNT(*) as count FROM categories'))[0].count;
-        const commentCount = (await executeQuery('SELECT COUNT(*) as count FROM comments'))[0].count;
-        const favoriteCount = (await executeQuery('SELECT COUNT(*) as count FROM favorites'))[0].count;
-        const ratingCount = (await executeQuery('SELECT COUNT(*) as count FROM ratings'))[0].count;
-        const friendshipCount = (await executeQuery("SELECT COUNT(*) as count FROM friendships WHERE status = 'accepted'"))[0].count;
-
-        // Today's activity
         const today = new Date().toISOString().split('T')[0];
-        const todayRecipes = (await executeQuery("SELECT COUNT(*) as count FROM recipes WHERE DATE(created_at) = $1", [today]))[0].count;
-        const todayUsers = (await executeQuery("SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = $1", [today]))[0].count;
-        const todayComments = (await executeQuery("SELECT COUNT(*) as count FROM comments WHERE DATE(created_at) = $1", [today]))[0].count;
 
-        const recentUsers = await executeQuery('SELECT id, username, full_name, profile_image, created_at FROM users ORDER BY created_at DESC LIMIT 5');
-
-        const recentRecipes = await executeQuery(`
-            SELECT recipes.id, recipes.title, recipes.image_url, recipes.created_at,
-                   categories.name as category_name,
-                   users.username as chef_username, users.full_name as chef_name, users.profile_image as chef_image
-            FROM recipes
-            LEFT JOIN categories ON recipes.category_id = categories.id
-            LEFT JOIN users ON recipes.user_id = users.id
-            ORDER BY recipes.created_at DESC LIMIT 5
-        `);
-
-        const recentComments = await executeQuery(`
-            SELECT comments.id, comments.content, comments.created_at,
-                   users.username, users.full_name, users.profile_image,
-                   recipes.id as recipe_id, recipes.title as recipe_title,
-                   ratings.score as rating
-            FROM comments
-            LEFT JOIN users ON comments.user_id = users.id
-            LEFT JOIN recipes ON comments.recipe_id = recipes.id
-            LEFT JOIN ratings ON comments.user_id = ratings.user_id AND comments.recipe_id = ratings.recipe_id
-            ORDER BY comments.created_at DESC LIMIT 5
-        `);
-
-        // Top rated recipes
-        const topRated = await executeQuery(`
-            SELECT recipes.id, recipes.title, recipes.image_url,
-                   ROUND(AVG(ratings.score), 1) as avg_rating,
-                   COUNT(ratings.id) as rating_count
-            FROM recipes
-            INNER JOIN ratings ON recipes.id = ratings.recipe_id
-            GROUP BY recipes.id
-            ORDER BY avg_rating DESC, rating_count DESC
-            LIMIT 5
-        `);
+        const [
+            recipeCountResult,
+            userCountResult,
+            categoryCountResult,
+            commentCountResult,
+            favoriteCountResult,
+            ratingCountResult,
+            friendshipCountResult,
+            todayRecipesResult,
+            todayUsersResult,
+            todayCommentsResult,
+            recentUsers,
+            recentRecipes,
+            recentComments,
+            topRated
+        ] = await Promise.all([
+            executeQuery('SELECT COUNT(*) as count FROM recipes'),
+            executeQuery('SELECT COUNT(*) as count FROM users'),
+            executeQuery('SELECT COUNT(*) as count FROM categories'),
+            executeQuery('SELECT COUNT(*) as count FROM comments'),
+            executeQuery('SELECT COUNT(*) as count FROM favorites'),
+            executeQuery('SELECT COUNT(*) as count FROM ratings'),
+            executeQuery("SELECT COUNT(*) as count FROM friendships WHERE status = 'accepted'"),
+            executeQuery("SELECT COUNT(*) as count FROM recipes WHERE DATE(created_at) = $1", [today]),
+            executeQuery("SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = $1", [today]),
+            executeQuery("SELECT COUNT(*) as count FROM comments WHERE DATE(created_at) = $1", [today]),
+            executeQuery('SELECT id, username, full_name, profile_image, created_at FROM users ORDER BY created_at DESC LIMIT 5'),
+            executeQuery(`
+                SELECT recipes.id, recipes.title, recipes.image_url, recipes.created_at,
+                       categories.name as category_name,
+                       users.username as chef_username, users.full_name as chef_name, users.profile_image as chef_image
+                FROM recipes
+                LEFT JOIN categories ON recipes.category_id = categories.id
+                LEFT JOIN users ON recipes.user_id = users.id
+                ORDER BY recipes.created_at DESC LIMIT 5
+            `),
+            executeQuery(`
+                SELECT comments.id, comments.content, comments.created_at,
+                       users.username, users.full_name, users.profile_image,
+                       recipes.id as recipe_id, recipes.title as recipe_title,
+                       ratings.score as rating
+                FROM comments
+                LEFT JOIN users ON comments.user_id = users.id
+                LEFT JOIN recipes ON comments.recipe_id = recipes.id
+                LEFT JOIN ratings ON comments.user_id = ratings.user_id AND comments.recipe_id = ratings.recipe_id
+                ORDER BY comments.created_at DESC LIMIT 5
+            `),
+            executeQuery(`
+                SELECT recipes.id, recipes.title, recipes.image_url,
+                       ROUND(AVG(ratings.score), 1) as avg_rating,
+                       COUNT(ratings.id) as rating_count
+                FROM recipes
+                INNER JOIN ratings ON recipes.id = ratings.recipe_id
+                GROUP BY recipes.id
+                ORDER BY avg_rating DESC, rating_count DESC
+                LIMIT 5
+            `)
+        ]);
 
         res.json({
             counts: {
-                recipes: recipeCount,
-                users: userCount,
-                categories: categoryCount,
-                comments: commentCount,
-                favorites: favoriteCount,
-                ratings: ratingCount,
-                friendships: friendshipCount
+                recipes: recipeCountResult[0].count,
+                users: userCountResult[0].count,
+                categories: categoryCountResult[0].count,
+                comments: commentCountResult[0].count,
+                favorites: favoriteCountResult[0].count,
+                ratings: ratingCountResult[0].count,
+                friendships: friendshipCountResult[0].count
             },
             today: {
-                recipes: todayRecipes,
-                users: todayUsers,
-                comments: todayComments
+                recipes: todayRecipesResult[0].count,
+                users: todayUsersResult[0].count,
+                comments: todayCommentsResult[0].count
             },
             recentUsers,
             recentRecipes,
@@ -93,46 +104,51 @@ router.get('/stats', adminOnly, async (req, res) => {
 // Public Statistics for Homepage
 router.get('/public-stats', async (req, res) => {
     try {
-        const recipeCount = (await executeQuery('SELECT COUNT(*) as count FROM recipes'))[0].count;
-        const userCount = (await executeQuery('SELECT COUNT(*) as count FROM users'))[0].count;
-
-        const latestRecipes = await executeQuery(`
-            SELECT recipes.id, recipes.title, recipes.image_url, recipes.created_at,
-                   categories.name as category_name,
-                   users.username as chef_username, users.full_name as chef_name, users.profile_image as chef_image
-            FROM recipes
-            LEFT JOIN categories ON recipes.category_id = categories.id
-            LEFT JOIN users ON recipes.user_id = users.id
-            ORDER BY recipes.created_at DESC LIMIT 8
-        `);
-
-        const recentComments = await executeQuery(`
-            SELECT comments.id, comments.content, comments.created_at,
-                   users.username, users.full_name, users.profile_image,
-                   recipes.id as recipe_id, recipes.title as recipe_title,
-                   ratings.score as rating
-            FROM comments
-            LEFT JOIN users ON comments.user_id = users.id
-            LEFT JOIN recipes ON comments.recipe_id = recipes.id
-            LEFT JOIN ratings ON comments.user_id = ratings.user_id AND comments.recipe_id = ratings.recipe_id
-            ORDER BY comments.created_at DESC LIMIT 6
-        `);
-
-        const topRated = await executeQuery(`
-            SELECT recipes.id, recipes.title, recipes.image_url,
-                   ROUND(AVG(ratings.score), 1) as avg_rating,
-                   COUNT(ratings.id) as rating_count
-            FROM recipes
-            INNER JOIN ratings ON recipes.id = ratings.recipe_id
-            GROUP BY recipes.id
-            ORDER BY avg_rating DESC, rating_count DESC
-            LIMIT 5
-        `);
+        const [
+            recipeCountResult,
+            userCountResult,
+            latestRecipes,
+            recentComments,
+            topRated
+        ] = await Promise.all([
+            executeQuery('SELECT COUNT(*) as count FROM recipes'),
+            executeQuery('SELECT COUNT(*) as count FROM users'),
+            executeQuery(`
+                SELECT recipes.id, recipes.title, recipes.image_url, recipes.created_at,
+                       categories.name as category_name,
+                       users.username as chef_username, users.full_name as chef_name, users.profile_image as chef_image
+                FROM recipes
+                LEFT JOIN categories ON recipes.category_id = categories.id
+                LEFT JOIN users ON recipes.user_id = users.id
+                ORDER BY recipes.created_at DESC LIMIT 8
+            `),
+            executeQuery(`
+                SELECT comments.id, comments.content, comments.created_at,
+                       users.username, users.full_name, users.profile_image,
+                       recipes.id as recipe_id, recipes.title as recipe_title,
+                       ratings.score as rating
+                FROM comments
+                LEFT JOIN users ON comments.user_id = users.id
+                LEFT JOIN recipes ON comments.recipe_id = recipes.id
+                LEFT JOIN ratings ON comments.user_id = ratings.user_id AND comments.recipe_id = ratings.recipe_id
+                ORDER BY comments.created_at DESC LIMIT 6
+            `),
+            executeQuery(`
+                SELECT recipes.id, recipes.title, recipes.image_url,
+                       ROUND(AVG(ratings.score), 1) as avg_rating,
+                       COUNT(ratings.id) as rating_count
+                FROM recipes
+                INNER JOIN ratings ON recipes.id = ratings.recipe_id
+                GROUP BY recipes.id
+                ORDER BY avg_rating DESC, rating_count DESC
+                LIMIT 5
+            `)
+        ]);
 
         res.json({
             counts: {
-                recipes: recipeCount,
-                users: userCount
+                recipes: recipeCountResult[0].count,
+                users: userCountResult[0].count
             },
             latestRecipes,
             recentComments,
