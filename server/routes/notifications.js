@@ -86,9 +86,48 @@ router.post('/send', authenticateToken, adminOnly, async (req, res) => {
         const query = `INSERT INTO notifications (user_id, type, title, message) VALUES ${placeholders.join(', ')}`;
         await executeQuery(query, values);
 
+        // Record in history
+        await executeQuery(
+            'INSERT INTO admin_notification_history (sender_id, title, message, target_type, recipient_count) VALUES ($1, $2, $3, $4, $5)',
+            [req.user.id, title, message, target, recipientIds.length]
+        );
+
         res.json({ message: `Notification sent to ${recipientIds.length} users` });
     } catch (err) {
         console.error('Error sending administrative notification:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get admin notification history (Admin only)
+router.get('/admin-history', authenticateToken, adminOnly, async (req, res) => {
+    try {
+        const history = await executeQuery(`
+            SELECT h.*, u.username as sender_name 
+            FROM admin_notification_history h
+            LEFT JOIN users u ON h.sender_id = u.id
+            ORDER BY h.created_at DESC
+            LIMIT 50
+        `);
+        res.json(history);
+    } catch (err) {
+        console.error('Error fetching notification history:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete a notification
+router.delete('/:id', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+        await executeQuery(
+            'DELETE FROM notifications WHERE id = $1 AND user_id = $2',
+            [id, userId]
+        );
+        res.json({ message: 'Notification deleted' });
+    } catch (err) {
+        console.error('Error deleting notification:', err);
         res.status(500).json({ error: err.message });
     }
 });

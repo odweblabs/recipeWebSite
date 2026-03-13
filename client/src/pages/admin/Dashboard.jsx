@@ -28,7 +28,11 @@ import {
     Star,
     TrendingUp,
     ChefHat,
-    ArrowRight
+    ArrowRight,
+    UserPlus,
+    History,
+    Globe,
+    UserCheck
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -108,17 +112,13 @@ const Dashboard = () => {
     const [chefRecommendation, setChefRecommendation] = useState(null);
     const [isSavingRecommendation, setIsSavingRecommendation] = useState(false);
 
-    // Pending Friends State
-    const [pendingFriends, setPendingFriends] = useState([]);
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-    const [feedback, setFeedback] = useState([]);
-    const [notifForm, setNotifForm] = useState({
-        target: 'all',
-        userIds: [],
-        title: '',
-        message: ''
-    });
     const [isSendingNotif, setIsSendingNotif] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [isMobileNotificationsOpen, setIsMobileNotificationsOpen] = useState(false);
+    const [notificationHistory, setNotificationHistory] = useState([]);
+    const [notifForm, setNotifForm] = useState({ target: 'all', userIds: [], title: '', message: '' });
+    const [pendingFriends, setPendingFriends] = useState([]);
+    const [feedback, setFeedback] = useState([]);
 
     useEffect(() => {
         if (!token) {
@@ -134,11 +134,15 @@ const Dashboard = () => {
             fetchActivity();
             fetchRecommendation();
             fetchPendingFriends();
+            fetchNotifications();
+            fetchNotificationHistory();
             // Refresh activity data every 60 seconds
             const activityInterval = setInterval(() => {
                 fetchActivity();
                 fetchPendingFriends();
                 fetchFeedback();
+                fetchNotifications();
+                fetchNotificationHistory();
             }, 60000);
             return () => clearInterval(activityInterval);
         }
@@ -163,14 +167,48 @@ const Dashboard = () => {
         }
     };
 
+    const fetchNotifications = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/notifications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(res.data);
+        } catch (err) {
+            console.error('Error fetching notifications:', err);
+        }
+    };
+
+    const fetchNotificationHistory = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/notifications/admin-history`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotificationHistory(res.data);
+        } catch (err) {
+            console.error('Error fetching notification history:', err);
+        }
+    };
+
+    const handleDeleteNotification = async (id) => {
+        try {
+            await axios.delete(`${API_BASE}/api/notifications/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchNotifications();
+        } catch (err) {
+            console.error('Error deleting notification:', err);
+        }
+    };
+
     const handleAcceptFriend = async (friendshipId) => {
         try {
             await axios.put(`${API_BASE}/api/friends/accept/${friendshipId}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchPendingFriends();
+            fetchNotifications();
         } catch (err) {
-            alert('İstek kabul edilemedi.');
+            console.error('Error accepting friend:', err);
         }
     };
 
@@ -180,8 +218,9 @@ const Dashboard = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchPendingFriends();
+            fetchNotifications();
         } catch (err) {
-            alert('İstek reddedilemedi.');
+            console.error('Error rejecting friend:', err);
         }
     };
 
@@ -996,6 +1035,72 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             </form>
+
+                            {/* Notification History Section */}
+                            <div className="mt-16 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
+                                <div className="flex items-center gap-3 px-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
+                                        <History className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight">Gönderilen Bildirimler</h3>
+                                        <p className="text-xs font-bold text-chefie-secondary uppercase tracking-widest">{notificationHistory.length} Kayıt Listeleniyor</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    {notificationHistory.length === 0 ? (
+                                        <div className="bg-chefie-card p-12 rounded-[2.5rem] border border-chefie-border text-center shadow-lg">
+                                            <History className="w-16 h-16 text-chefie-secondary/10 mx-auto mb-4" />
+                                            <p className="text-sm font-bold text-chefie-secondary uppercase tracking-widest">Henüz bildirim geçmişi bulunmuyor.</p>
+                                        </div>
+                                    ) : (
+                                        notificationHistory.map((item) => (
+                                            <div 
+                                                key={item.id} 
+                                                className="bg-chefie-card p-6 rounded-[2rem] border border-chefie-border shadow-md hover:shadow-xl hover:border-chefie-yellow/50 transition-all duration-300 group"
+                                            >
+                                                <div className="flex flex-col md:flex-row md:items-center gap-6">
+                                                    <div className="flex-1 space-y-3">
+                                                        <div className="flex items-start justify-between gap-4">
+                                                            <div className="space-y-1">
+                                                                <h4 className="text-sm font-black text-chefie-text leading-tight group-hover:text-chefie-yellow transition-colors">{item.title}</h4>
+                                                                <p className="text-[11px] text-chefie-secondary font-medium line-clamp-2 md:line-clamp-1">{item.message}</p>
+                                                            </div>
+                                                            <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter flex items-center gap-1.5 flex-shrink-0 ${item.target_type === 'all' ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
+                                                                {item.target_type === 'all' ? (
+                                                                    <><Globe className="w-3 h-3" /> TÜMÜ</>
+                                                                ) : (
+                                                                    <><Users className="w-3 h-3" /> ÖZEL</>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 border-t border-chefie-border/50">
+                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-chefie-secondary">
+                                                                <UserCheck className="w-3.5 h-3.5 text-[#10B981]" />
+                                                                <span className="text-chefie-text">@{item.sender_name || 'Admin'}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-chefie-secondary">
+                                                                <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                                                                <span>{new Date(item.created_at).toLocaleDateString('tr-TR')}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-chefie-secondary">
+                                                                <Clock className="w-3.5 h-3.5 text-orange-400" />
+                                                                <span>{new Date(item.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-chefie-secondary">
+                                                                <Users className="w-3.5 h-3.5 text-purple-400" />
+                                                                <span className="text-chefie-text">{item.recipient_count} Alıcı</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -1228,7 +1333,7 @@ const Dashboard = () => {
                         </button>
 
                         <AnimatePresence>
-                            {isNotificationsOpen && (
+                            {isMobileNotificationsOpen && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1242,15 +1347,16 @@ const Dashboard = () => {
                                         </span>
                                     </div>
                                     <div className="max-h-[400px] overflow-y-auto">
-                                        {pendingFriends.length === 0 ? (
+                                        {notifications.length === 0 && pendingFriends.length === 0 ? (
                                             <div className="p-8 text-center">
                                                 <Bell className="w-10 h-10 text-chefie-secondary/20 mx-auto mb-3" />
                                                 <p className="text-xs font-bold text-chefie-secondary">Yeni bildirim bulunmuyor.</p>
                                             </div>
                                         ) : (
                                             <div className="divide-y divide-chefie-border">
+                                                {/* Active Pending Requests */}
                                                 {pendingFriends.map((request) => (
-                                                    <div key={request.friendship_id} className="p-4 hover:bg-chefie-cream transition-colors">
+                                                    <div key={`req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors">
                                                         <div className="flex items-center gap-3 mb-3">
                                                             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border">
                                                                 <img
@@ -1267,7 +1373,7 @@ const Dashboard = () => {
                                                         <div className="flex gap-2">
                                                             <button
                                                                 onClick={() => handleAcceptFriend(request.friendship_id)}
-                                                                className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all shadow-lg shadow-yellow-100 dark:shadow-none"
+                                                                className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all"
                                                             >
                                                                 KABUL ET
                                                             </button>
@@ -1277,6 +1383,29 @@ const Dashboard = () => {
                                                             >
                                                                 REDDET
                                                             </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+
+                                                {/* History & System Notifications */}
+                                                {notifications.map((notif) => (
+                                                    <div key={`notif-${notif.id}`} className={`p-4 hover:bg-chefie-cream transition-colors group/item ${notif.is_read ? 'opacity-60' : ''}`}>
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center flex-shrink-0">
+                                                                {notif.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex justify-between items-center mb-1">
+                                                                    <p className="text-xs font-black text-chefie-text truncate">{notif.title}</p>
+                                                                    <button 
+                                                                        onClick={() => handleDeleteNotification(notif.id)}
+                                                                        className="opacity-0 group-hover/item:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                                    >
+                                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                                <p className="text-[10px] text-chefie-secondary leading-tight">{notif.message}</p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -1389,15 +1518,16 @@ const Dashboard = () => {
                                             </span>
                                         </div>
                                         <div className="max-h-[400px] overflow-y-auto">
-                                            {pendingFriends.length === 0 ? (
+                                            {notifications.length === 0 && pendingFriends.length === 0 ? (
                                                 <div className="p-8 text-center">
                                                     <Bell className="w-10 h-10 text-chefie-secondary/20 mx-auto mb-3" />
                                                     <p className="text-xs font-bold text-chefie-secondary">Yeni bildirim bulunmuyor.</p>
                                                 </div>
                                             ) : (
                                                 <div className="divide-y divide-chefie-border">
+                                                    {/* Active Pending Requests */}
                                                     {pendingFriends.map((request) => (
-                                                        <div key={request.friendship_id} className="p-4 hover:bg-chefie-cream transition-colors">
+                                                        <div key={`desktop-req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors">
                                                             <div className="flex items-center gap-3 mb-3">
                                                                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border">
                                                                     <img
@@ -1414,16 +1544,39 @@ const Dashboard = () => {
                                                             <div className="flex gap-2">
                                                                 <button
                                                                     onClick={() => handleAcceptFriend(request.friendship_id)}
-                                                                    className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all shadow-lg shadow-yellow-100 dark:shadow-none"
+                                                                    className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all"
                                                                 >
                                                                     KABUL ET
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleRejectFriend(request.friendship_id)}
-                                                                    className="flex-1 py-2 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg hover:bg-red-50 hover:text-red-500 transition-all"
+                                                                    className="flex-1 py-2 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg hover:bg-red-50 hover:text-red-500 transition-all border border-chefie-border"
                                                                 >
                                                                     REDDET
                                                                 </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+
+                                                    {/* History & System Notifications */}
+                                                    {notifications.map((notif) => (
+                                                        <div key={`desktop-notif-${notif.id}`} className={`p-4 hover:bg-chefie-cream transition-colors group/notif ${notif.is_read ? 'opacity-60' : ''}`}>
+                                                            <div className="flex items-start gap-3">
+                                                                <div className="w-8 h-8 rounded-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center flex-shrink-0">
+                                                                    {notif.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex justify-between items-center mb-1">
+                                                                        <p className="text-xs font-black text-chefie-text truncate">{notif.title}</p>
+                                                                        <button 
+                                                                            onClick={() => handleDeleteNotification(notif.id)}
+                                                                            className="opacity-0 group-hover/notif:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                                        >
+                                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                    </div>
+                                                                    <p className="text-[10px] text-chefie-secondary leading-tight">{notif.message}</p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     ))}

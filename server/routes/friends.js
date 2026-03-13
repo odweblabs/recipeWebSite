@@ -36,9 +36,18 @@ router.post('/request/:userId', authenticateToken, async (req, res) => {
         }
 
         const info = await executeQuery('INSERT INTO friendships (requester_id, addressee_id, status) VALUES ($1, $2, $3) RETURNING id', [requesterId, addresseeId, 'pending']);
+        const friendshipId = info[0].id;
 
-        res.json({ id: info.lastInsertRowid, message: 'Arkadaşlık isteği gönderildi.' });
+        // Create a notification for the recipient
+        const requester = await executeQuery('SELECT username FROM users WHERE id = $1', [requesterId]);
+        await executeQuery(
+            'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1, $2, $3, $4, $5)',
+            [addresseeId, 'friend_request', 'Yeni Takip İsteği', `@${requester[0].username} seni takip etmek istiyor.`, friendshipId]
+        );
+
+        res.json({ id: friendshipId, message: 'Arkadaşlık isteği gönderildi.' });
     } catch (err) {
+        console.error('Error sending friend request:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -57,8 +66,16 @@ router.put('/accept/:friendshipId', authenticateToken, async (req, res) => {
         }
 
         await executeQuery('UPDATE friendships SET status = $1 WHERE id = $2', ['accepted', friendshipId]);
+
+        // Update notification
+        await executeQuery(
+            'UPDATE notifications SET message = $1, is_read = TRUE WHERE related_id = $2 AND type = $3',
+            ['Takip isteğini kabul ettin.', friendshipId, 'friend_request']
+        );
+
         res.json({ message: 'Arkadaşlık isteği kabul edildi.' });
     } catch (err) {
+        console.error('Error accepting friend request:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -78,8 +95,16 @@ router.delete('/reject/:friendshipId', authenticateToken, async (req, res) => {
         }
 
         await executeQuery('DELETE FROM friendships WHERE id = $1', [friendshipId]);
+
+        // Update notification instead of deleting it (to persist until user deletes it)
+        await executeQuery(
+            'UPDATE notifications SET message = $1, is_read = TRUE WHERE related_id = $2 AND type = $3',
+            ['Takip isteğini reddettin.', friendshipId, 'friend_request']
+        );
+
         res.json({ message: 'Arkadaşlık isteği reddedildi.' });
     } catch (err) {
+        console.error('Error rejecting friend request:', err);
         res.status(500).json({ error: err.message });
     }
 });

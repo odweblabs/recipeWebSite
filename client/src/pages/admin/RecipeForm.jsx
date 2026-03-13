@@ -20,8 +20,9 @@ import {
     UploadCloud,
     Menu,
     X,
-    Check,
-    MessageCircle
+    MessageCircle,
+    UserPlus,
+    Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -80,6 +81,7 @@ const RecipeForm = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchPendingFriends();
+            fetchNotifications();
         } catch (err) {
             console.error('Error accepting friend request:', err);
         }
@@ -91,8 +93,20 @@ const RecipeForm = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchPendingFriends();
+            fetchNotifications();
         } catch (err) {
             console.error('Error rejecting friend request:', err);
+        }
+    };
+
+    const handleDeleteNotification = async (notifId) => {
+        try {
+            await axios.delete(`${API_BASE}/api/notifications/${notifId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchNotifications();
+        } catch (err) {
+            console.error('Error deleting notification:', err);
         }
     };
 
@@ -259,8 +273,9 @@ const RecipeForm = () => {
                                             </div>
                                         ) : (
                                             <div className="divide-y divide-chefie-border">
+                                                {/* Active Pending Requests */}
                                                 {pendingFriends.map((request) => (
-                                                    <div key={request.friendship_id} className="p-4 hover:bg-chefie-cream transition-colors">
+                                                    <div key={`mob-req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors">
                                                         <div className="flex items-center gap-3 mb-3">
                                                             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border bg-chefie-yellow/5">
                                                                 {request.profile_image ? (
@@ -275,18 +290,28 @@ const RecipeForm = () => {
                                                             </div>
                                                         </div>
                                                         <div className="flex gap-2">
-                                                            <button onClick={() => handleAcceptFriend(request.friendship_id)} className="flex-1 py-1.5 bg-chefie-yellow text-white text-[10px] font-black rounded-lg shadow-lg shadow-yellow-100">ONAYLA</button>
+                                                            <button onClick={() => handleAcceptFriend(request.friendship_id)} className="flex-1 py-1.5 bg-chefie-yellow text-white text-[10px] font-black rounded-lg">ONAYLA</button>
                                                             <button onClick={() => handleRejectFriend(request.friendship_id)} className="flex-1 py-1.5 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg border border-chefie-border">REDDET</button>
                                                         </div>
                                                     </div>
                                                 ))}
+
+                                                {/* History & System Notifications */}
                                                 {notifications.map((notif) => (
-                                                    <div key={notif.id} className={`p-4 flex gap-3 hover:bg-chefie-cream transition-colors ${notif.is_read ? 'opacity-50' : 'bg-chefie-yellow/[0.02]'}`}>
+                                                    <div key={`mob-notif-${notif.id}`} className={`p-4 flex gap-3 hover:bg-chefie-cream transition-colors group/item ${notif.is_read ? 'opacity-50' : 'bg-chefie-yellow/[0.02]'}`}>
                                                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border ${notif.is_read ? 'bg-gray-50 border-gray-100 text-gray-400' : 'bg-chefie-yellow/10 border-chefie-yellow/20 text-chefie-yellow'}`}>
-                                                            {notif.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                                                            {notif.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : notif.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-xs font-black text-chefie-text line-clamp-1">{notif.title}</p>
+                                                            <div className="flex justify-between items-start">
+                                                                <p className="text-xs font-black text-chefie-text line-clamp-1">{notif.title}</p>
+                                                                <button 
+                                                                    onClick={() => handleDeleteNotification(notif.id)}
+                                                                    className="opacity-0 group-hover/item:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </div>
                                                             <p className="text-[10px] text-chefie-secondary font-bold line-clamp-2">{notif.message}</p>
                                                         </div>
                                                         {!notif.is_read && <div className="w-1.5 h-1.5 bg-chefie-yellow rounded-full flex-shrink-0 mt-1"></div>}
@@ -409,49 +434,60 @@ const RecipeForm = () => {
                                             </div>
                                         </div>
                                         <div className="max-h-[400px] overflow-y-auto">
-                                            {pendingFriends.length === 0 && notifications.length === 0 ? (
-                                                <div className="p-8 text-center text-gray-400">
-                                                    <Bell className="w-10 h-10 mx-auto mb-3 opacity-20" />
-                                                    <p className="text-xs font-bold">Yeni bildirim bulunmuyor.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="divide-y divide-chefie-border">
-                                                    {pendingFriends.map((request) => (
-                                                        <div key={request.friendship_id} className="p-4 hover:bg-chefie-cream transition-colors">
-                                                            <div className="flex items-center gap-3 mb-3">
-                                                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border bg-chefie-yellow/5">
-                                                                    {request.profile_image ? (
-                                                                        <img src={getImageUrl(request.profile_image)} alt="" className="w-full h-full object-cover" />
-                                                                    ) : (
-                                                                        <div className="w-full h-full flex items-center justify-center text-xs font-black text-chefie-yellow">{request.username.charAt(0).toUpperCase()}</div>
-                                                                    )}
+                                                {notifications.length === 0 && pendingFriends.length === 0 ? (
+                                                    <div className="p-8 text-center text-gray-400">
+                                                        <Bell className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                                                        <p className="text-xs font-bold">Yeni bildirim bulunmuyor.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="divide-y divide-chefie-border">
+                                                        {/* Active Pending Requests */}
+                                                        {pendingFriends.map((request) => (
+                                                            <div key={`desktop-req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors">
+                                                                <div className="flex items-center gap-3 mb-3">
+                                                                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border bg-chefie-yellow/5">
+                                                                        {request.profile_image ? (
+                                                                            <img src={getImageUrl(request.profile_image)} alt="" className="w-full h-full object-cover" />
+                                                                        ) : (
+                                                                            <div className="w-full h-full flex items-center justify-center text-xs font-black text-chefie-yellow">{request.username.charAt(0).toUpperCase()}</div>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="text-xs font-black text-chefie-text truncate">@{request.username}</p>
+                                                                        <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-tighter">Seni takip etmek istiyor</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    <button onClick={() => handleAcceptFriend(request.friendship_id)} className="flex-1 py-1.5 bg-chefie-yellow text-white text-[10px] font-black rounded-lg">ONAYLA</button>
+                                                                    <button onClick={() => handleRejectFriend(request.friendship_id)} className="flex-1 py-1.5 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg border border-chefie-border">REDDET</button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+
+                                                        {/* History & System Notifications */}
+                                                        {notifications.map((notif) => (
+                                                            <div key={`desktop-notif-${notif.id}`} className={`p-4 flex gap-3 hover:bg-chefie-cream transition-colors group/notif ${notif.is_read ? 'opacity-50' : 'bg-chefie-yellow/[0.02]'}`}>
+                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border ${notif.is_read ? 'bg-gray-50 border-gray-100 text-gray-400' : 'bg-chefie-yellow/10 border-chefie-yellow/20 text-chefie-yellow'}`}>
+                                                                    {notif.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : notif.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
-                                                                    <p className="text-xs font-black text-chefie-text truncate">@{request.username}</p>
-                                                                    <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-tighter">Seni takip etmek istiyor</p>
+                                                                    <div className="flex justify-between items-start">
+                                                                        <p className="text-xs font-black text-chefie-text line-clamp-1">{notif.title}</p>
+                                                                        <button 
+                                                                            onClick={() => handleDeleteNotification(notif.id)}
+                                                                            className="opacity-0 group-hover/notif:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                                        >
+                                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                    </div>
+                                                                    <p className="text-[10px] text-chefie-secondary font-bold line-clamp-2">{notif.message}</p>
                                                                 </div>
+                                                                {!notif.is_read && <div className="w-1.5 h-1.5 bg-chefie-yellow rounded-full flex-shrink-0 mt-1"></div>}
                                                             </div>
-                                                            <div className="flex gap-2">
-                                                                <button onClick={() => handleAcceptFriend(request.friendship_id)} className="flex-1 py-1.5 bg-chefie-yellow text-white text-[10px] font-black rounded-lg shadow-lg shadow-yellow-100">ONAYLA</button>
-                                                                <button onClick={() => handleRejectFriend(request.friendship_id)} className="flex-1 py-1.5 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg border border-chefie-border">REDDET</button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {notifications.map((notif) => (
-                                                        <div key={notif.id} className={`p-4 flex gap-3 hover:bg-chefie-cream transition-colors ${notif.is_read ? 'opacity-50' : 'bg-chefie-yellow/[0.02]'}`}>
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border ${notif.is_read ? 'bg-gray-50 border-gray-100 text-gray-400' : 'bg-chefie-yellow/10 border-chefie-yellow/20 text-chefie-yellow'}`}>
-                                                                {notif.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-xs font-black text-chefie-text line-clamp-1">{notif.title}</p>
-                                                                <p className="text-[10px] text-chefie-secondary font-bold line-clamp-2">{notif.message}</p>
-                                                            </div>
-                                                            {!notif.is_read && <div className="w-1.5 h-1.5 bg-chefie-yellow rounded-full flex-shrink-0 mt-1"></div>}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>

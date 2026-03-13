@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, Check, MessageCircle, UserPlus } from 'lucide-react';
+import { Menu, X, Bell, Check, MessageCircle, UserPlus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { safeGetToken, safeGetSessionStorage } from '../../utils/storage';
@@ -68,8 +68,20 @@ const Navbar = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchPendingRequests(token);
+            fetchNotifications(token); // Refresh history
         } catch (err) {
             console.error('Error rejecting friend request:', err);
+        }
+    };
+
+    const handleDeleteNotification = async (id) => {
+        try {
+            await axios.delete(`${API_BASE}/api/notifications/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchNotifications(token);
+        } catch (err) {
+            console.error('Error deleting notification:', err);
         }
     };
 
@@ -151,53 +163,50 @@ const Navbar = () => {
                                                         </div>
                                                     ) : (
                                                         <div className="divide-y divide-chefie-border">
-                                                            {/* Friend Requests */}
+                                                            {/* Friend Requests (Active) */}
                                                             {pendingRequests.map((request) => (
-                                                                <div key={`req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors">
-                                                                    <div className="flex items-center gap-3 mb-3">
-                                                                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border bg-chefie-yellow/10">
-                                                                            {request.profile_image ? (
-                                                                                <img src={getImageUrl(request.profile_image)} className="w-full h-full object-cover" alt="" />
-                                                                            ) : (
-                                                                                <div className="w-full h-full flex items-center justify-center text-xs font-black text-chefie-yellow">
-                                                                                    {request.username.charAt(0).toUpperCase()}
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <p className="text-xs font-black text-chefie-text hover:text-chefie-yellow truncate">@{request.username}</p>
-                                                                            <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-tighter">Takip İsteği Gönderdi</p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex gap-2">
-                                                                        <button
-                                                                            onClick={() => handleAcceptRequest(request.friendship_id)}
-                                                                            className="flex-1 py-1.5 bg-chefie-yellow text-white text-[9px] font-black rounded-lg hover:bg-chefie-dark transition-all shadow-lg shadow-yellow-100"
-                                                                        >
-                                                                            ONAYLA
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => handleRejectRequest(request.friendship_id)}
-                                                                            className="flex-1 py-1.5 bg-chefie-cream text-chefie-secondary text-[9px] font-black rounded-lg hover:bg-red-50 hover:text-red-500 transition-all border border-chefie-border"
-                                                                        >
-                                                                            REDDET
-                                                                        </button>
-                                                                    </div>
+                                                                <div key={`req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors hidden">
+                                                                    {/* Hidden because we now use persistent notifications list below */}
                                                                 </div>
                                                             ))}
                                                             
-                                                            {/* System Notifications */}
+                                                            {/* System & History Notifications */}
                                                             {notifications.map((notification) => (
                                                                 <div 
                                                                     key={`notif-${notification.id}`} 
-                                                                    className={`p-4 hover:bg-chefie-cream transition-colors flex gap-3 ${notification.is_read ? 'opacity-60' : 'bg-chefie-yellow/[0.02]'}`}
+                                                                    className={`p-4 hover:bg-chefie-cream transition-colors group/item flex gap-3 ${notification.is_read ? 'opacity-60' : 'bg-chefie-yellow/[0.02]'}`}
                                                                 >
                                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border ${notification.is_read ? 'bg-gray-50 border-gray-100 text-gray-400' : 'bg-chefie-yellow/10 border-chefie-yellow/20 text-chefie-yellow'}`}>
-                                                                        {notification.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                                                                        {notification.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : notification.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
-                                                                        <p className="text-xs font-black text-chefie-text leading-tight mb-1">{notification.title}</p>
+                                                                        <div className="flex justify-between items-start">
+                                                                            <p className="text-xs font-black text-chefie-text leading-tight mb-1">{notification.title}</p>
+                                                                            <button 
+                                                                                onClick={() => handleDeleteNotification(notification.id)}
+                                                                                className="opacity-0 group-hover/item:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                                                                            >
+                                                                                <Trash2 className="w-3 h-3" />
+                                                                            </button>
+                                                                        </div>
                                                                         <p className="text-[10px] text-chefie-secondary font-bold leading-relaxed line-clamp-2">{notification.message}</p>
+                                                                        
+                                                                        {notification.type === 'friend_request' && !notification.is_read && (
+                                                                            <div className="flex gap-2 mt-2">
+                                                                                <button
+                                                                                    onClick={() => handleAcceptRequest(notification.related_id)}
+                                                                                    className="flex-1 py-1 bg-chefie-yellow text-white text-[8px] font-black rounded hover:bg-chefie-dark transition-all"
+                                                                                >
+                                                                                    ONAYLA
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => handleRejectRequest(notification.related_id)}
+                                                                                    className="flex-1 py-1 bg-chefie-cream text-chefie-secondary text-[8px] font-black rounded border border-chefie-border"
+                                                                                >
+                                                                                    REDDET
+                                                                                </button>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                     {!notification.is_read && (
                                                                         <div className="w-1.5 h-1.5 bg-chefie-yellow rounded-full flex-shrink-0 mt-1"></div>
@@ -259,30 +268,32 @@ const Navbar = () => {
                                                     ) : (
                                                         <div className="divide-y divide-chefie-border">
                                                             {pendingRequests.map((request) => (
-                                                                <div key={`mob-req-${request.friendship_id}`} className="p-5">
-                                                                    <div className="flex items-center gap-3 mb-4">
-                                                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-border">
-                                                                            {request.profile_image ? <img src={getImageUrl(request.profile_image)} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full bg-chefie-yellow/10 flex items-center justify-center font-black text-chefie-yellow">{request.username.charAt(0)}</div>}
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="text-xs font-black text-chefie-text">@{request.username}</p>
-                                                                            <p className="text-[10px] font-bold text-chefie-secondary uppercase">Takip isteği gönderdi</p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-2 gap-3">
-                                                                        <button onClick={() => handleAcceptRequest(request.friendship_id)} className="py-2.5 bg-chefie-yellow text-white text-[10px] font-black rounded-xl">ONAYLA</button>
-                                                                        <button onClick={() => handleRejectRequest(request.friendship_id)} className="py-2.5 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-xl border border-chefie-border">REDDET</button>
-                                                                    </div>
+                                                                <div key={`mob-req-${request.friendship_id}`} className="hidden">
                                                                 </div>
                                                             ))}
                                                             {notifications.map((notification) => (
-                                                                <div key={`mob-notif-${notification.id}`} className={`p-5 flex gap-4 ${notification.is_read ? 'opacity-50' : ''}`}>
+                                                                <div key={`mob-notif-${notification.id}`} className={`p-5 flex gap-4 item-center ${notification.is_read ? 'opacity-50' : ''}`}>
                                                                     <div className="w-10 h-10 rounded-2xl bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center flex-shrink-0">
-                                                                        {notification.type === 'feedback_update' ? <MessageCircle className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
+                                                                        {notification.type === 'friend_request' ? <UserPlus className="w-5 h-5" /> : notification.type === 'feedback_update' ? <MessageCircle className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
                                                                     </div>
                                                                     <div className="flex-1">
-                                                                        <p className="text-xs font-black text-chefie-text mb-1">{notification.title}</p>
+                                                                        <div className="flex justify-between items-start">
+                                                                            <p className="text-xs font-black text-chefie-text mb-1">{notification.title}</p>
+                                                                            <button 
+                                                                                onClick={() => handleDeleteNotification(notification.id)}
+                                                                                className="p-1 text-gray-400 hover:text-red-500"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </div>
                                                                         <p className="text-[10px] text-chefie-secondary font-bold leading-relaxed">{notification.message}</p>
+                                                                        
+                                                                        {notification.type === 'friend_request' && !notification.is_read && (
+                                                                            <div className="grid grid-cols-2 gap-2 mt-3">
+                                                                                <button onClick={() => handleAcceptRequest(notification.related_id)} className="py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg">ONAYLA</button>
+                                                                                <button onClick={() => handleRejectRequest(notification.related_id)} className="py-2 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg border border-chefie-border">REDDET</button>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             ))}
