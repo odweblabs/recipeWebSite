@@ -112,6 +112,13 @@ const Dashboard = () => {
     const [pendingFriends, setPendingFriends] = useState([]);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [feedback, setFeedback] = useState([]);
+    const [notifForm, setNotifForm] = useState({
+        target: 'all',
+        userIds: [],
+        title: '',
+        message: ''
+    });
+    const [isSendingNotif, setIsSendingNotif] = useState(false);
 
     useEffect(() => {
         if (!token) {
@@ -140,7 +147,7 @@ const Dashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback'].includes(tab)) {
+        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback', 'send_notification'].includes(tab)) {
             setActiveTab(tab);
         }
     }, [location.search]);
@@ -265,15 +272,31 @@ const Dashboard = () => {
         }
     };
 
-    const handleUpdateFeedbackStatus = async (id, status) => {
+    const handleSendNotification = async (e) => {
+        e.preventDefault();
+        if (!notifForm.title || !notifForm.message) return;
+        if (notifForm.target === 'specific' && notifForm.userIds.length === 0) {
+            alert('Lütfen en az bir kullanıcı seçin.');
+            return;
+        }
+
+        setIsSendingNotif(true);
         try {
-            await axios.put(`${API_BASE}/api/feedback/${id}/status`, { status }, {
+            await axios.post(`${API_BASE}/api/notifications/send`, notifForm, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            fetchFeedback();
+            alert('Bildirim başarıyla gönderildi!');
+            setNotifForm({
+                target: 'all',
+                userIds: [],
+                title: '',
+                message: ''
+            });
         } catch (err) {
-            console.error('Error updating feedback status:', err);
-            alert('Durum güncellenemedi.');
+            console.error('Error sending notification:', err);
+            alert(err.response?.data?.error || 'Bildirim gönderilemedi.');
+        } finally {
+            setIsSendingNotif(false);
         }
     };
 
@@ -857,6 +880,116 @@ const Dashboard = () => {
             );
         }
 
+        if (activeTab === 'send_notification') {
+            return (
+                <tr>
+                    <td colSpan="5" className="px-6 py-8">
+                        <div className="max-w-4xl mx-auto">
+                            <form onSubmit={handleSendNotification} className="bg-chefie-card p-8 rounded-[2.5rem] border border-chefie-border shadow-2xl space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Hedef Kitle</label>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setNotifForm({ ...notifForm, target: 'all' })}
+                                                    className={`px-4 py-3 rounded-2xl font-bold text-sm transition-all border ${notifForm.target === 'all' ? 'bg-chefie-yellow text-white border-chefie-yellow shadow-lg' : 'bg-chefie-cream text-chefie-secondary border-chefie-border hover:bg-chefie-cream/80'}`}
+                                                >
+                                                    Tüm Kullanıcılar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setNotifForm({ ...notifForm, target: 'specific' })}
+                                                    className={`px-4 py-3 rounded-2xl font-bold text-sm transition-all border ${notifForm.target === 'specific' ? 'bg-chefie-yellow text-white border-chefie-yellow shadow-lg' : 'bg-chefie-cream text-chefie-secondary border-chefie-border hover:bg-chefie-cream/80'}`}
+                                                >
+                                                    Belirli Kullanıcılar
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {notifForm.target === 'specific' && (
+                                            <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+                                                <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Kullanıcı Seçin ({notifForm.userIds.length})</label>
+                                                <div className="max-h-[300px] overflow-y-auto border border-chefie-border rounded-2xl bg-chefie-cream p-4 space-y-2 scrollbar-thin">
+                                                    {users.map(u => (
+                                                        <label key={u.id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-card border border-chefie-border/50 hover:border-chefie-yellow transition-all cursor-pointer group">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={notifForm.userIds.includes(u.id)}
+                                                                onChange={(e) => {
+                                                                    const newIds = e.target.checked
+                                                                        ? [...notifForm.userIds, u.id]
+                                                                        : notifForm.userIds.filter(id => id !== u.id);
+                                                                    setNotifForm({ ...notifForm, userIds: newIds });
+                                                                }}
+                                                                className="w-4 h-4 rounded border-chefie-border text-chefie-yellow focus:ring-chefie-yellow"
+                                                            />
+                                                            <div className="w-8 h-8 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
+                                                                {u.profile_image ? (
+                                                                    <img src={u.profile_image.startsWith('http') ? u.profile_image : `${API_BASE}${u.profile_image}`} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-xs uppercase">
+                                                                        {(u.full_name || u.username).charAt(0)}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-xs font-bold text-chefie-text truncate">@{u.username}</div>
+                                                                <div className="text-[10px] text-chefie-secondary truncate">{u.full_name}</div>
+                                                            </div>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Bildirim Başlığı</label>
+                                            <input
+                                                type="text"
+                                                value={notifForm.title}
+                                                onChange={(e) => setNotifForm({ ...notifForm, title: e.target.value })}
+                                                placeholder="Örn: Hafta Sonu Sürprizi!"
+                                                className="w-full px-5 py-4 bg-chefie-cream border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow outline-none text-chefie-text font-bold shadow-inner"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Bildirim Mesajı</label>
+                                            <textarea
+                                                value={notifForm.message}
+                                                onChange={(e) => setNotifForm({ ...notifForm, message: e.target.value })}
+                                                placeholder="Bildirim içeriğini buraya yazın..."
+                                                rows="5"
+                                                className="w-full px-5 py-4 bg-chefie-cream border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow outline-none text-chefie-text font-medium shadow-inner resize-none"
+                                                required
+                                            ></textarea>
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={isSendingNotif || !notifForm.title || !notifForm.message}
+                                            className="w-full py-5 bg-chefie-yellow text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 shadow-xl shadow-chefie-yellow/20 flex items-center justify-center gap-3"
+                                        >
+                                            {isSendingNotif ? (
+                                                <><Loader2 className="w-5 h-5 animate-spin" /> GÖNDERİLİYOR...</>
+                                            ) : (
+                                                <><Bell className="w-5 h-5" /> BİLDİRİMİ GÖNDER</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            );
+        }
+
         if (activeTab === 'settings') {
             return (
                 <tr>
@@ -1187,6 +1320,7 @@ const Dashboard = () => {
                             <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
                             <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
                             <button onClick={() => { setActiveTab('feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'feedback' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><MessageSquare className="w-5 h-5 mr-3" /> Öneriler & Hatalar</button>
+                            <button onClick={() => { setActiveTab('send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'send_notification' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Bell className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
                         </>
                     )}
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
@@ -1202,7 +1336,7 @@ const Dashboard = () => {
                 <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-10 gap-4">
                     <div className="flex items-center gap-4 w-full max-w-xl">
                         <h1 className="text-2xl font-bold text-chefie-text">
-                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : 'Ayarlar'}
+                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}
                         </h1>
                         <div className="relative flex-1 hidden md:block ml-8">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -1324,7 +1458,7 @@ const Dashboard = () => {
 
                 <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-hidden w-full max-w-[calc(100vw-2rem)] md:max-w-full">
                     <div className="p-4 md:p-6 border-b border-chefie-border flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : 'Ayarlar'}</h2>
+                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}</h2>
                         {activeTab === 'all' && (
                             <Link to="/admin/recipes/new" className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold rounded-xl flex items-center gap-2"><Plus className="w-4 h-4" /> Yeni Ekle</Link>
                         )}

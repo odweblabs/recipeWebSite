@@ -51,6 +51,7 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('recipes');
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
 
     // Comment Edit State
     const [editingCommentId, setEditingCommentId] = useState(null);
@@ -137,7 +138,6 @@ const Profile = () => {
         }
     };
 
-    // Fetch pending requests (only for profile owner)
     const fetchPendingRequests = async () => {
         if (!isOwner || !token) return;
         try {
@@ -147,6 +147,30 @@ const Profile = () => {
             setPendingRequests(res.data);
         } catch (err) {
             console.error('Error fetching pending requests:', err);
+        }
+    };
+
+    const fetchNotifications = async () => {
+        if (!isOwner || !token) return;
+        try {
+            const res = await axios.get(`${API_BASE}/api/notifications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(res.data);
+        } catch (err) {
+            console.error('Error fetching notifications:', err);
+        }
+    };
+
+    const markNotificationsAsRead = async () => {
+        if (!isOwner || !token || notifications.filter(n => !n.is_read).length === 0) return;
+        try {
+            await axios.put(`${API_BASE}/api/notifications/mark-as-read`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        } catch (err) {
+            console.error('Error marking notifications as read:', err);
         }
     };
 
@@ -171,7 +195,8 @@ const Profile = () => {
                     friendStatusRes,
                     pendingRequestsRes,
                     userListsRes,
-                    userFavoritesRes
+                    userFavoritesRes,
+                    notificationsRes
                 ] = await Promise.all([
                     axios.get(`${API_BASE}/api/auth/users/${id}/profile`),
                     axios.get(`${API_BASE}/api/recipes/users/${id}/comments`),
@@ -185,7 +210,10 @@ const Profile = () => {
                     (isOwner && token) ? axios.get(`${API_BASE}/api/lists`, {
                         headers: { Authorization: `Bearer ${token}` }
                     }) : Promise.resolve({ data: [] }),
-                    axios.get(`${API_BASE}/api/favorites/user/${id}`)
+                    axios.get(`${API_BASE}/api/favorites/user/${id}`),
+                    (isOwner && token) ? axios.get(`${API_BASE}/api/notifications`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }) : Promise.resolve({ data: [] })
                 ]);
 
                 setProfile(profileRes.data);
@@ -195,6 +223,7 @@ const Profile = () => {
                 setPendingRequests(pendingRequestsRes.data);
                 setUserLists(userListsRes.data);
                 setUserFavorites(userFavoritesRes.data);
+                setNotifications(notificationsRes.data);
 
                 // Fetch recipes separately as it might be larger or has its own logic
                 await fetchRecipes();
@@ -732,7 +761,7 @@ const Profile = () => {
                         >
                             <div className="relative">
                                 <Bell className="w-3.5 h-3.5" />
-                                {pendingRequests.length > 0 && (
+                                { (pendingRequests.length + notifications.filter(n => !n.is_read).length) > 0 && (
                                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                                 )}
                             </div>
@@ -771,6 +800,11 @@ const Profile = () => {
                                 }`}
                         >
                             {t('profile.tabs.notifications')}
+                            {(pendingRequests.length + notifications.filter(n => !n.is_read).length) > 0 && (
+                                <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold leading-none text-white bg-red-500 rounded-full">
+                                    {pendingRequests.length + notifications.filter(n => !n.is_read).length}
+                                </span>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -867,18 +901,31 @@ const Profile = () => {
 
                     {activeTab === 'notifications' && (
                         <div className="w-full">
-                            {pendingRequests.length === 0 ? (
+                             {pendingRequests.length === 0 && notifications.length === 0 ? (
                                 <div className="py-32 text-center w-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                                     <div className="w-24 h-24 bg-chefie-yellow/10 rounded-full flex items-center justify-center mb-6 border border-chefie-yellow/20 shadow-inner">
                                         <Bell className="w-12 h-12 text-chefie-yellow" />
                                     </div>
-                                    <h3 className="text-chefie-text font-bold text-xl mb-2">Bildirim Yok</h3>
+                                    <h3 className="text-chefie-text font-bold text-xl mb-2">{t('profile.no_notifications_title', 'Bildirim Yok')}</h3>
                                     <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_notifications')}</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
+                                    {notifications.filter(n => !n.is_read).length > 0 && (
+                                        <div className="flex justify-end mb-2">
+                                            <button 
+                                                onClick={markNotificationsAsRead}
+                                                className="text-xs font-bold text-chefie-yellow hover:underline flex items-center gap-1"
+                                            >
+                                                <Check className="w-3 h-3" />
+                                                Tümünü Okundu İşaretle
+                                            </button>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Follow Requests */}
                                     {pendingRequests.map((request) => (
-                                        <div key={request.friendship_id} className="bg-chefie-card rounded-3xl border border-chefie-border p-5 flex items-center gap-4 animate-in fade-in duration-500 shadow-md">
+                                        <div key={`req-${request.friendship_id}`} className="bg-chefie-card rounded-3xl border border-chefie-border p-5 flex items-center gap-4 animate-in fade-in duration-500 shadow-md">
                                             <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 shadow-sm">
                                                 {request.profile_image ? (
                                                     <img src={getImageUrl(request.profile_image)} className="w-full h-full object-cover" alt="" />
@@ -906,6 +953,30 @@ const Profile = () => {
                                                     <X className="w-5 h-5" />
                                                 </button>
                                             </div>
+                                        </div>
+                                    ))}
+
+                                    {/* General Notifications */}
+                                    {notifications.map((notification) => (
+                                        <div 
+                                            key={`notif-${notification.id}`} 
+                                            className={`bg-chefie-card rounded-3xl border ${notification.is_read ? 'border-chefie-border opacity-70' : 'border-chefie-yellow shadow-md shadow-chefie-yellow/5'} p-5 flex items-start gap-4 animate-in fade-in duration-500 relative transition-all`}
+                                        >
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm ${notification.is_read ? 'bg-chefie-secondary/10 text-chefie-secondary' : 'bg-chefie-yellow/10 text-chefie-yellow'}`}>
+                                                {notification.type === 'feedback_update' ? <MessageCircle className="w-6 h-6" /> : <Bell className="w-6 h-6" />}
+                                            </div>
+                                            <div className="flex-1 min-w-0 pt-1">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <p className="text-sm font-bold text-chefie-text">{notification.title}</p>
+                                                    <span className="text-[10px] text-chefie-secondary">
+                                                        {new Date(notification.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-chefie-secondary font-medium leading-relaxed">{notification.message}</p>
+                                            </div>
+                                            {!notification.is_read && (
+                                                <div className="absolute top-4 right-4 w-2 h-2 bg-chefie-yellow rounded-full"></div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
