@@ -55,9 +55,11 @@ const Login = () => {
                 safeSetSessionStorage('token', token);
                 safeSetSessionStorage('user', JSON.stringify(user));
 
-                // Başarılı girişten sonra gidilecek yer (eğer bir yerden yönlendirilmişse oraya, yoksa dashboard'a)
+                // Başarılı girişten sonra gidilecek yer
                 const origin = location.state?.from?.pathname || '/';
-                navigate(origin);
+                setTimeout(() => {
+                    navigate(origin, { replace: true });
+                }, 100);
             } else {
                 setSuccess('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
                 setIsLogin(true);

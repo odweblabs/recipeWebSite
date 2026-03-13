@@ -655,11 +655,11 @@ const Dashboard = () => {
                                                     </div>
                                                     <div className="flex items-center gap-1.5 mt-0.5">
                                                         <span className={`text-[10px] font-black uppercase tracking-wider ${isOnline ? 'text-green-500' : 'text-chefie-secondary'}`}>
-                                                            {isOnline ? 'ÇEVRİMİÇİ' : 'GEÇMİŞTE AKTİF'}
+                                                            {isOnline ? 'ÇEVRİMİÇİ' : 'SON AKTİF'}
                                                         </span>
                                                         {lastActiveTime && !isOnline && (
                                                             <span className="text-[10px] text-chefie-secondary font-medium">
-                                                                · {timeStr}
+                                                                · {lastActiveTime.toLocaleDateString('tr-TR')} {lastActiveTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                                                             </span>
                                                         )}
                                                     </div>
@@ -796,37 +796,53 @@ const Dashboard = () => {
                     <td colSpan="5" className="px-6 py-8">
                         <div className="space-y-6">
                             {feedback.length > 0 ? feedback.map((item) => (
-                                <div key={item.id} className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-sm">
-                                    <div className="flex items-center justify-between mb-4">
+                                <div key={item.id} className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                                         <div className="flex items-center gap-3">
                                             <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${
-                                                item.type === 'bug' ? 'bg-red-50 text-red-500 border-red-100' : 'bg-blue-50 text-blue-500 border-blue-100'
+                                                (item.type === 'bug' || item.type === 'bug_report') ? 'bg-red-50 text-red-500 border-red-100' : 'bg-blue-50 text-blue-500 border-blue-100'
                                             }`}>
-                                                {item.type === 'bug' ? 'Hata Bildirimi' : 'Öneri'}
+                                                {(item.type === 'bug' || item.type === 'bug_report') ? '⚠️ Hata Bildirimi' : '💡 Öneri'}
                                             </span>
-                                            <span className="text-xs text-chefie-secondary font-bold">
-                                                {new Date(item.created_at).toLocaleDateString('tr-TR')}
+                                            <span className="text-xs text-chefie-secondary font-bold pb-0.5 border-b-2 border-chefie-yellow/20">
+                                                {new Date(item.created_at).toLocaleDateString('tr-TR')} {new Date(item.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
                                         <select
                                             value={item.status}
                                             onChange={(e) => handleUpdateFeedbackStatus(item.id, e.target.value)}
-                                            className="text-xs font-bold bg-chefie-cream border border-chefie-border rounded-lg px-2 py-1 outline-none"
+                                            className="text-xs font-bold bg-chefie-cream border border-chefie-border rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-chefie-yellow transition-all"
                                         >
-                                            <option value="pending">Beklemede</option>
-                                            <option value="reviewed">İncelendi</option>
-                                            <option value="resolved">Çözüldü</option>
+                                            <option value="pending">🕒 Beklemede</option>
+                                            <option value="reviewed">👀 İncelendi</option>
+                                            <option value="resolved">✅ Çözüldü</option>
                                         </select>
                                     </div>
-                                    <h4 className="text-sm font-bold text-chefie-text mb-2">{item.subject}</h4>
-                                    <p className="text-xs text-chefie-secondary font-medium leading-relaxed mb-4">{item.message}</p>
-                                    <div className="flex items-center gap-2 pt-4 border-t border-chefie-border">
-                                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden border border-gray-200">
-                                            {item.profile_image ? <img src={item.profile_image.startsWith('http') ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover" /> : (item.full_name || item.username).charAt(0)}
+                                    <div className="bg-chefie-cream/50 p-4 rounded-xl border border-chefie-border mb-4">
+                                        <div className="text-xs font-bold text-chefie-secondary uppercase tracking-[0.1em] mb-2 opacity-50">Mesaj İçeriği:</div>
+                                        <p className="text-sm text-chefie-text font-medium leading-relaxed whitespace-pre-wrap">{item.content}</p>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-4 border-t border-chefie-border">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden border border-gray-200">
+                                                {item.profile_image ? (
+                                                    <img src={item.profile_image.startsWith('http') ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
+                                                        {(item.full_name || item.username).charAt(0)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[11px] font-bold text-chefie-text">
+                                                    {item.full_name || item.username}
+                                                </span>
+                                                <span className="text-[10px] text-chefie-secondary">@{item.username}</span>
+                                            </div>
                                         </div>
-                                        <span className="text-[10px] font-bold text-chefie-secondary">
-                                            {item.full_name || item.username} (@{item.username})
-                                        </span>
+                                        <div className="text-[10px] font-black text-chefie-secondary/30 uppercase tracking-widest">
+                                            ID: #{item.id}
+                                        </div>
                                     </div>
                                 </div>
                             )) : (

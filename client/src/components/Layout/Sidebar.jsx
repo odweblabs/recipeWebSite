@@ -138,11 +138,11 @@ const Sidebar = () => {
             {/* Bottom Actions */}
             <div className="pt-6 mt-6 border-t border-chefie-border space-y-2">
                 <NavLink
-                    to="/admin/dashboard"
+                    to={user ? "/admin/dashboard" : "/admin/login"}
                     className="flex items-center px-4 py-3 text-gray-400 hover:text-chefie-yellow hover:bg-chefie-cream/50 rounded-2xl transition-all text-sm group"
                 >
                     <LayoutDashboard className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
-                    {t('nav.admin_panel')}
+                    {user ? 'Yönetici Paneli' : t('nav.admin_panel')}
                 </NavLink>
                 {user && (
                     <button
