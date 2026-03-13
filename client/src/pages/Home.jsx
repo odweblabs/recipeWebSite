@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Search, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare, Soup, Beef, Cake, Croissant, Coffee, Flame, Trophy } from 'lucide-react';
 import { blogPosts } from '../data/blogData';
 import SearchBar from '../components/SearchBar';
+import NotificationBell from '../components/NotificationBell';
 import { useTranslation } from 'react-i18next';
 
 const Home = () => {
@@ -95,11 +96,16 @@ const Home = () => {
                     />
                 </motion.div>
 
-                <Link to="/admin/recipes/new" className="h-[48px] md:h-auto px-5 md:px-8 py-0 md:py-4 bg-gradient-to-r from-chefie-yellow to-amber-500 text-white font-black text-[10px] sm:text-xs md:text-sm rounded-2xl shadow-lg shadow-amber-200/40 dark:shadow-amber-900/20 hover:shadow-xl hover:shadow-amber-300/50 dark:hover:shadow-amber-800/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shrink-0">
-                    <ChefHat className="h-4 w-4 md:h-5 md:w-5" />
-                    <span className="hidden sm:inline">{t('nav.share_recipe').toUpperCase()}</span>
-                    <span className="sm:hidden">{t('common.share').toUpperCase()}</span>
-                </Link>
+                <div className="flex items-center gap-3 shrink-0">
+                    <div className="hidden md:block">
+                        <NotificationBell />
+                    </div>
+                    <Link to="/admin/recipes/new" className="h-[48px] md:h-auto px-5 md:px-8 py-0 md:py-4 bg-gradient-to-r from-chefie-yellow to-amber-500 text-white font-black text-[10px] sm:text-xs md:text-sm rounded-2xl shadow-lg shadow-amber-200/40 dark:shadow-amber-900/20 hover:shadow-xl hover:shadow-amber-300/50 dark:hover:shadow-amber-800/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                        <ChefHat className="h-4 w-4 md:h-5 md:w-5" />
+                        <span className="hidden sm:inline">{t('nav.share_recipe').toUpperCase()}</span>
+                        <span className="sm:hidden">{t('common.share').toUpperCase()}</span>
+                    </Link>
+                </div>
             </header>
 
             {/* Hero Section */}

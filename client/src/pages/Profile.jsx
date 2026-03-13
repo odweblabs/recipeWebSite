@@ -162,6 +162,17 @@ const Profile = () => {
         }
     };
 
+    const handleDeleteNotification = async (id) => {
+        try {
+            await axios.delete(`${API_BASE}/api/notifications/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        } catch (err) {
+            console.error('Error deleting notification:', err);
+        }
+    };
+
     const markNotificationsAsRead = async () => {
         if (!isOwner || !token || notifications.filter(n => !n.is_read).length === 0) return;
         try {
@@ -968,9 +979,17 @@ const Profile = () => {
                                             <div className="flex-1 min-w-0 pt-1">
                                                 <div className="flex items-center justify-between mb-1">
                                                     <p className="text-sm font-bold text-chefie-text">{notification.title}</p>
-                                                    <span className="text-[10px] text-chefie-secondary">
-                                                        {new Date(notification.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] text-chefie-secondary">
+                                                            {new Date(notification.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                        <button 
+                                                            onClick={() => handleDeleteNotification(notification.id)}
+                                                            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <p className="text-[11px] text-chefie-secondary font-medium leading-relaxed">{notification.message}</p>
                                             </div>

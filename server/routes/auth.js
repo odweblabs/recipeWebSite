@@ -77,7 +77,35 @@ router.post('/register', upload.single('profile_image'), async (req, res) => {
             'INSERT INTO users (username, password, full_name, profile_image, role, country, city) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
             [username, hashedPassword, full_name || null, profile_image || null, role, country || null, req.body.city || null]
         );
-        res.json({ id: info.lastInsertRowid });
+        const newUserId = info.lastInsertRowid;
+
+        // Send welcome notification
+        try {
+            const settings = await executeQuery(
+                "SELECT key, value FROM site_settings WHERE key IN ('welcome_notif_title', 'welcome_notif_message')"
+            );
+            let titleTemplate = 'Tarifo Mutfağına Hoş Geldin, {isim}! 👨‍🍳✨';
+            let messageTemplate = 'Selam {isim}! Aramıza katılmana çok sevindik...';
+            
+            settings.forEach(s => {
+                if (s.key === 'welcome_notif_title') titleTemplate = s.value;
+                if (s.key === 'welcome_notif_message') messageTemplate = s.value;
+            });
+
+            const displayName = full_name || username;
+            const personalizedTitle = titleTemplate.replace(/{isim}/g, displayName);
+            const personalizedMessage = messageTemplate.replace(/{isim}/g, displayName);
+
+            await executeQuery(
+                'INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)',
+                [newUserId, 'welcome', personalizedTitle, personalizedMessage]
+            );
+        } catch (notifErr) {
+            console.error('Error sending welcome notification:', notifErr);
+            // Don't fail registration if notification fails
+        }
+
+        res.json({ id: newUserId });
     } catch (err) {
         res.status(500).json({ error: 'Kullanıcı zaten mevcut' });
     }

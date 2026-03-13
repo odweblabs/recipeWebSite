@@ -132,4 +132,42 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Get welcome notification template (Admin only)
+router.get('/welcome-template', authenticateToken, adminOnly, async (req, res) => {
+    try {
+        const settings = await executeQuery(
+            "SELECT key, value FROM site_settings WHERE key IN ('welcome_notif_title', 'welcome_notif_message')"
+        );
+        const template = {};
+        settings.forEach(s => {
+            if (s.key === 'welcome_notif_title') template.title = s.value;
+            if (s.key === 'welcome_notif_message') template.message = s.value;
+        });
+        res.json(template);
+    } catch (err) {
+        console.error('Error fetching welcome template:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update welcome notification template (Admin only)
+router.post('/welcome-template', authenticateToken, adminOnly, async (req, res) => {
+    const { title, message } = req.body;
+    if (!title || !message) {
+        return res.status(400).json({ error: 'Title and message are required' });
+    }
+
+    try {
+        await executeQuery(
+            "INSERT INTO site_settings (key, value) VALUES ('welcome_notif_title', $1), ('welcome_notif_message', $2) " +
+            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+            [title, message]
+        );
+        res.json({ message: 'Welcome notification template updated successfully' });
+    } catch (err) {
+        console.error('Error updating welcome template:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

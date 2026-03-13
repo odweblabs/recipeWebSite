@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ChefHat, Heart, BookOpen, Users, Settings, LogOut, LayoutDashboard, UtensilsCrossed, ShoppingCart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import NotificationBell from '../NotificationBell';
 
 const Sidebar = () => {
     const { t } = useTranslation();
@@ -29,13 +30,13 @@ const Sidebar = () => {
 
     return (
         <aside className="w-64 bg-chefie-card min-h-screen fixed left-0 top-0 border-r border-chefie-border flex flex-col p-6 z-50 hidden md:flex shadow-2xl shadow-gray-100 dark:shadow-none">
-            {/* Brand */}
-            <div className="mb-10 flex justify-center">
-                <Link to="/" className="group">
+            {/* Brand & Actions */}
+            <div className="mb-10 flex items-center">
+                <Link to="/" className="group flex-1">
                     <img
                         src="/bitarif_logo_1.png"
                         alt="Bitarif Logo"
-                        className="h-24 w-auto group-hover:scale-105 transition-transform duration-300"
+                        className="h-20 w-auto group-hover:scale-105 transition-transform duration-300"
                     />
                 </Link>
             </div>

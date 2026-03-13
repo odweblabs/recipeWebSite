@@ -8,7 +8,6 @@ import {
     Settings,
     LogOut,
     Search,
-    Bell,
     Plus,
     Edit,
     Trash2,
@@ -32,10 +31,16 @@ import {
     UserPlus,
     History,
     Globe,
-    UserCheck
+    UserCheck,
+    Calendar,
+    Sparkles,
+    Info,
+    Save,
+    Bell
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import NotificationBell from '../../components/NotificationBell';
 
 // Country list with flag emojis
 const COUNTRY_LIST = [
@@ -73,7 +78,6 @@ const Dashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('all');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isDesktopNotificationsOpen, setIsDesktopNotificationsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const token = safeGetToken();
@@ -113,12 +117,11 @@ const Dashboard = () => {
     const [isSavingRecommendation, setIsSavingRecommendation] = useState(false);
 
     const [isSendingNotif, setIsSendingNotif] = useState(false);
-    const [notifications, setNotifications] = useState([]);
-    const [isMobileNotificationsOpen, setIsMobileNotificationsOpen] = useState(false);
-    const [notificationHistory, setNotificationHistory] = useState([]);
-    const [notifForm, setNotifForm] = useState({ target: 'all', userIds: [], title: '', message: '' });
-    const [pendingFriends, setPendingFriends] = useState([]);
+    const [welcomeTemplate, setWelcomeTemplate] = useState({ title: '', message: '' });
+    const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+    const [templateMessage, setTemplateMessage] = useState({ type: '', text: '' });
     const [feedback, setFeedback] = useState([]);
+    const [notificationHistory, setNotificationHistory] = useState([]);
 
     useEffect(() => {
         if (!token) {
@@ -133,15 +136,11 @@ const Dashboard = () => {
             fetchUsers();
             fetchActivity();
             fetchRecommendation();
-            fetchPendingFriends();
-            fetchNotifications();
             fetchNotificationHistory();
             // Refresh activity data every 60 seconds
             const activityInterval = setInterval(() => {
                 fetchActivity();
-                fetchPendingFriends();
                 fetchFeedback();
-                fetchNotifications();
                 fetchNotificationHistory();
             }, 60000);
             return () => clearInterval(activityInterval);
@@ -154,27 +153,36 @@ const Dashboard = () => {
         if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback', 'send_notification'].includes(tab)) {
             setActiveTab(tab);
         }
-    }, [location.search]);
+        if (tab === 'send_notification' && user.role === 'admin') {
+            fetchWelcomeTemplate();
+        }
+    }, [location.search, user.role]);
 
-    const fetchPendingFriends = async () => {
+    const fetchWelcomeTemplate = async () => {
         try {
-            const res = await axios.get(`${API_BASE}/api/friends/requests/pending`, {
+            const res = await axios.get(`${API_BASE}/api/notifications/welcome-template`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setPendingFriends(res.data);
+            setWelcomeTemplate(res.data);
         } catch (err) {
-            console.error('Error fetching pending friends:', err);
+            console.error('Error fetching welcome template:', err);
         }
     };
 
-    const fetchNotifications = async () => {
+    const handleUpdateTemplate = async (e) => {
+        if (e) e.preventDefault();
+        setIsSavingTemplate(true);
+        setTemplateMessage({ type: '', text: '' });
         try {
-            const res = await axios.get(`${API_BASE}/api/notifications`, {
+            await axios.post(`${API_BASE}/api/notifications/welcome-template`, welcomeTemplate, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setNotifications(res.data);
+            setTemplateMessage({ type: 'success', text: 'Karşılama şablonu güncellendi!' });
         } catch (err) {
-            console.error('Error fetching notifications:', err);
+            console.error('Error updating welcome template:', err);
+            setTemplateMessage({ type: 'error', text: 'Güncelleme sırasında bir hata oluştu.' });
+        } finally {
+            setIsSavingTemplate(false);
         }
     };
 
@@ -186,41 +194,6 @@ const Dashboard = () => {
             setNotificationHistory(res.data);
         } catch (err) {
             console.error('Error fetching notification history:', err);
-        }
-    };
-
-    const handleDeleteNotification = async (id) => {
-        try {
-            await axios.delete(`${API_BASE}/api/notifications/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchNotifications();
-        } catch (err) {
-            console.error('Error deleting notification:', err);
-        }
-    };
-
-    const handleAcceptFriend = async (friendshipId) => {
-        try {
-            await axios.put(`${API_BASE}/api/friends/accept/${friendshipId}`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchPendingFriends();
-            fetchNotifications();
-        } catch (err) {
-            console.error('Error accepting friend:', err);
-        }
-    };
-
-    const handleRejectFriend = async (friendshipId) => {
-        try {
-            await axios.delete(`${API_BASE}/api/friends/reject/${friendshipId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchPendingFriends();
-            fetchNotifications();
-        } catch (err) {
-            console.error('Error rejecting friend:', err);
         }
     };
 
@@ -1036,6 +1009,75 @@ const Dashboard = () => {
                                 </div>
                             </form>
 
+                            {/* Welcome Notification Template Management */}
+                            <div className="mt-16 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
+                                <div className="flex items-center gap-3 px-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
+                                        <Sparkles className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight">Yeni Üye Karşılama Şablonu</h3>
+                                        <p className="text-xs font-bold text-chefie-secondary uppercase tracking-widest">Otomatik hoş geldin bildirimi ayarları</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-chefie-card p-8 rounded-[2.5rem] border border-chefie-border shadow-2xl space-y-8">
+                                    {templateMessage.text && (
+                                        <div className={`px-4 py-3 rounded-xl text-sm font-bold ${templateMessage.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                            {templateMessage.text}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Şablon Başlığı</label>
+                                                <input
+                                                    type="text"
+                                                    value={welcomeTemplate.title}
+                                                    onChange={(e) => setWelcomeTemplate({ ...welcomeTemplate, title: e.target.value })}
+                                                    className="w-full px-5 py-4 bg-chefie-cream border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow outline-none text-chefie-text font-bold shadow-inner"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="p-4 bg-chefie-yellow/5 border border-chefie-yellow/20 rounded-2xl">
+                                                <h4 className="text-[10px] font-black text-chefie-yellow uppercase mb-2 tracking-widest flex items-center gap-2">
+                                                    <Info className="w-3.5 h-3.5" /> İpucu
+                                                </h4>
+                                                <p className="text-[10px] text-chefie-secondary font-bold leading-relaxed">
+                                                    Metin içerisinde <code className="bg-chefie-yellow/20 px-1.5 py-0.5 rounded text-chefie-text">{"{isim}"}</code> etiketini kullanarak kullanıcının adını otomatik olarak ekleyebilirsiniz.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Şablon Mesajı</label>
+                                                <textarea
+                                                    value={welcomeTemplate.message}
+                                                    onChange={(e) => setWelcomeTemplate({ ...welcomeTemplate, message: e.target.value })}
+                                                    rows="4"
+                                                    className="w-full px-5 py-4 bg-chefie-cream border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow outline-none text-chefie-text font-medium shadow-inner resize-none"
+                                                    required
+                                                ></textarea>
+                                            </div>
+
+                                            <button
+                                                onClick={handleUpdateTemplate}
+                                                disabled={isSavingTemplate || !welcomeTemplate.title || !welcomeTemplate.message}
+                                                className="w-full py-4 bg-chefie-dark text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-black transition-all disabled:opacity-50 shadow-xl flex items-center justify-center gap-3"
+                                            >
+                                                {isSavingTemplate ? (
+                                                    <><Loader2 className="w-5 h-5 animate-spin" /> KAYDEDİLİYOR...</>
+                                                ) : (
+                                                    <><Save className="w-5 h-5" /> ŞABLONU KAYDET</>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Notification History Section */}
                             <div className="mt-16 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
                                 <div className="flex items-center gap-3 px-4">
@@ -1321,101 +1363,7 @@ const Dashboard = () => {
                     <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsMobileNotificationsOpen(!isMobileNotificationsOpen)}
-                            className="relative w-10 h-10 flex items-center justify-center text-gray-400 hover:text-chefie-yellow rounded-xl transition-all"
-                        >
-                            <Bell className="w-6 h-6" />
-                            {pendingFriends.length > 0 && (
-                                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-chefie-card animate-pulse"></span>
-                            )}
-                        </button>
-
-                        <AnimatePresence>
-                            {isMobileNotificationsOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    className="absolute right-0 mt-3 w-80 bg-chefie-card rounded-2xl shadow-2xl border border-chefie-border z-[100] overflow-hidden"
-                                >
-                                    <div className="p-4 border-b border-chefie-border flex items-center justify-between bg-chefie-cream">
-                                        <h3 className="text-sm font-black text-chefie-text uppercase tracking-wider">Bildirimler</h3>
-                                        <span className="bg-chefie-yellow text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                                            {pendingFriends.length} YENİ
-                                        </span>
-                                    </div>
-                                    <div className="max-h-[400px] overflow-y-auto">
-                                        {notifications.length === 0 && pendingFriends.length === 0 ? (
-                                            <div className="p-8 text-center">
-                                                <Bell className="w-10 h-10 text-chefie-secondary/20 mx-auto mb-3" />
-                                                <p className="text-xs font-bold text-chefie-secondary">Yeni bildirim bulunmuyor.</p>
-                                            </div>
-                                        ) : (
-                                            <div className="divide-y divide-chefie-border">
-                                                {/* Active Pending Requests */}
-                                                {pendingFriends.map((request) => (
-                                                    <div key={`req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors">
-                                                        <div className="flex items-center gap-3 mb-3">
-                                                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border">
-                                                                <img
-                                                                    src={request.profile_image ? (request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`) : "https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png"}
-                                                                    alt={request.username}
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-xs font-black text-chefie-text line-clamp-1">@{request.username}</p>
-                                                                <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-tighter">Seni takip etmek istiyor</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handleAcceptFriend(request.friendship_id)}
-                                                                className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all"
-                                                            >
-                                                                KABUL ET
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleRejectFriend(request.friendship_id)}
-                                                                className="flex-1 py-2 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg hover:bg-red-50 hover:text-red-500 transition-all"
-                                                            >
-                                                                REDDET
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-
-                                                {/* History & System Notifications */}
-                                                {notifications.map((notif) => (
-                                                    <div key={`notif-${notif.id}`} className={`p-4 hover:bg-chefie-cream transition-colors group/item ${notif.is_read ? 'opacity-60' : ''}`}>
-                                                        <div className="flex items-start gap-3">
-                                                            <div className="w-8 h-8 rounded-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center flex-shrink-0">
-                                                                {notif.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex justify-between items-center mb-1">
-                                                                    <p className="text-xs font-black text-chefie-text truncate">{notif.title}</p>
-                                                                    <button 
-                                                                        onClick={() => handleDeleteNotification(notif.id)}
-                                                                        className="opacity-0 group-hover/item:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                                                                    >
-                                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                                    </button>
-                                                                </div>
-                                                                <p className="text-[10px] text-chefie-secondary leading-tight">{notif.message}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                    <NotificationBell isMobile={true} />
 
                     <Link to={user?.id ? `/profile/${user.id}` : '#'}>
                         {user.profile_image ? (
@@ -1461,7 +1409,7 @@ const Dashboard = () => {
                             <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
                             <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
                             <button onClick={() => { setActiveTab('feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'feedback' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><MessageSquare className="w-5 h-5 mr-3" /> Öneriler & Hatalar</button>
-                            <button onClick={() => { setActiveTab('send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'send_notification' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Bell className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
+                            <button onClick={() => { setActiveTab('send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'send_notification' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Plus className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
                         </>
                     )}
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
@@ -1492,101 +1440,7 @@ const Dashboard = () => {
                     </div>
 
                     <div className="hidden md:flex items-center gap-4 ml-auto border-l border-chefie-border pl-6 mr-4">
-                        <div className="relative">
-                            <button
-                                onClick={() => setIsDesktopNotificationsOpen(!isDesktopNotificationsOpen)}
-                                className="relative p-2.5 text-gray-400 hover:bg-chefie-cream rounded-xl transition-all"
-                            >
-                                <Bell className="w-6 h-6" />
-                                {pendingFriends.length > 0 && (
-                                    <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-chefie-card animate-pulse"></span>
-                                )}
-                            </button>
-
-                            <AnimatePresence>
-                                {isDesktopNotificationsOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        className="absolute right-0 mt-3 w-80 bg-chefie-card rounded-2xl shadow-2xl border border-chefie-border z-[100] overflow-hidden"
-                                    >
-                                        <div className="p-4 border-b border-chefie-border flex items-center justify-between bg-chefie-cream">
-                                            <h3 className="text-sm font-black text-chefie-text uppercase tracking-wider">Bildirimler</h3>
-                                            <span className="bg-chefie-yellow text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                                                {pendingFriends.length} YENİ
-                                            </span>
-                                        </div>
-                                        <div className="max-h-[400px] overflow-y-auto">
-                                            {notifications.length === 0 && pendingFriends.length === 0 ? (
-                                                <div className="p-8 text-center">
-                                                    <Bell className="w-10 h-10 text-chefie-secondary/20 mx-auto mb-3" />
-                                                    <p className="text-xs font-bold text-chefie-secondary">Yeni bildirim bulunmuyor.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="divide-y divide-chefie-border">
-                                                    {/* Active Pending Requests */}
-                                                    {pendingFriends.map((request) => (
-                                                        <div key={`desktop-req-${request.friendship_id}`} className="p-4 hover:bg-chefie-cream transition-colors">
-                                                            <div className="flex items-center gap-3 mb-3">
-                                                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-chefie-border">
-                                                                    <img
-                                                                        src={request.profile_image ? (request.profile_image.startsWith('http') ? request.profile_image : `${API_BASE}${request.profile_image}`) : "https://cdn.dribbble.com/userupload/42512876/file/original-f83ea4a95013355104381d9512b4c4de.png"}
-                                                                        alt={request.username}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-xs font-black text-chefie-text line-clamp-1">@{request.username}</p>
-                                                                    <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-tighter">Seni takip etmek istiyor</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <button
-                                                                    onClick={() => handleAcceptFriend(request.friendship_id)}
-                                                                    className="flex-1 py-2 bg-chefie-yellow text-white text-[10px] font-black rounded-lg hover:bg-chefie-dark transition-all"
-                                                                >
-                                                                    KABUL ET
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleRejectFriend(request.friendship_id)}
-                                                                    className="flex-1 py-2 bg-chefie-cream text-chefie-secondary text-[10px] font-black rounded-lg hover:bg-red-50 hover:text-red-500 transition-all border border-chefie-border"
-                                                                >
-                                                                    REDDET
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* History & System Notifications */}
-                                                    {notifications.map((notif) => (
-                                                        <div key={`desktop-notif-${notif.id}`} className={`p-4 hover:bg-chefie-cream transition-colors group/notif ${notif.is_read ? 'opacity-60' : ''}`}>
-                                                            <div className="flex items-start gap-3">
-                                                                <div className="w-8 h-8 rounded-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center flex-shrink-0">
-                                                                    {notif.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex justify-between items-center mb-1">
-                                                                        <p className="text-xs font-black text-chefie-text truncate">{notif.title}</p>
-                                                                        <button 
-                                                                            onClick={() => handleDeleteNotification(notif.id)}
-                                                                            className="opacity-0 group-hover/notif:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                                                                        >
-                                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                                        </button>
-                                                                    </div>
-                                                                    <p className="text-[10px] text-chefie-secondary leading-tight">{notif.message}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                        <NotificationBell />
                     </div>
 
                     <Link to={user?.id ? `/profile/${user.id}` : '#'} className="hidden md:flex items-center gap-3 pl-6 border-l border-chefie-border hover:opacity-80 transition-opacity">
