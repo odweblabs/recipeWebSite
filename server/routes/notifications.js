@@ -61,7 +61,7 @@ router.post('/send', authenticateToken, adminOnly, async (req, res) => {
         let recipientIds = [];
 
         if (target === 'all') {
-            const users = await executeQuery('SELECT id FROM users');
+            const users = await executeQuery('SELECT id FROM users WHERE notifications_paused IS FALSE OR notifications_paused IS NULL');
             recipientIds = users.map(u => u.id);
         } else if (target === 'specific' && Array.isArray(userIds)) {
             recipientIds = userIds;

@@ -381,7 +381,7 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
 
         // Trigger notification to all users about the new recipe
         try {
-            const users = await executeQuery('SELECT id FROM users WHERE id != $1', [userId]);
+            const users = await executeQuery('SELECT id FROM users WHERE id != $1 AND (notifications_paused IS FALSE OR notifications_paused IS NULL)', [userId]);
             const recipientIds = users.map(u => u.id);
 
             if (recipientIds.length > 0) {

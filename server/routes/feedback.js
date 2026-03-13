@@ -42,8 +42,8 @@ router.put('/:id/status', adminOnly, async (req, res) => {
     const { status } = req.body;
     const feedbackId = req.params.id;
     try {
-        // First get the user_id and content to create a meaningful notification
-        const feedbackItems = await executeQuery('SELECT user_id, type FROM feedback WHERE id = $1', [feedbackId]);
+        // First get the user_id, type and notification status
+        const feedbackItems = await executeQuery('SELECT f.user_id, f.type, u.notifications_paused FROM feedback f JOIN users u ON f.user_id = u.id WHERE f.id = $1', [feedbackId]);
         const feedback = feedbackItems[0];
 
         if (!feedback) {
@@ -66,10 +66,12 @@ router.put('/:id/status', adminOnly, async (req, res) => {
         const title = `${typeLabel} Güncellemesi`;
         const message = `Gönderdiğiniz ${typeLabel.toLowerCase()} durumu "${statusMap[status] || status}" olarak güncellendi.`;
 
-        await executeQuery(
-            'INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)',
-            [feedback.user_id, 'feedback_update', title, message]
-        );
+        if (feedback.user_id && !feedback.notifications_paused) {
+            await executeQuery(
+                'INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)',
+                [feedback.user_id, 'feedback_update', title, message]
+            );
+        }
 
         res.json({ message: 'Feedback status updated and user notified' });
     } catch (err) {

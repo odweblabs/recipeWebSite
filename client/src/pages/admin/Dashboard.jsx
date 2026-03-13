@@ -272,6 +272,18 @@ const Dashboard = () => {
         }
     };
 
+    const handleUpdateFeedbackStatus = async (id, status) => {
+        try {
+            await axios.put(`${API_BASE}/api/feedback/${id}/status`, { status }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchFeedback();
+        } catch (err) {
+            console.error('Error updating feedback status:', err);
+            alert('Durum güncellenemedi.');
+        }
+    };
+
     const handleSendNotification = async (e) => {
         e.preventDefault();
         if (!notifForm.title || !notifForm.message) return;
@@ -1206,12 +1218,12 @@ const Dashboard = () => {
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <button
-                            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                            className="relative p-2 text-gray-400"
+                            onClick={() => setIsMobileNotificationsOpen(!isMobileNotificationsOpen)}
+                            className="relative w-10 h-10 flex items-center justify-center text-gray-400 hover:text-chefie-yellow rounded-xl transition-all"
                         >
                             <Bell className="w-6 h-6" />
                             {pendingFriends.length > 0 && (
-                                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-chefie-card animate-pulse"></span>
+                                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-chefie-card animate-pulse"></span>
                             )}
                         </button>
 
@@ -1285,7 +1297,7 @@ const Dashboard = () => {
                     </Link>
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="p-2 text-chefie-secondary bg-chefie-cream rounded-xl ml-1"
+                        className="w-10 h-10 flex items-center justify-center text-chefie-secondary bg-chefie-cream rounded-xl border border-chefie-border"
                     >
                         {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </button>
