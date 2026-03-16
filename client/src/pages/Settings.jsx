@@ -18,7 +18,8 @@ import {
     MessageSquare,
     AlertCircle,
     Shield,
-    X
+    X,
+    LayoutDashboard
 } from 'lucide-react';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
@@ -315,6 +316,17 @@ const Settings = () => {
                         <MenuItem icon={Shield} title={t('settings.items.policy')} onClick={() => navigate('/policy')} />
                     </div>
                 </div>
+
+                {/* Dashboard Button for Admin */}
+                {user.role === 'admin' && (
+                    <button
+                        onClick={() => navigate('/admin/dashboard')}
+                        className="w-full bg-chefie-dark p-4 rounded-full border border-chefie-border shadow-sm flex items-center justify-center gap-2 hover:bg-chefie-green transition-colors group"
+                    >
+                        <LayoutDashboard className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                        <span className="text-white font-bold uppercase tracking-wider">Yönetim Paneli</span>
+                    </button>
+                )}
 
                 {/* Log Out */}
                 <button

@@ -73,26 +73,27 @@ router.post('/send', authenticateToken, adminOnly, async (req, res) => {
             return res.status(400).json({ error: 'No recipients found' });
         }
 
-        // Batch insert notifications
+        // 1. Record in history FIRST to get the history_id
+        const historyResult = await executeQuery(
+            'INSERT INTO admin_notification_history (sender_id, title, message, target_type, recipient_count) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [req.user.id, title, message, target, recipientIds.length]
+        );
+        const historyId = historyResult.lastInsertRowid;
+
+        // 2. Batch insert notifications with history_id
         const values = [];
         const placeholders = [];
         let index = 1;
 
         recipientIds.forEach(userId => {
-            placeholders.push(`($${index++}, $${index++}, $${index++}, $${index++})`);
-            values.push(userId, 'admin_broadcast', title, message);
+            placeholders.push(`($${index++}, $${index++}, $${index++}, $${index++}, $${index++})`);
+            values.push(userId, 'admin_broadcast', title, message, historyId);
         });
 
-        const query = `INSERT INTO notifications (user_id, type, title, message) VALUES ${placeholders.join(', ')}`;
+        const query = `INSERT INTO notifications (user_id, type, title, message, history_id) VALUES ${placeholders.join(', ')}`;
         await executeQuery(query, values);
 
-        // Record in history
-        await executeQuery(
-            'INSERT INTO admin_notification_history (sender_id, title, message, target_type, recipient_count) VALUES ($1, $2, $3, $4, $5)',
-            [req.user.id, title, message, target, recipientIds.length]
-        );
-
-        res.json({ message: `Notification sent to ${recipientIds.length} users` });
+        res.json({ message: `Notification sent to ${recipientIds.length} users`, historyId });
     } catch (err) {
         console.error('Error sending administrative notification:', err);
         res.status(500).json({ error: err.message });
@@ -112,6 +113,24 @@ router.get('/admin-history', authenticateToken, adminOnly, async (req, res) => {
         res.json(history);
     } catch (err) {
         console.error('Error fetching notification history:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get recipients for a specific history record (Admin only)
+router.get('/admin-history/:id/recipients', authenticateToken, adminOnly, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const recipients = await executeQuery(`
+            SELECT u.id, u.username, u.full_name, u.profile_image
+            FROM notifications n
+            JOIN users u ON n.user_id = u.id
+            WHERE n.history_id = $1
+            ORDER BY u.username ASC
+        `, [id]);
+        res.json(recipients);
+    } catch (err) {
+        console.error('Error fetching notification recipients:', err);
         res.status(500).json({ error: err.message });
     }
 });

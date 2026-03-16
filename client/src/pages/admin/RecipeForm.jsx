@@ -24,13 +24,16 @@ import {
     Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import NotificationBell from '../../components/NotificationBell';
 
 const RecipeForm = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { id } = useParams();
     const token = safeGetToken();
     const user = JSON.parse(safeGetSessionStorage('user') || '{}');
+    const isLoggedIn = !!token && !!user?.id;
 
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
@@ -152,72 +155,132 @@ const RecipeForm = () => {
     return (
         <div className="flex flex-col md:flex-row min-h-screen bg-chefie-cream font-sans pb-24 md:pb-0">
             {/* Mobile Header Box */}
-            <div className="md:hidden flex items-center justify-between p-4 bg-chefie-card border-b border-chefie-border sticky top-0 z-30 shadow-sm dark:shadow-none">
-                <Link to="/" className="flex items-center gap-2">
-                    <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
-                </Link>
-                <div className="flex items-center gap-3">
-                    <NotificationBell isMobile={true} />
-                    <Link to={user?.id ? `/profile/${user.id}` : '#'}>
-                        {user.profile_image ? (
-                            <img src={getImageUrl(user.profile_image)} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
-                        ) : (
-                            <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border border-gray-100">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
-                        )}
-                    </Link>
-                    <button
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="p-2 text-chefie-text bg-chefie-cream rounded-xl ml-1 border border-chefie-border"
-                    >
-                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                    </button>
+            {/* Mobile Header Box */}
+            <div className="md:hidden bg-chefie-card sticky top-0 z-50 border-b border-chefie-border shadow-sm dark:shadow-none">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-20">
+                        <div className="flex items-center">
+                            <Link to="/" className="flex items-center group">
+                                <img
+                                    src="/bitarif_logo_1.png"
+                                    alt="Bitarif Logo"
+                                    className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
+                                />
+                            </Link>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            {isLoggedIn && (
+                                <div className="flex items-center gap-3">
+                                    <NotificationBell isMobile={true} />
+                                    <Link to={`/profile/${user.id}`} className="hover:opacity-80 transition-opacity">
+                                        {user.profile_image ? (
+                                            <img src={getImageUrl(user.profile_image)} alt="User" className="w-8 h-8 rounded-full object-cover border border-gray-100" />
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border border-gray-100">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
+                                        )}
+                                    </Link>
+                                </div>
+                            )}
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="p-2 text-gray-400 hover:text-chefie-text bg-chefie-cream rounded-xl transition-all border border-chefie-border"
+                            >
+                                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Mobile Dropdown Menu (Inside header like Navbar.jsx) */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden bg-chefie-card border-t border-chefie-border shadow-lg absolute w-full top-20 left-0 z-40 max-h-[80vh] overflow-y-auto pb-8">
+                        <div className="px-4 pt-4 pb-12 space-y-1">
+                            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">
+                                {t('nav.home').toUpperCase()}
+                            </Link>
+                            <Link to="/recipes" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">
+                                {t('nav.recipes').toUpperCase()}
+                            </Link>
+                            <Link to="/menus" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">
+                                {t('nav.menus').toUpperCase()}
+                            </Link>
+                            <Link to="/trend" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">
+                                {t('nav.trend').toUpperCase()}
+                            </Link>
+                            <Link to="/what-to-cook" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">
+                                {t('nav.what_to_cook').toUpperCase()}
+                            </Link>
+                            <Link to="/lists" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">
+                                {t('nav.lists').toUpperCase()}
+                            </Link>
+                            <Link to="/blog" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-gray-500 hover:text-chefie-yellow active:bg-chefie-cream rounded-2xl font-black text-xs tracking-wide">
+                                {t('nav.blog').toUpperCase()}
+                            </Link>
+
+                            <div className="h-px bg-chefie-border my-4 mx-4"></div>
+
+                            {isLoggedIn && user?.id ? (
+                                <Link to={`/profile/${user.id}`} onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4">
+                                    {t('nav.profile', 'PROFİLİM').toUpperCase()}
+                                </Link>
+                            ) : (
+                                <Link to="/admin/login" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4">
+                                    {t('nav.admin_panel', 'GİRİŞ YAP').toUpperCase()}
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Overlay */}
-            {isMobileMenuOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                />
-            )}
-
-            {/* Sidebar */}
-            <aside className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-300 w-64 bg-chefie-card border-r border-chefie-border flex flex-col fixed h-full z-50 shadow-lg dark:shadow-none`}>
-                <div className="flex items-center justify-between p-6">
-                    <Link to="/" className="flex items-center gap-2 hover:bg-chefie-cream transition-colors group">
-                        <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
+            {/* Sidebar (Desktop Only) */}
+            <aside className="hidden md:flex flex-col w-64 bg-chefie-card border-r border-chefie-border fixed h-full z-50">
+                <div className="flex items-center justify-center p-8">
+                    <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-16 w-auto object-contain" />
                     </Link>
-                    <button className="md:hidden text-gray-500" onClick={() => setIsMobileMenuOpen(false)}>
-                        <X className="w-6 h-6" />
-                    </button>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
-                    <div className="text-xs font-semibold text-gray-400 px-4 mb-2 uppercase tracking-wide">Menu</div>
-
-                    <Link to="/admin/dashboard" className="flex items-center px-4 py-3 text-chefie-yellow bg-chefie-cream border border-chefie-border rounded-xl font-medium transition-colors">
-                        <LayoutDashboard className="w-5 h-5 mr-3" />
-                        Panele Dön
+                <nav className="flex-1 px-6 space-y-2 mt-4 overflow-y-auto">
+                    <Link to="/" className="flex items-center px-4 py-3 text-gray-500 hover:text-chefie-yellow hover:bg-chefie-cream rounded-xl font-bold transition-all text-xs tracking-widest">
+                        {t('nav.home').toUpperCase()}
+                    </Link>
+                    <Link to="/recipes" className="flex items-center px-4 py-3 text-gray-500 hover:text-chefie-yellow hover:bg-chefie-cream rounded-xl font-bold transition-all text-xs tracking-widest">
+                        {t('nav.recipes').toUpperCase()}
+                    </Link>
+                    <Link to="/menus" className="flex items-center px-4 py-3 text-gray-500 hover:text-chefie-yellow hover:bg-chefie-cream rounded-xl font-bold transition-all text-xs tracking-widest">
+                        {t('nav.menus').toUpperCase()}
+                    </Link>
+                    <Link to="/trend" className="flex items-center px-4 py-3 text-gray-500 hover:text-chefie-yellow hover:bg-chefie-cream rounded-xl font-bold transition-all text-xs tracking-widest">
+                        {t('nav.trend').toUpperCase()}
+                    </Link>
+                    <Link to="/what-to-cook" className="flex items-center px-4 py-3 text-gray-500 hover:text-chefie-yellow hover:bg-chefie-cream rounded-xl font-bold transition-all text-xs tracking-widest">
+                        {t('nav.what_to_cook').toUpperCase()}
+                    </Link>
+                    <Link to="/lists" className="flex items-center px-4 py-3 text-gray-500 hover:text-chefie-yellow hover:bg-chefie-cream rounded-xl font-bold transition-all text-xs tracking-widest">
+                        {t('nav.lists').toUpperCase()}
+                    </Link>
+                    <Link to="/blog" className="flex items-center px-4 py-3 text-gray-500 hover:text-chefie-yellow hover:bg-chefie-cream rounded-xl font-bold transition-all text-xs tracking-widest">
+                        {t('nav.blog').toUpperCase()}
                     </Link>
 
-                    <Link to="/admin/dashboard?tab=all" className="flex items-center px-4 py-3 text-chefie-secondary hover:bg-chefie-cream hover:text-chefie-text rounded-xl font-medium transition-colors">
-                        <Folder className="w-5 h-5 mr-3" />
-                        Tüm Tarifler
-                    </Link>
+                    <div className="h-px bg-chefie-border my-6"></div>
 
-                    <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
-
-                    <Link to="/admin/dashboard?tab=settings" className="flex items-center px-4 py-3 text-chefie-secondary hover:bg-chefie-cream hover:text-chefie-text rounded-xl font-medium transition-colors border border-transparent hover:border-chefie-border">
-                        <Settings className="w-5 h-5 mr-3" />
-                        Ayarlar
-                    </Link>
+                    {isLoggedIn && user?.id ? (
+                        <Link to={`/profile/${user.id}`} className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4 transition-transform hover:scale-[1.02]">
+                            {t('nav.profile', 'PROFİLİM').toUpperCase()}
+                        </Link>
+                    ) : (
+                        <Link to="/admin/login" className="block px-4 py-4 bg-chefie-yellow text-white text-center rounded-2xl font-black text-sm shadow-lg shadow-yellow-100 mt-4 transition-transform hover:scale-[1.02]">
+                            {t('nav.login', 'GİRİŞ YAP').toUpperCase()}
+                        </Link>
+                    )}
                 </nav>
 
-                <div className="p-4 border-t border-chefie-border">
-                    <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl font-medium transition-colors border border-transparent hover:border-red-500/20">
-                        <LogOut className="w-5 h-5 mr-3" />
-                        Çıkış Yap
+                <div className="p-6 border-t border-chefie-border">
+                    <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-bold transition-all text-xs tracking-widest uppercase">
+                        <LogOut className="w-4 h-4 mr-3" />
+                        {t('common.logout', 'Çıkış Yap')}
                     </button>
                 </div>
             </aside>

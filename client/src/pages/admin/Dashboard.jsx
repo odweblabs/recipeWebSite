@@ -98,7 +98,12 @@ const Dashboard = () => {
 
     // User Edit State
     const [editingUser, setEditingUser] = useState(null);
-    const [editFormData, setEditFormData] = useState({ role: '', can_comment: 1 });
+    const [editFormData, setEditFormData] = useState({ role: 'user', can_comment: 1 });
+
+    // Notification Recipient States
+    const [viewingHistoryId, setViewingHistoryId] = useState(null);
+    const [recipientsList, setRecipientsList] = useState([]);
+    const [isRecipientsLoading, setIsRecipientsLoading] = useState(false);
 
     // User Activity State
     const [userActivity, setUserActivity] = useState({ activities: [], onlineCount: 0 });
@@ -173,10 +178,11 @@ const Dashboard = () => {
         if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback', 'send_notification'].includes(tab)) {
             setActiveTab(tab);
         }
-        if (tab === 'send_notification' && user.role === 'admin') {
+        // Always fetch template if target tab is send_notification or activeTab is changed to it
+        if ((tab === 'send_notification' || activeTab === 'send_notification') && user.role === 'admin') {
             fetchWelcomeTemplate();
         }
-    }, [location.search, user.role]);
+    }, [location.search, activeTab, user.role]);
 
     const fetchWelcomeTemplate = async () => {
         try {
@@ -341,6 +347,22 @@ const Dashboard = () => {
             alert(err.response?.data?.error || 'Bildirim gönderilemedi.');
         } finally {
             setIsSendingNotif(false);
+        }
+    };
+
+    const fetchRecipients = async (historyId) => {
+        setViewingHistoryId(historyId);
+        setIsRecipientsLoading(true);
+        try {
+            const token = safeGetToken();
+            const res = await axios.get(`${API_BASE}/api/notifications/admin-history/${historyId}/recipients`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setRecipientsList(res.data);
+        } catch (err) {
+            console.error('Error fetching recipients:', err);
+        } finally {
+            setIsRecipientsLoading(false);
         }
     };
 
@@ -533,7 +555,7 @@ const Dashboard = () => {
                                 <div className="flex items-center gap-4">
                                     <Link to={`/profile/${u.id}`}>
                                         {u.profile_image ? (
-                                            <img src={u.profile_image.startsWith('http') ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name} className="w-10 h-10 rounded-full object-cover border border-chefie-border hover:border-[#10B981] transition-colors" />
+                                            <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name} className="w-10 h-10 rounded-full object-cover border border-chefie-border hover:border-[#10B981] transition-colors" />
                                         ) : (
                                             <div className="w-10 h-10 rounded-full bg-chefie-cream flex items-center justify-center text-chefie-secondary border border-chefie-border hover:border-[#10B981] transition-colors uppercase font-bold text-lg">
                                                 {(u.full_name || u.username).charAt(0)}
@@ -632,7 +654,7 @@ const Dashboard = () => {
                                         {stats?.recentUsers?.length > 0 ? stats.recentUsers.map((u) => (
                                             <Link key={u.id} to={`/profile/${u.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-chefie-cream transition-colors group">
                                                 {u.profile_image ? (
-                                                    <img src={u.profile_image.startsWith('http') ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name || u.username} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                                                    <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name || u.username} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200 uppercase font-bold text-sm">
                                                         {(u.full_name || u.username || '?').charAt(0)}
@@ -710,7 +732,7 @@ const Dashboard = () => {
                                             <div key={a.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-cream border border-chefie-border group/activity hover:shadow-sm transition-all">
                                                 <div className="relative">
                                                     {a.profile_image ? (
-                                                        <img src={a.profile_image.startsWith('http') ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-10 h-10 rounded-full object-cover border border-chefie-border" />
+                                                        <img src={(a.profile_image.startsWith('http') || a.profile_image.startsWith('data:')) ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-10 h-10 rounded-full object-cover border border-chefie-border" />
                                                     ) : (
                                                         <div className="w-10 h-10 rounded-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold text-sm uppercase border border-chefie-border">{(a.full_name || a.username).charAt(0)}</div>
                                                     )}
@@ -893,7 +915,7 @@ const Dashboard = () => {
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden border border-gray-200">
                                                 {item.profile_image ? (
-                                                    <img src={item.profile_image.startsWith('http') ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover" />
+                                                    <img src={(item.profile_image.startsWith('http') || item.profile_image.startsWith('data:')) ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
                                                         {(item.full_name || item.username).charAt(0)}
@@ -971,7 +993,7 @@ const Dashboard = () => {
                                                             />
                                                             <div className="w-8 h-8 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
                                                                 {u.profile_image ? (
-                                                                    <img src={u.profile_image.startsWith('http') ? u.profile_image : `${API_BASE}${u.profile_image}`} className="w-full h-full object-cover" />
+                                                                    <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} className="w-full h-full object-cover" />
                                                                 ) : (
                                                                     <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-xs uppercase">
                                                                         {(u.full_name || u.username).charAt(0)}
@@ -1030,69 +1052,123 @@ const Dashboard = () => {
                             </form>
 
                             {/* Welcome Notification Template Management */}
-                            <div className="mt-16 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
-                                <div className="flex items-center gap-3 px-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
-                                        <Sparkles className="w-6 h-6" />
+                            <div className="mt-16 space-y-8">
+                                <div className="flex items-center gap-4 px-4">
+                                    <div className="w-14 h-14 rounded-[20px] bg-gradient-to-br from-chefie-yellow/20 to-chefie-yellow/5 text-chefie-yellow flex items-center justify-center shadow-sm border border-chefie-yellow/10">
+                                        <Sparkles className="w-7 h-7" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight">Yeni Üye Karşılama Şablonu</h3>
-                                        <p className="text-xs font-bold text-chefie-secondary uppercase tracking-widest">Otomatik hoş geldin bildirimi ayarları</p>
+                                        <h3 className="text-2xl font-black text-chefie-text tracking-tight">Yeni Üye Karşılama Şablonu</h3>
+                                        <p className="text-xs font-bold text-chefie-secondary uppercase tracking-[0.2em] opacity-60 mt-1">Sistem Hoş Geldin Mesajı Ayarları</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-chefie-card p-8 rounded-[2.5rem] border border-chefie-border shadow-2xl space-y-8">
-                                    {templateMessage.text && (
-                                        <div className={`px-4 py-3 rounded-xl text-sm font-bold ${templateMessage.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-                                            {templateMessage.text}
-                                        </div>
-                                    )}
+                                <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+                                    {/* Editor Card */}
+                                    <div className="xl:col-span-3 bg-chefie-card p-8 rounded-[40px] border border-chefie-border shadow-2xl space-y-8">
+                                        {templateMessage.text && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className={`px-5 py-4 rounded-2xl text-sm font-bold flex items-center gap-3 ${templateMessage.type === 'success' ? 'bg-green-500/10 text-green-600 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
+                                            >
+                                                {templateMessage.type === 'success' ? <UserCheck className="w-5 h-5" /> : <Info className="w-5 h-5" />}
+                                                {templateMessage.text}
+                                            </motion.div>
+                                        )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-6">
-                                            <div>
-                                                <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Şablon Başlığı</label>
+                                            <div className="space-y-3">
+                                                <label className="block text-xs font-black text-chefie-text uppercase tracking-widest ml-1">Şeblon Başlığı</label>
                                                 <input
                                                     type="text"
-                                                    value={welcomeTemplate.title}
+                                                    value={welcomeTemplate.title || ''}
                                                     onChange={(e) => setWelcomeTemplate({ ...welcomeTemplate, title: e.target.value })}
-                                                    className="w-full px-5 py-4 bg-chefie-cream border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow outline-none text-chefie-text font-bold shadow-inner"
+                                                    placeholder="Örn: Aramıza Hoş Geldin!"
+                                                    className="w-full px-6 py-4 bg-chefie-cream/50 border border-chefie-border rounded-[22px] focus:ring-4 focus:ring-chefie-yellow/10 focus:border-chefie-yellow outline-none text-chefie-text font-bold transition-all shadow-inner"
                                                     required
                                                 />
                                             </div>
-                                            <div className="p-4 bg-chefie-yellow/5 border border-chefie-yellow/20 rounded-2xl">
-                                                <h4 className="text-[10px] font-black text-chefie-yellow uppercase mb-2 tracking-widest flex items-center gap-2">
-                                                    <Info className="w-3.5 h-3.5" /> İpucu
-                                                </h4>
-                                                <p className="text-[10px] text-chefie-secondary font-bold leading-relaxed">
-                                                    Metin içerisinde <code className="bg-chefie-yellow/20 px-1.5 py-0.5 rounded text-chefie-text">{"{isim}"}</code> etiketini kullanarak kullanıcının adını otomatik olarak ekleyebilirsiniz.
-                                                </p>
-                                            </div>
-                                        </div>
 
-                                        <div className="space-y-6">
-                                            <div>
-                                                <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Şablon Mesajı</label>
+                                            <div className="space-y-3">
+                                                <label className="block text-xs font-black text-chefie-text uppercase tracking-widest ml-1">Şablon Mesajı</label>
                                                 <textarea
-                                                    value={welcomeTemplate.message}
+                                                    value={welcomeTemplate.message || ''}
                                                     onChange={(e) => setWelcomeTemplate({ ...welcomeTemplate, message: e.target.value })}
-                                                    rows="4"
-                                                    className="w-full px-5 py-4 bg-chefie-cream border border-chefie-border rounded-2xl focus:ring-2 focus:ring-chefie-yellow outline-none text-chefie-text font-medium shadow-inner resize-none"
+                                                    placeholder="Karşılama mesajınızı buraya yazın..."
+                                                    rows="5"
+                                                    className="w-full px-6 py-5 bg-chefie-cream/50 border border-chefie-border rounded-[22px] focus:ring-4 focus:ring-chefie-yellow/10 focus:border-chefie-yellow outline-none text-chefie-text font-medium transition-all shadow-inner resize-none min-h-[160px]"
                                                     required
                                                 ></textarea>
+                                            </div>
+
+                                            <div className="p-5 bg-chefie-dark/5 border border-chefie-dark/10 rounded-[28px] flex items-start gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-chefie-dark text-white flex items-center justify-center flex-shrink-0">
+                                                    <Info className="w-5 h-5" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <h4 className="text-xs font-black text-chefie-dark uppercase tracking-wider">Değişken Kullanımı</h4>
+                                                    <p className="text-[11px] text-chefie-secondary font-bold leading-relaxed">
+                                                        Metin içerisinde <code className="bg-chefie-dark/10 px-2 py-0.5 rounded text-chefie-dark">{"{isim}"}</code> etiketini kullanarak kullanıcının adını otomatik olarak ekleyebilirsiniz.
+                                                    </p>
+                                                </div>
                                             </div>
 
                                             <button
                                                 onClick={handleUpdateTemplate}
                                                 disabled={isSavingTemplate || !welcomeTemplate.title || !welcomeTemplate.message}
-                                                className="w-full py-4 bg-chefie-dark text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-black transition-all disabled:opacity-50 shadow-xl flex items-center justify-center gap-3"
+                                                className="group w-full py-5 bg-chefie-dark text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-sm hover:bg-black transition-all disabled:opacity-50 shadow-2xl flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-[0.99]"
                                             >
                                                 {isSavingTemplate ? (
-                                                    <><Loader2 className="w-5 h-5 animate-spin" /> KAYDEDİLİYOR...</>
+                                                    <><Loader2 className="w-5 h-5 animate-spin" /> SİSTEME İŞLENİYOR...</>
                                                 ) : (
-                                                    <><Save className="w-5 h-5" /> ŞABLONU KAYDET</>
+                                                    <><Save className="w-5 h-5 group-hover:rotate-12 transition-transform" /> ŞABLONU SİSTEME KAYDET</>
                                                 )}
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Live Preview Card */}
+                                    <div className="xl:col-span-2 space-y-6">
+                                        <div className="flex items-center justify-between px-4">
+                                            <h4 className="text-xs font-black text-chefie-secondary uppercase tracking-widest">Canlı Önizleme</h4>
+                                            <span className="text-[10px] font-bold text-chefie-yellow bg-chefie-yellow/10 px-2 py-1 rounded-md">Masaüstü Görünümü</span>
+                                        </div>
+                                        
+                                        <div className="relative p-6 bg-chefie-cream/30 border border-dashed border-chefie-border rounded-[40px] flex items-center justify-center min-h-[300px]">
+                                            <motion.div 
+                                                className="w-full max-w-[380px] bg-chefie-card rounded-2xl shadow-2xl border border-chefie-border overflow-hidden flex flex-col pointer-events-none"
+                                            >
+                                                <div className="p-5 bg-chefie-cream border-b border-chefie-border flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-chefie-yellow/10 flex items-center justify-center text-chefie-yellow">
+                                                            <Bell className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-sm font-black text-chefie-text leading-tight">{welcomeTemplate.title || 'Bildirim Başlığı'}</h3>
+                                                            <span className="text-[9px] font-bold text-chefie-secondary uppercase tracking-wider">Hemen Şimdi</span>
+                                                        </div>
+                                                    </div>
+                                                    <X className="w-4 h-4 text-chefie-secondary/40" />
+                                                </div>
+                                                <div className="p-6">
+                                                    <p className="text-chefie-text text-sm font-medium leading-relaxed whitespace-pre-wrap">
+                                                        {welcomeTemplate.message ? welcomeTemplate.message.replace('{isim}', user.full_name || user.username) : 'Bildirim mesajı içeriği burada görünecek...'}
+                                                    </p>
+                                                </div>
+                                            </motion.div>
+                                            
+                                            <div className="absolute inset-x-0 -bottom-3 flex justify-center">
+                                                <div className="px-4 py-1.5 bg-chefie-card border border-chefie-border rounded-full shadow-lg">
+                                                    <p className="text-[10px] font-black text-chefie-secondary uppercase tracking-tighter">Yeni Üyeye Gidecek Görünüm</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-chefie-card/50 p-6 rounded-[32px] border border-chefie-border/50">
+                                            <p className="text-[10px] text-chefie-secondary font-bold leading-relaxed text-center italic">
+                                                * Bu şablon, sisteme yeni kayıt olan her kullanıcıya otomatik olarak gönderilir. Değişiklikler anında sisteme yansıtılır.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -1147,13 +1223,12 @@ const Dashboard = () => {
                                                                 <Calendar className="w-3.5 h-3.5 text-blue-400" />
                                                                 <span>{new Date(item.created_at).toLocaleDateString('tr-TR')}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-chefie-secondary">
-                                                                <Clock className="w-3.5 h-3.5 text-orange-400" />
-                                                                <span>{new Date(item.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-chefie-secondary">
+                                                            <div 
+                                                                onClick={(e) => { e.stopPropagation(); fetchRecipients(item.id); }}
+                                                                className="flex items-center gap-1.5 text-[10px] font-bold text-chefie-secondary hover:text-chefie-yellow cursor-pointer transition-colors p-1 rounded-md hover:bg-chefie-yellow/5"
+                                                            >
                                                                 <Users className="w-3.5 h-3.5 text-purple-400" />
-                                                                <span className="text-chefie-text">{item.recipient_count} Alıcı</span>
+                                                                <span className="text-chefie-text underline decoration-chefie-yellow/30 underline-offset-2">{item.recipient_count} Alıcı</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1387,7 +1462,7 @@ const Dashboard = () => {
 
                     <Link to={user?.id ? `/profile/${user.id}` : '#'}>
                         {user.profile_image ? (
-                            <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-chefie-border" />
+                            <img src={(user.profile_image.startsWith('http') || user.profile_image.startsWith('data:')) ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-chefie-border" />
                         ) : (
                             <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border border-chefie-border">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
                         )}
@@ -1465,7 +1540,7 @@ const Dashboard = () => {
 
                     <Link to={user?.id ? `/profile/${user.id}` : '#'} className="hidden md:flex items-center gap-3 pl-6 border-l border-chefie-border hover:opacity-80 transition-opacity">
                         {user.profile_image ? (
-                            <img src={user.profile_image.startsWith('http') ? user.profile_image : `${API_BASE}${user.profile_image}`} alt={user.full_name} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
+                            <img src={(user.profile_image.startsWith('http') || user.profile_image.startsWith('data:')) ? user.profile_image : `${API_BASE}${user.profile_image}`} alt={user.full_name} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
                         ) : (
                             <div className="w-10 h-10 rounded-full bg-[#10B981] text-white flex items-center justify-center font-bold border-2 border-white shadow-sm">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
                         )}
@@ -1614,6 +1689,83 @@ const Dashboard = () => {
                             </div>
                         </form>
                     </div>
+                </div>
+            )}
+
+            {/* Recipients Modal */}
+            {viewingHistoryId && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-chefie-card rounded-[32px] w-full max-w-lg border border-chefie-border shadow-2xl overflow-hidden"
+                    >
+                        <div className="p-6 border-b border-chefie-border flex items-center justify-between bg-chefie-cream/30">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                                    <Users className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-chefie-text uppercase tracking-tight">Alıcı Listesi</h3>
+                                    <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-widest">{recipientsList.length} Kullanıcı bulundu</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => { setViewingHistoryId(null); setRecipientsList([]); }}
+                                className="w-10 h-10 rounded-xl bg-chefie-card border border-chefie-border flex items-center justify-center text-chefie-secondary hover:text-red-500 hover:border-red-500/20 transition-all shadow-sm"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        <div className="p-6 max-h-[60vh] overflow-y-auto scrollbar-thin">
+                            {isRecipientsLoading ? (
+                                <div className="py-20 flex flex-col items-center justify-center gap-4">
+                                    <Loader2 className="w-10 h-10 text-chefie-yellow animate-spin" />
+                                    <p className="text-sm font-bold text-chefie-secondary uppercase tracking-widest">Yükleniyor...</p>
+                                </div>
+                            ) : recipientsList.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-3">
+                                    {recipientsList.map((rec) => (
+                                        <div key={rec.id} className="flex items-center gap-4 p-4 rounded-2xl bg-chefie-cream/50 border border-chefie-border/50 hover:bg-chefie-card hover:border-chefie-yellow/30 transition-all group">
+                                            <div className="w-12 h-12 rounded-xl overflow-hidden border border-chefie-border shadow-sm flex-shrink-0">
+                                                {rec.profile_image ? (
+                                                    <img src={(rec.profile_image.startsWith('http') || rec.profile_image.startsWith('data:')) ? rec.profile_image : `${API_BASE}${rec.profile_image}`} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-sm uppercase">
+                                                        {(rec.full_name || rec.username).charAt(0)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm font-black text-chefie-text group-hover:text-chefie-yellow transition-colors truncate">
+                                                    {rec.full_name || 'İsimsiz Kullanıcı'}
+                                                </div>
+                                                <div className="text-[11px] font-bold text-chefie-secondary truncate">@{rec.username}</div>
+                                            </div>
+                                            <div className="text-[10px] font-black text-chefie-secondary/40 uppercase tracking-tighter">ID: #{rec.id}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="py-20 text-center space-y-4">
+                                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto text-gray-400">
+                                        <Users className="w-8 h-8" />
+                                    </div>
+                                    <p className="text-sm font-bold text-chefie-secondary">Henüz taranmış bir alıcı verisi bulunamadı.</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="p-6 border-t border-chefie-border bg-chefie-cream/30">
+                            <button 
+                                onClick={() => { setViewingHistoryId(null); setRecipientsList([]); }}
+                                className="w-full py-4 bg-chefie-dark text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:bg-black transition-all"
+                            >
+                                Pencereyi Kapat
+                            </button>
+                        </div>
+                    </motion.div>
                 </div>
             )}
         </div>

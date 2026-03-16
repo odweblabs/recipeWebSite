@@ -2,6 +2,7 @@ import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemove
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell, Globe, Flame, Settings, BadgeCheck, MessageCircle } from 'lucide-react';
@@ -52,6 +53,8 @@ const Profile = () => {
     const [activeTab, setActiveTab] = useState('recipes');
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [selectedNotification, setSelectedNotification] = useState(null);
+    const [mounted, setMounted] = useState(false);
 
     // Comment Edit State
     const [editingCommentId, setEditingCommentId] = useState(null);
@@ -161,6 +164,24 @@ const Profile = () => {
             console.error('Error fetching notifications:', err);
         }
     };
+
+    const handleNotificationClick = async (notification) => {
+        setSelectedNotification(notification);
+        if (!notification.is_read) {
+            try {
+                await axios.put(`${API_BASE}/api/notifications/${notification.id}/read`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, is_read: true } : n));
+            } catch (err) {
+                console.error('Error marking notification as read:', err);
+            }
+        }
+    };
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleDeleteNotification = async (id) => {
         try {
@@ -971,7 +992,8 @@ const Profile = () => {
                                     {notifications.map((notification) => (
                                         <div 
                                             key={`notif-${notification.id}`} 
-                                            className={`bg-chefie-card rounded-3xl border ${notification.is_read ? 'border-chefie-border opacity-70' : 'border-chefie-yellow shadow-md shadow-chefie-yellow/5'} p-5 flex items-start gap-4 animate-in fade-in duration-500 relative transition-all`}
+                                            onClick={() => handleNotificationClick(notification)}
+                                            className={`bg-chefie-card rounded-3xl border ${notification.is_read ? 'border-chefie-border opacity-70' : 'border-chefie-yellow shadow-md shadow-chefie-yellow/5'} p-5 flex items-start gap-4 animate-in fade-in duration-500 relative transition-all cursor-pointer hover:bg-chefie-cream/50`}
                                         >
                                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm ${notification.is_read ? 'bg-chefie-secondary/10 text-chefie-secondary' : 'bg-chefie-yellow/10 text-chefie-yellow'}`}>
                                                 {notification.type === 'feedback_update' ? <MessageCircle className="w-6 h-6" /> : <Bell className="w-6 h-6" />}
@@ -984,14 +1006,17 @@ const Profile = () => {
                                                             {new Date(notification.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                         <button 
-                                                            onClick={() => handleDeleteNotification(notification.id)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteNotification(notification.id);
+                                                            }}
                                                             className="p-1 text-gray-400 hover:text-red-500 transition-colors"
                                                         >
                                                             <Trash2 className="w-3.5 h-3.5" />
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <p className="text-[11px] text-chefie-secondary font-medium leading-relaxed">{notification.message}</p>
+                                                <p className="text-[11px] text-chefie-secondary font-medium leading-relaxed line-clamp-2">{notification.message}</p>
                                             </div>
                                             {!notification.is_read && (
                                                 <div className="absolute top-4 right-4 w-2 h-2 bg-chefie-yellow rounded-full"></div>
@@ -1004,6 +1029,67 @@ const Profile = () => {
                     )}
                 </div>
             </div>
+
+            {/* Notification Detail Modal (Portal) */}
+            {mounted && selectedNotification && createPortal(
+                <AnimatePresence mode="wait">
+                    <div 
+                        className="fixed top-0 left-0 w-full h-full z-[99999] flex justify-center items-start pt-24 px-4 pointer-events-auto bg-black/40 backdrop-blur-sm overflow-y-auto"
+                        onClick={() => setSelectedNotification(null)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                            className="w-full max-w-[480px] bg-chefie-card rounded-[32px] shadow-2xl border border-chefie-border overflow-hidden my-8 flex flex-col max-h-[85vh]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="p-6 bg-chefie-cream border-b border-chefie-border flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className="w-12 h-12 rounded-2xl bg-chefie-yellow/10 flex items-center justify-center text-chefie-yellow flex-shrink-0">
+                                        {selectedNotification.type === 'feedback_update' ? <MessageCircle className="w-6 h-6" /> : <Bell className="w-6 h-6" />}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="text-lg font-black text-chefie-text leading-tight truncate">{selectedNotification.title}</h3>
+                                        <div className="flex items-center gap-1.5 mt-1 text-chefie-secondary">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            <span className="text-[10px] font-bold uppercase tracking-wider">
+                                                {new Date(selectedNotification.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => setSelectedNotification(null)}
+                                    className="p-2 bg-chefie-card rounded-xl border border-chefie-border text-chefie-secondary hover:text-chefie-text transition-all flex-shrink-0 ml-4"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="p-6 md:p-8 overflow-y-auto flex-1 overscroll-contain">
+                                <p className="text-chefie-text text-base font-medium leading-relaxed whitespace-pre-wrap">
+                                    {selectedNotification.message}
+                                </p>
+
+                                <div className="mt-8 pt-6 border-t border-chefie-border flex justify-end">
+                                    <button
+                                        onClick={() => {
+                                            handleDeleteNotification(selectedNotification.id);
+                                            setSelectedNotification(null);
+                                        }}
+                                        className="px-6 py-3 text-red-500 font-black text-[11px] uppercase tracking-widest hover:bg-red-50 rounded-xl transition-all flex items-center gap-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        {t('common.delete', 'SİL')}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     </div>
 );
