@@ -948,14 +948,14 @@ const Profile = () => {
                 )}
 
                 {/* Tab System Mobile vs Desktop */}
-                <div className="md:border-b md:border-chefie-border mb-8 md:mb-12 w-full overflow-x-auto hide-scrollbar">
+                <div className="md:border-b md:border-chefie-border mb-8 md:mb-12 w-full">
                     {/* Mobile Tabs */}
-                    <div className="md:hidden flex items-center gap-1 bg-chefie-card/50 p-1 rounded-full border border-chefie-border shadow-md">
+                    <div className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 px-1 snap-x">
                         <button
                             onClick={() => setActiveTab('recipes')}
-                            className={`flex-[1.2] flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all ${activeTab === 'recipes'
-                                ? 'bg-chefie-yellow text-white shadow-md'
-                                : 'text-chefie-secondary hover:text-chefie-text'
+                            className={`snap-start whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full font-bold text-[11px] transition-all border ${activeTab === 'recipes'
+                                ? 'bg-chefie-yellow text-white border-transparent shadow-md'
+                                : 'bg-chefie-card/50 text-chefie-secondary border-chefie-border hover:bg-chefie-cream'
                                 }`}
                         >
                             <ChefHat className="w-3.5 h-3.5" />
@@ -966,9 +966,9 @@ const Profile = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('favorites')}
-                            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all ${activeTab === 'favorites'
-                                ? 'bg-chefie-yellow text-white shadow-md'
-                                : 'text-chefie-secondary hover:text-chefie-text'
+                            className={`snap-start whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full font-bold text-[11px] transition-all border ${activeTab === 'favorites'
+                                ? 'bg-chefie-yellow text-white border-transparent shadow-md'
+                                : 'bg-chefie-card/50 text-chefie-secondary border-chefie-border hover:bg-chefie-cream'
                                 }`}
                         >
                             <Heart className="w-3.5 h-3.5" />
@@ -976,9 +976,9 @@ const Profile = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('notifications')}
-                            className={`flex-[1.1] flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all relative ${activeTab === 'notifications'
-                                ? 'bg-chefie-yellow text-white shadow-md'
-                                : 'text-chefie-secondary hover:text-chefie-text'
+                            className={`snap-start whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full font-bold text-[11px] transition-all border relative ${activeTab === 'notifications'
+                                ? 'bg-chefie-yellow text-white border-transparent shadow-md'
+                                : 'bg-chefie-card/50 text-chefie-secondary border-chefie-border hover:bg-chefie-cream'
                                 }`}
                         >
                             <div className="relative">
@@ -991,9 +991,9 @@ const Profile = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('menus')}
-                            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all ${activeTab === 'menus'
-                                ? 'bg-chefie-yellow text-white shadow-md'
-                                : 'text-chefie-secondary hover:text-chefie-text'
+                            className={`snap-start whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full font-bold text-[11px] transition-all border ${activeTab === 'menus'
+                                ? 'bg-chefie-yellow text-white border-transparent shadow-md'
+                                : 'bg-chefie-card/50 text-chefie-secondary border-chefie-border hover:bg-chefie-cream'
                                 }`}
                         >
                             <LayoutGrid className="w-3.5 h-3.5" />

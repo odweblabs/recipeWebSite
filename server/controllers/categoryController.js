@@ -17,3 +17,10 @@ exports.deleteCategory = asyncHandler(async (req, res) => {
     const result = await categoryService.deleteCategory(id);
     res.json(result);
 });
+
+exports.updateCategory = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    const result = await categoryService.updateCategory(id, name);
+    res.json(result);
+});

@@ -24,6 +24,7 @@ const Home = () => {
     const [searchOpen, setSearchOpen] = useState(false);
     const scrollContainerRef = useRef(null);
     const chefsScrollRef = useRef(null);
+    const categoriesScrollRef = useRef(null);
 
     const scrollChefs = (direction) => {
         if (chefsScrollRef.current) {
@@ -184,13 +185,20 @@ const Home = () => {
             </section>
 
             {/* Category Pills */}
-            <section className="bg-chefie-card/50 backdrop-blur-sm p-2 rounded-[2rem] border border-chefie-border flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <div className="relative group/pills flex items-center">
+                <button
+                    onClick={() => {
+                        if (categoriesScrollRef.current) categoriesScrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+                    }}
+                    className="absolute left-2 z-10 w-10 h-10 bg-white/90 backdrop-blur-md shadow-lg border border-gray-100 rounded-full items-center justify-center opacity-0 group-hover/pills:opacity-100 transition-opacity hidden md:flex text-chefie-text hover:text-chefie-yellow"
+                >
+                    <ChevronLeft size={20} />
+                </button>
+                <section ref={categoriesScrollRef} className="bg-chefie-card/50 backdrop-blur-sm p-2 rounded-[2rem] border border-chefie-border w-full flex items-center gap-2 overflow-x-auto scrollbar-hide relative z-0">
                 <Link to="/recipes" className="px-8 py-3.5 bg-chefie-dark text-white rounded-2xl text-xs font-black tracking-widest hover:bg-chefie-yellow transition-all whitespace-nowrap shadow-lg shadow-gray-200 dark:shadow-none">
                     {t('home.categories.explore')}
                 </Link>
-                {categories.filter(cat =>
-                    ['Kahvaltılık', 'Aperatifler', 'Çorba', 'Hızlı Yemekler', 'Makarna', 'Salata'].some(keyword => cat.name.includes(keyword))
-                ).map((cat) => (
+                {categories.map((cat) => (
                     <Link
                         key={cat.id}
                         to={`/recipes#category-${cat.id}`}
@@ -199,7 +207,16 @@ const Home = () => {
                         {cat.name.toUpperCase()}
                     </Link>
                 ))}
-            </section>
+                </section>
+                <button
+                    onClick={() => {
+                        if (categoriesScrollRef.current) categoriesScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+                    }}
+                    className="absolute right-2 z-10 w-10 h-10 bg-white/90 backdrop-blur-md shadow-lg border border-gray-100 rounded-full items-center justify-center opacity-0 group-hover/pills:opacity-100 transition-opacity hidden md:flex text-chefie-text hover:text-chefie-yellow"
+                >
+                    <ChevronRight size={20} />
+                </button>
+            </div>
 
             {/* Haftanın Yıldızları Section */}
             <section className="relative group">
@@ -341,9 +358,7 @@ const Home = () => {
 
             {/* Haftanın Şefleri Section */}
             <section className="bg-chefie-card rounded-[4rem] p-10 md:p-20 shadow-2xl shadow-gray-100 dark:shadow-none border border-chefie-border overflow-hidden relative">
-                <div className="absolute top-1/2 -translate-y-1/2 -right-32 md:right-10 opacity-[0.05] md:opacity-[0.05] pointer-events-none">
-                    <ChefHat size={600} className="text-chefie-dark" />
-                </div>
+                <div className="absolute inset-0 opacity-40 dark:opacity-30 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/food.png')] bg-repeat mix-blend-multiply dark:mix-blend-soft-light" style={{ backgroundSize: '400px' }}></div>
 
                 <div className="flex flex-col md:flex-row items-end justify-between mb-16 relative z-10">
                     <div className="max-w-xl text-center md:text-left">

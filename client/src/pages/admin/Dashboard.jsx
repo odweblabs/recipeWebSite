@@ -37,7 +37,8 @@ import {
     Sparkles,
     Info,
     Save,
-    Bell
+    Bell,
+    Tag
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -96,6 +97,12 @@ const Dashboard = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+
+    // Category Management State
+    const [categoryForm, setCategoryForm] = useState({ id: null, name: '' });
+    const [isSavingCategory, setIsSavingCategory] = useState(false);
+    const [categoryMessage, setCategoryMessage] = useState({ type: '', text: '' });
+    const [confirmDeleteCatId, setConfirmDeleteCatId] = useState(null);
 
     // User Edit State
     const [editingUser, setEditingUser] = useState(null);
@@ -266,6 +273,40 @@ const Dashboard = () => {
             setCategories(res.data);
         } catch (err) {
             console.error('Error fetching categories:', err);
+        }
+    };
+
+    const handleSaveCategory = async (e) => {
+        e.preventDefault();
+        setIsSavingCategory(true);
+        setCategoryMessage({ type: '', text: '' });
+        try {
+            if (categoryForm.id) {
+                await axios.put(`${API_BASE}/api/categories/${categoryForm.id}`, { name: categoryForm.name }, { headers: { Authorization: `Bearer ${token}` } });
+                setCategoryMessage({ type: 'success', text: 'Kategori başarıyla güncellendi.' });
+            } else {
+                await axios.post(`${API_BASE}/api/categories`, { name: categoryForm.name }, { headers: { Authorization: `Bearer ${token}` } });
+                setCategoryMessage({ type: 'success', text: 'Yeni kategori eklendi.' });
+            }
+            setCategoryForm({ id: null, name: '' });
+            fetchCategories();
+        } catch (err) {
+            setCategoryMessage({ type: 'error', text: err.response?.data?.error || 'Beklenmeyen bir hata oluştu.' });
+        } finally {
+            setIsSavingCategory(false);
+            setTimeout(() => setCategoryMessage({ type: '', text: '' }), 3000);
+        }
+    };
+
+    const handleDeleteCategoryConfirmed = async (id) => {
+        try {
+            await axios.delete(`${API_BASE}/api/categories/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            fetchCategories();
+            setConfirmDeleteCatId(null);
+        } catch (err) {
+            console.error('Kategori silinemedi:', err);
+            alert('Kategori silinirken bir hata oluştu');
+            setConfirmDeleteCatId(null);
         }
     };
 
@@ -631,26 +672,24 @@ const Dashboard = () => {
 
         if (activeTab === 'stats') {
             return (
-                <tr>
-                    <td colSpan="5" className="px-4 md:px-6 py-8">
-                        <div className="space-y-8">
+                <div className="px-4 md:px-6 py-6 md:py-8 space-y-8">
                             {/* Today's Activity */}
                             <div>
                                 <h3 className="font-bold text-chefie-secondary mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
                                     <TrendingUp className="w-4 h-4 text-[#10B981]" /> Bugünkü Aktivite
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-5 rounded-2xl border border-blue-100">
-                                        <div className="text-3xl font-black text-blue-600">{stats?.today?.recipes || 0}</div>
-                                        <div className="text-sm font-bold text-blue-500 mt-1">Yeni Tarif</div>
+                                <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-3 sm:p-5 rounded-2xl border border-blue-100 flex flex-col justify-center items-center text-center">
+                                        <div className="text-2xl sm:text-3xl font-black text-blue-600">{stats?.today?.recipes || 0}</div>
+                                        <div className="text-[11px] sm:text-sm font-bold text-blue-500 mt-1">Yeni Tarif</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-green-50 to-green-100/50 p-5 rounded-2xl border border-green-100">
-                                        <div className="text-3xl font-black text-green-600">{stats?.today?.users || 0}</div>
-                                        <div className="text-sm font-bold text-green-500 mt-1">Yeni Üye</div>
+                                    <div className="bg-gradient-to-br from-green-50 to-green-100/50 p-3 sm:p-5 rounded-2xl border border-green-100 flex flex-col justify-center items-center text-center">
+                                        <div className="text-2xl sm:text-3xl font-black text-green-600">{stats?.today?.users || 0}</div>
+                                        <div className="text-[11px] sm:text-sm font-bold text-green-500 mt-1">Yeni Üye</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 p-5 rounded-2xl border border-purple-100">
-                                        <div className="text-3xl font-black text-purple-600">{stats?.today?.comments || 0}</div>
-                                        <div className="text-sm font-bold text-purple-500 mt-1">Yeni Yorum</div>
+                                    <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 p-3 sm:p-5 rounded-2xl border border-purple-100 flex flex-col justify-center items-center text-center">
+                                        <div className="text-2xl sm:text-3xl font-black text-purple-600">{stats?.today?.comments || 0}</div>
+                                        <div className="text-[11px] sm:text-sm font-bold text-purple-500 mt-1">Yeni Yorum</div>
                                     </div>
                                 </div>
                             </div>
@@ -717,33 +756,33 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Totals Grid */}
-                            <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                                <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                            {/* Totals Flex Grid */}
+                            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                                <div className="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.666rem)] md:w-[calc(25%-0.75rem)] lg:w-0 lg:flex-1 bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 text-center flex flex-col justify-center min-h-[90px]">
                                     <div className="text-xl sm:text-2xl font-black text-blue-600 truncate px-1">{formatStat(stats?.counts?.recipes)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-blue-500/60 mt-1 break-words">Tarif</div>
                                 </div>
-                                <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                <div className="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.666rem)] md:w-[calc(25%-0.75rem)] lg:w-0 lg:flex-1 bg-green-500/10 p-4 rounded-xl border border-green-500/20 text-center flex flex-col justify-center min-h-[90px]">
                                     <div className="text-xl sm:text-2xl font-black text-green-600 truncate px-1">{formatStat(stats?.counts?.users)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-green-500/60 mt-1 break-words">Üye</div>
                                 </div>
-                                <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                <div className="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.666rem)] md:w-[calc(25%-0.75rem)] lg:w-0 lg:flex-1 bg-orange-500/10 p-4 rounded-xl border border-orange-500/20 text-center flex flex-col justify-center min-h-[90px]">
                                     <div className="text-xl sm:text-2xl font-black text-orange-600 truncate px-1">{formatStat(stats?.counts?.categories)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-orange-500/60 mt-1 break-words">Kategori</div>
                                 </div>
-                                <div className="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                <div className="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.666rem)] md:w-[calc(25%-0.75rem)] lg:w-0 lg:flex-1 bg-purple-500/10 p-4 rounded-xl border border-purple-500/20 text-center flex flex-col justify-center min-h-[90px]">
                                     <div className="text-xl sm:text-2xl font-black text-purple-600 truncate px-1">{formatStat(stats?.counts?.comments)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-purple-500/60 mt-1 break-words">Yorum</div>
                                 </div>
-                                <div className="bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                <div className="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.666rem)] md:w-[calc(25%-0.75rem)] lg:w-0 lg:flex-1 bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 text-center flex flex-col justify-center min-h-[90px]">
                                     <div className="text-xl sm:text-2xl font-black text-rose-600 truncate px-1">{formatStat(stats?.counts?.favorites)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-rose-500/60 mt-1 break-words">Favori</div>
                                 </div>
-                                <div className="bg-yellow-500/10 p-4 rounded-xl border border-yellow-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                <div className="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.666rem)] md:w-[calc(25%-0.75rem)] lg:w-0 lg:flex-1 bg-yellow-500/10 p-4 rounded-xl border border-yellow-500/20 text-center flex flex-col justify-center min-h-[90px]">
                                     <div className="text-xl sm:text-2xl font-black text-yellow-600 truncate px-1">{formatStat(stats?.counts?.ratings)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-600/60 mt-1 break-words">Puan</div>
                                 </div>
-                                <div className="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 text-center flex flex-col justify-center min-h-[90px]">
+                                <div className="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.666rem)] md:w-[calc(25%-0.75rem)] lg:w-0 lg:flex-1 bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 text-center flex flex-col justify-center min-h-[90px]">
                                     <div className="text-xl sm:text-2xl font-black text-indigo-600 truncate px-1">{formatStat(stats?.counts?.friendships)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-500/60 mt-1 break-words">Takip</div>
                                 </div>
@@ -821,17 +860,13 @@ const Dashboard = () => {
                                     )}
                                 </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
+                </div>
             );
         }
 
         if (activeTab === 'recommendation') {
             return (
-                <tr>
-                    <td colSpan="5" className="px-6 py-8">
-                        <div className="space-y-8">
+                <div className="px-4 md:px-6 py-6 md:py-8 space-y-8">
                             {/* Current Recommendation */}
                             <div className="bg-chefie-card p-8 rounded-[2.5rem] border border-chefie-border shadow-2xl">
                                 <div className="flex items-center justify-between mb-6">
@@ -935,16 +970,12 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                    </td>
-                </tr>
             );
         }
 
         if (activeTab === 'feedback') {
             return (
-                <tr>
-                    <td colSpan="5" className="px-6 py-8">
-                        <div className="space-y-6">
+                <div className="px-4 md:px-6 py-6 md:py-8 space-y-8">
                             {feedback.length > 0 ? feedback.map((item) => (
                                 <div key={item.id} className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -1016,16 +1047,13 @@ const Dashboard = () => {
                                 </div>
                             )}
                         </div>
-                    </td>
-                </tr>
             );
         }
 
         if (activeTab === 'send_notification') {
             return (
-                <tr>
-                    <td colSpan="5" className="px-6 py-8">
-                        <div className="max-w-4xl mx-auto">
+                <div className="px-4 md:px-6 py-6 md:py-8">
+                    <div className="max-w-4xl mx-auto">
                             <form onSubmit={handleSendNotification} className="bg-chefie-card p-8 rounded-[2.5rem] border border-chefie-border shadow-2xl space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-6">
@@ -1368,15 +1396,13 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                    </td>
-                </tr>
+                </div>
             );
         }
 
         if (activeTab === 'settings') {
             return (
-                <tr>
-                    <td colSpan="5" className="px-6 py-12 bg-chefie-cream/30">
+                <div className="px-4 md:px-6 py-6 md:py-12 bg-chefie-cream/30">
                         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start relative">
                             <div className="space-y-8">
                                 <div className="bg-chefie-card p-8 rounded-3xl border border-chefie-border shadow-2xl">
@@ -1525,8 +1551,100 @@ const Dashboard = () => {
                                 <img src="/images/chef-settings.jpg" alt="Chef Illustration" className="w-full max-w-md object-contain mix-blend-multiply dark:mix-blend-normal opacity-80 dark:opacity-60 dark:invert-[0.05]" />
                             </div>
                         </div>
-                    </td>
-                </tr>
+                </div>
+            );
+        }
+
+        if (activeTab === 'categories') {
+            return (
+                <div className="p-4 md:p-8 space-y-8">
+                    {/* Add/Edit Category Form */}
+                    <div className="bg-chefie-card p-6 rounded-3xl border border-chefie-border shadow-md">
+                        <div className="flex items-center gap-2 mb-6">
+                            <Tag className="w-5 h-5 text-[#10B981]" />
+                            <h2 className="text-xl font-bold text-chefie-text">
+                                {categoryForm.id ? 'Kategoriyi Düzenle' : 'Yeni Kategori Ekle'}
+                            </h2>
+                        </div>
+                        
+                        {categoryMessage.text && (
+                            <div className={`mb-5 px-4 py-3 rounded-xl text-sm font-bold ${categoryMessage.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                {categoryMessage.text}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSaveCategory} className="flex gap-4 items-end">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-chefie-secondary mb-2">Kategori Adı</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={categoryForm.name}
+                                    onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                                    placeholder="Örn: Tatlı Tarifleri"
+                                    className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none text-chefie-text font-bold"
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                {categoryForm.id && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setCategoryForm({ id: null, name: '' })}
+                                        className="h-12 px-6 rounded-xl font-bold bg-chefie-cream text-chefie-secondary hover:bg-chefie-border border border-chefie-border transition-colors"
+                                    >
+                                        İptal
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={isSavingCategory || !categoryForm.name.trim()}
+                                    className="h-12 px-8 rounded-xl font-bold bg-[#10B981] text-white hover:bg-[#059669] transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {isSavingCategory ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    Kaydet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Category List */}
+                    <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-hidden">
+                        <table className="w-full">
+                            <thead className="bg-chefie-cream/50">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">ID</th>
+                                    <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-chefie-border">
+                                {categories.length > 0 ? (
+                                    categories.map(cat => (
+                                        <tr key={cat.id} className="hover:bg-chefie-cream transition-colors group">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center">
+                                                        <Folder className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="font-bold text-chefie-text">{cat.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-chefie-secondary font-medium">#{cat.id}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button onClick={() => setCategoryForm({ id: cat.id, name: cat.name })} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></button>
+                                                    <button onClick={() => setConfirmDeleteCatId(cat.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr><td colSpan="3" className="px-6 py-12 text-center text-gray-400">Henüz kategori bulunmuyor.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             );
         }
 
@@ -1631,6 +1749,7 @@ const Dashboard = () => {
                         <>
                             <button onClick={() => { setActiveTab('stats'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'stats' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> İstatistikler</button>
                             <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
+                            <button onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'categories' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Tag className="w-5 h-5 mr-3" /> Kategoriler</button>
                             <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
                             <button onClick={() => { setActiveTab('feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'feedback' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><MessageSquare className="w-5 h-5 mr-3" /> Öneriler & Hatalar</button>
                             <button onClick={() => { setActiveTab('send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'send_notification' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Plus className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
@@ -1649,7 +1768,7 @@ const Dashboard = () => {
                 <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-10 gap-4">
                     <div className="flex items-center gap-4 w-full max-w-xl">
                         <h1 className="text-2xl font-bold text-chefie-text">
-                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}
+                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'categories' ? 'Kategoriler' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}
                         </h1>
                         <div className="relative flex-1 hidden md:block ml-8">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -1701,14 +1820,15 @@ const Dashboard = () => {
 
                 <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-hidden w-full max-w-[calc(100vw-2rem)] md:max-w-full">
                     <div className="p-4 md:p-6 border-b border-chefie-border flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}</h2>
+                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'categories' ? 'Kategoriler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}</h2>
                         {activeTab === 'all' && (
                             <Link to="/admin/recipes/new" className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold rounded-xl flex items-center gap-2"><Plus className="w-4 h-4" /> Yeni Ekle</Link>
                         )}
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
+                    {['all', 'favorites', 'users'].includes(activeTab) ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
                             {activeTab === 'all' && (
                                 <thead className="bg-chefie-cream/50">
                                     <tr>
@@ -1775,6 +1895,11 @@ const Dashboard = () => {
                             <tbody className="divide-y divide-chefie-border">{renderTableContent()}</tbody>
                         </table>
                     </div>
+                    ) : (
+                        <div className="w-full overflow-hidden">
+                            {renderTableContent()}
+                        </div>
+                    )}
 
                     {activeTab === 'all' && hasMore && recipes.length > 0 && (
                         <div className="p-6 bg-chefie-cream/50 text-center border-t border-chefie-border">
@@ -1976,6 +2101,48 @@ const Dashboard = () => {
                                     <button
                                         type="button"
                                         onClick={() => handleDeleteFeedback(confirmDeleteFeedbackId)}
+                                        className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 active:scale-95"
+                                    >
+                                        EVET, SİL
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* Custom Delete Category Modal */}
+            <AnimatePresence>
+                {confirmDeleteCatId && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-chefie-card w-full max-w-md rounded-[2.5rem] border border-chefie-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 text-center space-y-6">
+                                <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                                    <Trash2 className="w-10 h-10" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight text-red-500">KATEGORİYİ SİL?</h3>
+                                    <p className="text-sm font-bold text-chefie-secondary uppercase tracking-tight leading-relaxed px-4">
+                                        Bu kategoriyi kalıcı olarak silmek istediğinize emin misiniz? Bu kategoriye bağlı tarifler "kategorisiz" duruma geçecektir.
+                                    </p>
+                                    <p className="text-[10px] font-black text-red-500/50 uppercase tracking-widest pt-2">Bu işlem geri alınamaz.</p>
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmDeleteCatId(null)}
+                                        className="flex-1 py-4 bg-chefie-cream text-chefie-secondary rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-chefie-border transition-colors border border-chefie-border shadow-sm active:scale-95"
+                                    >
+                                        VAZGEÇ
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDeleteCategoryConfirmed(confirmDeleteCatId)}
                                         className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 active:scale-95"
                                     >
                                         EVET, SİL

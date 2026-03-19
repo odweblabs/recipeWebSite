@@ -21,6 +21,10 @@ class CategoryRepository {
     async deleteById(id) {
         return executeQuery('DELETE FROM categories WHERE id = $1', [id]);
     }
+
+    async updateById(id, name) {
+        return executeQuery('UPDATE categories SET name = $1 WHERE id = $2 RETURNING *', [name, id]);
+    }
 }
 
 module.exports = new CategoryRepository();

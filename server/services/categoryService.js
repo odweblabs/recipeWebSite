@@ -14,8 +14,22 @@ class CategoryService {
         return { id: info.lastInsertRowid, name };
     }
 
+    async updateCategory(id, name) {
+        const info = await categoryRepo.updateById(id, name);
+        if (!info || info.length === 0) {
+            const err = new Error('Category not found');
+            err.statusCode = 404;
+            throw err;
+        }
+        return { id, name };
+    }
+
     async deleteCategory(id) {
         // Validation moved to middleware
+        // First, set category_id to NULL for any recipes using this category
+        const { executeQuery } = require('../database');
+        await executeQuery('UPDATE recipes SET category_id = NULL WHERE category_id = $1', [id]);
+
         const info = await categoryRepo.deleteById(id);
         if (info.changes === 0) {
             const err = new Error('Category not found');
