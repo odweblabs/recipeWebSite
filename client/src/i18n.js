@@ -560,12 +560,15 @@ i18n
                         header: {
                             title_1: "Alışveriş",
                             title_2: "Listelerin",
-                            desc: "Sadece senin görebileceğin özel alışveriş listelerini oluştur ve yönet."
+                            desc: "Sadece senin görebileceğin özel alışveriş listelerini oluştur ve yönet.",
+                            lists_count: "LİSTE",
+                            items_count: "ÜRÜN"
                         },
                         create_new: "YENİ LİSTE OLUŞTUR",
                         create_button: "LİSTE OLUŞTUR",
                         modal: {
                             title: "LİSTE OLUŞTUR",
+                            new_list: "Yeni Liste",
                             name_label: "Liste Adı",
                             name_placeholder: "Örn: Haftalık Market Listesi",
                             store_label: "Market İsmi (İsteğe Bağlı)",
@@ -1136,12 +1139,15 @@ i18n
                         header: {
                             title_1: "Your Shopping",
                             title_2: "Lists",
-                            desc: "Create and manage custom shopping lists that only you can see."
+                            desc: "Create and manage custom shopping lists that only you can see.",
+                            lists_count: "LISTS",
+                            items_count: "ITEMS"
                         },
                         create_new: "CREATE NEW LIST",
                         create_button: "CREATE LIST",
                         modal: {
                             title: "CREATE LIST",
+                            new_list: "New List",
                             name_label: "List Name",
                             name_placeholder: "e.g., Weekly Grocery List",
                             store_label: "Store Name (Optional)",

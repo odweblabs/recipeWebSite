@@ -56,11 +56,21 @@ export const safeSetSessionStorage = (key, value) => {
     }
 };
 
+export const safeRemoveSessionStorage = (key) => {
+    try {
+        window.sessionStorage.removeItem(key);
+    } catch (error) {
+        console.warn('sessionStorage is not accessible:', error);
+    }
+};
+
 export const safeGetToken = () => {
     return safeGetStorage('token') || safeGetSessionStorage('token');
 };
 
 export const safeClearAuth = () => {
     safeRemoveStorage('token');
-    try { window.sessionStorage.removeItem('token'); } catch(e) {}
+    safeRemoveStorage('user');
+    safeRemoveSessionStorage('token');
+    safeRemoveSessionStorage('user');
 };

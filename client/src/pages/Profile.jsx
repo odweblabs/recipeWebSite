@@ -1,11 +1,12 @@
 import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
+import { formatStat } from '../utils/formatUtils';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell, Globe, Flame, Settings, BadgeCheck, MessageCircle } from 'lucide-react';
+import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell, Globe, Flame, Settings, BadgeCheck, MessageCircle, Utensils, LayoutGrid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // Country list with flag emojis
@@ -73,6 +74,12 @@ const Profile = () => {
     // Follower / Following Modal States
     const [showFollowers, setShowFollowers] = useState(false);
     const [showFollowing, setShowFollowing] = useState(false);
+
+    // Likes Detail Modals
+    const [showLikesModal, setShowLikesModal] = useState(false); // Likes Received (Likers)
+    const [showFavoritesModal, setShowFavoritesModal] = useState(false); // Likes Given (User's Favorites)
+    const [recipeLikers, setRecipeLikers] = useState([]);
+    const [likesLoading, setLikesLoading] = useState(false);
 
     const token = safeGetToken();
     const currentUser = JSON.parse(safeGetSessionStorage('user') || '{}');
@@ -591,6 +598,175 @@ const Profile = () => {
                 )}
             </AnimatePresence>
 
+            {/* Likes Detail Modal */}
+            <AnimatePresence>
+                {showLikesModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-chefie-dark/60 backdrop-blur-sm"
+                        onClick={() => setShowLikesModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-chefie-cream w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
+                                <div className="flex items-center gap-2">
+                                    <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
+                                    <h3 className="font-bold text-lg text-chefie-text">Aldığım Beğeniler ({formatStat(profile?.likes_count)})</h3>
+                                </div>
+                                <button onClick={() => setShowLikesModal(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-4 overflow-y-auto w-full flex-1">
+                                {likesLoading ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <Loader2 className="w-8 h-8 animate-spin text-chefie-yellow" />
+                                    </div>
+                                ) : recipeLikers.length === 0 ? (
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz beğeni yok.</p>
+                                ) : (
+                                    <div className="space-y-5">
+                                        {recipeLikers.map(recipe => (
+                                            <div key={recipe.recipe_id} className="bg-chefie-card rounded-2xl border border-chefie-border overflow-hidden">
+                                                <Link
+                                                    to={`/recipes/${recipe.recipe_id}`}
+                                                    onClick={() => setShowLikesModal(false)}
+                                                    className="flex items-center gap-3 p-3 bg-white/50 dark:bg-chefie-dark/50 border-b border-chefie-border hover:bg-chefie-cream transition-all group"
+                                                >
+                                                    <div className="w-10 h-10 rounded-xl overflow-hidden border border-chefie-border flex-shrink-0 bg-chefie-cream">
+                                                        {recipe.recipe_image ? (
+                                                            <img src={getImageUrl(recipe.recipe_image)} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center">
+                                                                <Utensils className="w-5 h-5 text-chefie-yellow/40" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-bold text-xs text-chefie-text truncate group-hover:text-chefie-green transition-colors">{recipe.recipe_title}</div>
+                                                        <div className="text-[10px] text-chefie-secondary font-medium">
+                                                            <Heart className="w-2.5 h-2.5 text-rose-500 fill-rose-500 inline mr-1" />
+                                                            {recipe.likers.length} beğeni
+                                                        </div>
+                                                    </div>
+                                                    <ArrowRight className="w-3.5 h-3.5 text-chefie-secondary/40 group-hover:text-chefie-green transition-colors" />
+                                                </Link>
+                                                <div className="p-2 space-y-1">
+                                                    {recipe.likers.map(liker => (
+                                                        <div
+                                                            key={liker.id}
+                                                            onClick={() => { setShowLikesModal(false); navigate(`/profile/${liker.id}`); }}
+                                                            className="flex items-center gap-2.5 p-1.5 hover:bg-chefie-cream rounded-xl transition-colors cursor-pointer"
+                                                        >
+                                                            <div className="w-7 h-7 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
+                                                                {liker.profile_image ? (
+                                                                    <img src={getImageUrl(liker.profile_image)} alt="" className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold text-[10px]">
+                                                                        {(liker.username || 'U').charAt(0).toUpperCase()}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <div className="font-bold text-[11px] text-chefie-text truncate">{liker.full_name || liker.username}</div>
+                                                                <div className="text-[9px] text-chefie-secondary truncate">@{liker.username}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Favorites (Likes Given) Modal */}
+            <AnimatePresence>
+                {showFavoritesModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-chefie-dark/60 backdrop-blur-sm"
+                        onClick={() => setShowFavoritesModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-chefie-cream w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
+                                <div className="flex items-center gap-2">
+                                    <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
+                                    <h3 className="font-bold text-lg text-chefie-text">Favorilerim ({formatStat(profile?.favorites_count || userFavorites.length)})</h3>
+                                </div>
+                                <button onClick={() => setShowFavoritesModal(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-4 overflow-y-auto w-full flex-1">
+                                {userFavorites.length === 0 ? (
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz favori tarifiniz yok.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {userFavorites.map(recipe => (
+                                            <div key={recipe.id} className="bg-chefie-card rounded-2xl border border-chefie-border overflow-hidden group hover:shadow-md transition-all">
+                                                <Link
+                                                    to={`/recipes/${recipe.id}`}
+                                                    onClick={() => setShowFavoritesModal(false)}
+                                                    className="flex items-center gap-3 p-3"
+                                                >
+                                                    <div className="w-14 h-14 rounded-xl overflow-hidden border border-chefie-border flex-shrink-0">
+                                                        {recipe.image_url ? (
+                                                            <img src={getImageUrl(recipe.image_url)} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-bold text-chefie-yellow/40">
+                                                                <Utensils className="w-6 h-6" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-bold text-sm text-chefie-text truncate group-hover:text-chefie-green transition-colors">{recipe.title}</div>
+                                                        <div className="flex items-center gap-1.5 mt-1 opacity-70">
+                                                            <div className="w-4 h-4 rounded-full overflow-hidden border border-chefie-border">
+                                                                {recipe.author_image ? (
+                                                                    <img src={getImageUrl(recipe.author_image)} className="w-full h-full object-cover" alt="" />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-[8px] font-black">
+                                                                        {(recipe.author_username || 'U').charAt(0).toUpperCase()}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-[10px] font-bold text-chefie-text">
+                                                                {recipe.author_name || `@${recipe.author_username}`}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <ArrowRight className="w-5 h-5 text-chefie-secondary/40 group-hover:text-chefie-green transition-colors" />
+                                                </Link>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="relative w-full">
                 {/* Desktop Cover Background (Hidden on mobile) */}
                 <div className="hidden md:block absolute top-0 left-0 w-full h-[320px] bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 rounded-b-[4rem] -z-10"></div>
@@ -603,9 +779,12 @@ const Profile = () => {
                             Tarifo<span className="text-chefie-yellow">.</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5 bg-chefie-card md:bg-white/50 md:dark:bg-chefie-dark/50 md:backdrop-blur-md px-3 py-1.5 rounded-full border border-chefie-border shadow-sm">
+                            <div
+                                className="flex items-center gap-1.5 bg-chefie-card md:bg-white/50 md:dark:bg-chefie-dark/50 md:backdrop-blur-md px-3 py-1.5 rounded-full border border-chefie-border shadow-sm cursor-pointer hover:shadow-md transition-all"
+                                onClick={() => setShowFavoritesModal(true)}
+                            >
                                 <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
-                                <span className="font-bold text-sm text-chefie-text">{profile?.likes_count || 0}</span>
+                                <span className="font-bold text-sm text-chefie-text">{formatStat(profile?.favorites_count || userFavorites.length)}</span>
                             </div>
                             <button
                                 onClick={() => isOwner && navigate('/settings')}
@@ -665,11 +844,11 @@ const Profile = () => {
 
                                 <div className="md:hidden flex items-center justify-center gap-4 text-chefie-secondary text-sm font-medium mb-6">
                                     <button onClick={() => setShowFollowers(true)} className="hover:text-chefie-text transition-colors">
-                                        <span className="font-bold text-chefie-text">{profile.follower_count || 0}</span> {t('profile.followers')}
+                                        <span className="font-bold text-chefie-text">{formatStat(profile.follower_count)}</span> {t('profile.followers')}
                                     </button>
                                     <span className="w-1.5 h-1.5 bg-chefie-border rounded-full"></span>
                                     <button onClick={() => setShowFollowing(true)} className="hover:text-chefie-text transition-colors">
-                                        <span className="font-bold text-chefie-text">{profile.following_count || 0}</span> {t('profile.following_count') || 'Takip'}
+                                        <span className="font-bold text-chefie-text">{formatStat(profile.following_count)}</span> {t('profile.following_count') || 'Takip'}
                                     </button>
                                 </div>
 
@@ -697,15 +876,26 @@ const Profile = () => {
                                 <div className="flex items-center gap-10">
                                     <div className="text-center group cursor-pointer" onClick={() => setShowFollowers(true)}>
                                         <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.followers')}</div>
-                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{profile.follower_count || 0}</div>
+                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{formatStat(profile.follower_count)}</div>
                                     </div>
                                     <div className="text-center group cursor-pointer" onClick={() => setShowFollowing(true)}>
                                         <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.following_count') || 'Takip'}</div>
-                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{profile.following_count || 0}</div>
+                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{formatStat(profile.following_count)}</div>
                                     </div>
-                                    <div className="text-center">
+                                    <div className="text-center group cursor-pointer" onClick={async () => {
+                                        setShowLikesModal(true);
+                                        setLikesLoading(true);
+                                        try {
+                                            const res = await axios.get(`${API_BASE}/api/favorites/recipe-likers/${id}`);
+                                            setRecipeLikers(res.data);
+                                        } catch (err) {
+                                            console.error('Error fetching likers:', err);
+                                        } finally {
+                                            setLikesLoading(false);
+                                        }
+                                    }}>
                                         <div className="text-[13px] text-chefie-text/60 font-medium mb-0">Beğeniler</div>
-                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{profile.likes_count || 0}</div>
+                                        <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{formatStat(profile.likes_count)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -799,6 +989,19 @@ const Profile = () => {
                             </div>
                             <span>{t('profile.tabs.notifications')}</span>
                         </button>
+                        <button
+                            onClick={() => setActiveTab('menus')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-full font-bold text-[11px] transition-all ${activeTab === 'menus'
+                                ? 'bg-chefie-yellow text-white shadow-md'
+                                : 'text-chefie-secondary hover:text-chefie-text'
+                                }`}
+                        >
+                            <LayoutGrid className="w-3.5 h-3.5" />
+                            <span>Menüler</span>
+                            {menus.length > 0 && (
+                                <span className="text-[9px] opacity-70 ml-0.5">({menus.length})</span>
+                            )}
+                        </button>
                     </div>
 
                     {/* Desktop Tabs */}
@@ -817,12 +1020,15 @@ const Profile = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('favorites')}
-                            className={`pb-4 font-bold text-base transition-all border-b-[3px] relative top-[3px] ${activeTab === 'favorites'
+                            className={`pb-4 font-bold text-base transition-all border-b-[3px] relative top-[3px] flex items-center gap-2 ${activeTab === 'favorites'
                                     ? 'text-chefie-text border-chefie-text dark:border-white'
                                     : 'text-chefie-secondary border-transparent hover:text-chefie-text hover:border-chefie-border'
                                 }`}
                         >
-                            Beğenilenler
+                            {t('profile.tabs.favorites')}
+                            <div className="text-[10px] font-black px-1.5 py-0.5 bg-chefie-card border border-chefie-border rounded-md text-chefie-secondary -mt-1">
+                                {userFavorites.length}
+                            </div>
                         </button>
                         <button
                             onClick={() => setActiveTab('notifications')}
@@ -838,17 +1044,28 @@ const Profile = () => {
                                 </span>
                             )}
                         </button>
+                        <button
+                            onClick={() => setActiveTab('menus')}
+                            className={`pb-4 font-bold text-base transition-all border-b-[3px] relative top-[3px] flex items-center gap-2 ${activeTab === 'menus'
+                                    ? 'text-chefie-text border-chefie-text dark:border-white'
+                                    : 'text-chefie-secondary border-transparent hover:text-chefie-text hover:border-chefie-border'
+                                }`}
+                        >
+                            Menüler
+                            <div className="text-[10px] font-black px-1.5 py-0.5 bg-chefie-card border border-chefie-border rounded-md text-chefie-secondary -mt-1">
+                                {menus.length}
+                            </div>
+                        </button>
                     </div>
                 </div>
 
                 {/* Content Area */}
                 <div className="w-full">
-                    {(activeTab === 'recipes' || activeTab === 'favorites') && (
-                        (activeTab === 'recipes' ? recipes : userFavorites).length > 0 ? (
+                    {activeTab === 'recipes' && (
+                        recipes.length > 0 ? (
                             <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-8">
-                                {(activeTab === 'recipes' ? recipes : userFavorites).map(recipe => (
+                                {recipes.map(recipe => (
                                     <div key={recipe.id} className="bg-chefie-card rounded-[2rem] border border-chefie-border overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col h-full">
-                                        {/* Media */}
                                         <Link to={`/recipes/${recipe.id}`} className="block relative aspect-[4/3] overflow-hidden group">
                                             <img
                                                 src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
@@ -861,60 +1078,195 @@ const Profile = () => {
                                                 </div>
                                             )}
                                         </Link>
-
-                                        {/* Content Area */}
                                         <div className="p-4 flex-1 flex flex-col">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="text-[10px] text-chefie-secondary font-bold uppercase tracking-wider">
                                                     {new Date(recipe.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-chefie-text">
-                                                        <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
-                                                        {recipe.favorite_count || 0}
-                                                    </div>
+                                                <div className="flex items-center gap-1 text-[10px] font-bold text-chefie-text">
+                                                    <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
+                                                    {recipe.favorite_count || 0}
                                                 </div>
                                             </div>
-
-                                            <h3 className="font-bold text-base mb-2 hover:text-chefie-green transition-colors line-clamp-1 leading-tight text-chefie-text">
+                                            <h3 className="font-bold text-base mb-1 hover:text-chefie-green transition-colors line-clamp-1 leading-tight text-chefie-text">
                                                 <Link to={`/recipes/${recipe.id}`}>{recipe.title}</Link>
                                             </h3>
                                             
+                                            <div className="flex items-center gap-1.5 mb-4 opacity-70">
+                                                <div className="w-4 h-4 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
+                                                    {profile.profile_image ? (
+                                                        <img src={getImageUrl(profile.profile_image)} className="w-full h-full object-cover" alt="" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-[8px] font-black">
+                                                            {(profile.username || 'U').charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="text-[10px] font-bold text-chefie-text">
+                                                    @{profile.username}
+                                                </span>
+                                            </div>
+
                                             <p className="text-chefie-secondary text-xs line-clamp-2 leading-relaxed mb-4">
                                                 {recipe.description}
                                             </p>
-
-                                            <div className="mt-auto flex items-center justify-between pt-4 border-t border-chefie-border">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full overflow-hidden border border-chefie-border">
-                                                        {profile.profile_image ? (
-                                                            <img src={getImageUrl(profile.profile_image)} className="w-full h-full object-cover" alt="" />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-[10px] font-black">
-                                                                {(profile.username || 'U').charAt(0).toUpperCase()}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <span className="text-[11px] font-bold text-chefie-text">@{profile.username}</span>
-                                                </div>
-
-                                                {isLoggedIn && currentUser.id === recipe.author_id && (
+                                            
+                                            {isLoggedIn && currentUser.id === recipe.author_id && (
+                                                <div className="mt-auto pt-4 border-t border-chefie-border flex justify-end">
                                                     <Link to={`/admin/recipes/edit/${recipe.id}`} className="text-chefie-yellow hover:scale-110 transition-transform">
                                                         <Edit className="w-4 h-4" />
                                                     </Link>
-                                                )}
-                                            </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                ))
-                            }</div>
+                                ))}
+                            </div>
                         ) : (
                             <div className="py-32 text-center w-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                                 <div className="w-24 h-24 bg-chefie-green/10 rounded-full flex items-center justify-center mb-6 border border-chefie-green/20 shadow-inner">
                                     <ChefHat className="w-12 h-12 text-chefie-green" />
                                 </div>
-                                <h3 className="text-chefie-text font-bold text-xl mb-2">{activeTab === 'recipes' ? 'Henüz Paylaşım Yok' : 'Henüz Beğeni Yok'}</h3>
+                                <h3 className="text-chefie-text font-bold text-xl mb-2">Henüz Paylaşım Yok</h3>
                                 <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_posts')}</p>
+                            </div>
+                        )
+                    )}
+
+                    {activeTab === 'favorites' && (
+                        userFavorites.length > 0 ? (
+                            <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-8">
+                                {userFavorites.map(recipe => (
+                                    <div key={recipe.id} className="bg-chefie-card rounded-[2rem] border border-chefie-border overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col h-full">
+                                        <Link to={`/recipes/${recipe.id}`} className="block relative aspect-[4/3] overflow-hidden group">
+                                            <img
+                                                src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
+                                                alt={recipe.title}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
+                                            {recipe.prep_time && (
+                                                <div className="absolute top-3 right-3 bg-chefie-card/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-black text-chefie-text flex items-center gap-1.5 border border-chefie-border shadow-sm">
+                                                    <Clock className="w-3 h-3 text-chefie-yellow" /> {recipe.prep_time.toString().toUpperCase()}
+                                                </div>
+                                            )}
+                                        </Link>
+                                        <div className="p-4 flex-1 flex flex-col">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="text-[10px] text-chefie-secondary font-bold uppercase tracking-wider">
+                                                    {recipe.category_name || 'GENEL'}
+                                                </div>
+                                                <div className="flex items-center gap-1 text-[10px] font-bold text-chefie-text">
+                                                    <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
+                                                    {recipe.favorite_count || 0}
+                                                </div>
+                                            </div>
+                                            <h3 className="font-bold text-base mb-1 hover:text-chefie-green transition-colors line-clamp-1 leading-tight text-chefie-text">
+                                                <Link to={`/recipes/${recipe.id}`}>{recipe.title}</Link>
+                                            </h3>
+                                            
+                                            <Link to={`/profile/${recipe.user_id}`} className="flex items-center gap-1.5 group/author mb-4 opacity-70 hover:opacity-100 transition-opacity">
+                                                <div className="w-4 h-4 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
+                                                    {recipe.author_image ? (
+                                                        <img src={getImageUrl(recipe.author_image)} className="w-full h-full object-cover" alt="" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center text-[8px] font-black">
+                                                            {(recipe.author_username || 'U').charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="text-[10px] font-bold text-chefie-text group-hover/author:text-chefie-green transition-colors">
+                                                    {recipe.author_name || `@${recipe.author_username}`}
+                                                </span>
+                                            </Link>
+
+                                            <p className="text-chefie-secondary text-xs line-clamp-2 leading-relaxed mb-4">
+                                                {recipe.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-32 text-center w-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                <div className="w-24 h-24 bg-chefie-green/10 rounded-full flex items-center justify-center mb-6 border border-chefie-green/20 shadow-inner">
+                                    <ChefHat className="w-12 h-12 text-chefie-green" />
+                                </div>
+                                <h3 className="text-chefie-text font-bold text-xl mb-2">Henüz Favoriler Yok</h3>
+                                <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_posts')}</p>
+                            </div>
+                        )
+                    )}
+
+                    {activeTab === 'menus' && (
+                        menus.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                                {menus.map((m) => {
+                                    const cover = m.recipes?.find((r) => r.image_url)?.image_url;
+                                    return (
+                                        <Link to="/menus" key={m.id} className="bg-chefie-card rounded-[2.5rem] border border-chefie-border shadow-md overflow-hidden group hover:shadow-xl transition-all hover:-translate-y-1">
+                                            <div className="relative h-40">
+                                                {cover ? (
+                                                    <img
+                                                        src={getImageUrl(cover)}
+                                                        alt={m.title}
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
+                                                        <Utensils className="w-10 h-10 text-chefie-yellow/30" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-chefie-dark/70 via-chefie-dark/10 to-transparent"></div>
+                                                <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-3">
+                                                    <div>
+                                                        <div className="text-white/80 text-[10px] font-black tracking-widest uppercase">
+                                                            {new Date(m.createdAt).toLocaleDateString('tr-TR')}
+                                                        </div>
+                                                        <h3 className="text-xl font-black text-white leading-tight">{m.title}</h3>
+                                                    </div>
+                                                    <div className="px-3 py-1.5 bg-chefie-card/90 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-chefie-text border border-chefie-border">
+                                                        {(m.recipes?.length || 0)} Tarif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="p-5">
+                                                <div className="flex items-center gap-2.5 mb-3">
+                                                    <div className="w-7 h-7 rounded-full overflow-hidden bg-chefie-cream border border-chefie-border flex-shrink-0">
+                                                        {m.createdBy?.profile_image ? (
+                                                            <img src={getImageUrl(m.createdBy.profile_image)} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-chefie-text/60">
+                                                                {(m.createdBy?.full_name || m.createdBy?.username || 'Ş').charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-xs font-bold text-chefie-text truncate">
+                                                            {m.createdBy?.full_name || m.createdBy?.username || 'Kullanıcı'}
+                                                        </span>
+                                                        {m.copiedFrom && (
+                                                            <span className="text-[10px] text-chefie-secondary/60 font-medium truncate">Kaynak: {m.copiedFrom}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {m.description && (
+                                                    <p className="text-chefie-secondary text-xs line-clamp-2 leading-relaxed">{m.description}</p>
+                                                )}
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="py-32 text-center w-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                <div className="w-24 h-24 bg-chefie-yellow/10 rounded-full flex items-center justify-center mb-6 border border-chefie-yellow/20 shadow-inner">
+                                    <LayoutGrid className="w-12 h-12 text-chefie-yellow" />
+                                </div>
+                                <h3 className="text-chefie-text font-bold text-xl mb-2">Henüz Menü Yok</h3>
+                                <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">Menüler sayfasından hazır menüleri kopyalayabilir veya kendi menünüzü oluşturabilirsiniz.</p>
+                                <Link to="/menus" className="mt-8 px-8 py-3 bg-chefie-yellow text-white font-bold text-sm rounded-2xl shadow-lg hover:scale-105 transition-all">
+                                    Menülere Git
+                                </Link>
                             </div>
                         )
                     )}

@@ -24,7 +24,7 @@ const Sidebar = () => {
 
     const handleLogout = () => {
         safeClearAuth();
-        safeRemoveStorage('user');
+        setUser(null);
         navigate('/admin/login');
     };
 

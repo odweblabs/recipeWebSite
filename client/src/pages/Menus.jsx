@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, X, Utensils, ArrowRight, Trash2, LayoutGrid, Star, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { safeGetStorage, safeSetStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
+import { getImageUrl } from '../utils/imageUtils';
 
 const MENUS_STORAGE_KEY = 'chefie_menus_v1';
 
@@ -50,7 +51,7 @@ const Menus = () => {
 
   useEffect(() => {
     try {
-      const raw = safeGetSessionStorage('user');
+      const raw = safeGetSessionStorage('user') || safeGetStorage('user');
       if (!raw) return;
       const parsed = JSON.parse(raw);
       setCurrentUser(parsed || null);
@@ -68,24 +69,6 @@ const Menus = () => {
       const byCategory = (keywords) =>
         safe.filter((r) => keywords.some((k) => (r.category_name || '').toLowerCase().includes(k)));
 
-      const topRated = [...safe]
-        .sort((a, b) => (Number(b.avg_rating) || 0) - (Number(a.avg_rating) || 0))
-        .slice(0, 8);
-
-      const quick = [...safe]
-        .sort((a, b) => (Number(a.prep_time) || 999) - (Number(b.prep_time) || 999))
-        .slice(0, 8);
-
-      const fitPool = [
-        ...byCategory(['salata', 'çorba', 'corba']),
-        ...topRated,
-      ];
-
-      const guestPool = [
-        ...byCategory(['makarna', 'ana', 'fırın', 'firin', 'tatlı', 'tatli']),
-        ...topRated,
-      ];
-
       const uniqById = (arr) => {
         const map = new Map();
         for (const r of arr) {
@@ -94,32 +77,61 @@ const Menus = () => {
         return Array.from(map.values());
       };
 
-      const pick = (pool, count) => uniqById(pool).slice(0, count).map((r) => ({
-        id: r.id,
-        title: r.title,
-        image_url: r.image_url,
-        avg_rating: r.avg_rating,
-        category_name: r.category_name,
-      }));
+      const pickRandom = (pool, count) => {
+        const unique = uniqById(pool);
+        const shuffled = [...unique].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count).map((r) => ({
+          id: r.id,
+          title: r.title,
+          image_url: r.image_url,
+          avg_rating: r.avg_rating,
+          category_name: r.category_name,
+        }));
+      };
+
+      // Türk Akşam Yemeği: çorba + et/tavuk + pilav + salata/turşu
+      const aksam = [
+        ...pickRandom(byCategory(['çorba', 'corba']), 1),
+        ...pickRandom(byCategory(['et yemek', 'tavuk']), 1),
+        ...pickRandom(byCategory(['pilav']), 1),
+        ...pickRandom(byCategory(['salata', 'meze', 'kanepe']), 1),
+        ...pickRandom(byCategory(['sebze']), 1),
+        ...pickRandom(byCategory(['turşu', 'tursu']), 1),
+      ];
+
+      // Misafir Menüsü: çorba + ana yemek + makarna/börek + salata + tatlı + içecek
+      const misafir = [
+        ...pickRandom(byCategory(['çorba', 'corba']), 1),
+        ...pickRandom(byCategory(['et yemek']), 1),
+        ...pickRandom(byCategory(['makarna', 'hamur', 'börek']), 1),
+        ...pickRandom(byCategory(['salata', 'meze', 'kanepe']), 1),
+        ...pickRandom(byCategory(['tatlı', 'tatli', 'kurabiye']), 1),
+        ...pickRandom(byCategory(['içecek', 'icecek']), 1),
+      ];
+
+      // Hızlı Akşam: en hızlı pişen tarifler
+      const quickAll = [...safe]
+        .filter(r => (parseInt(r.prep_time) || 0) + (parseInt(r.cook_time) || 0) > 0)
+        .sort((a, b) => ((parseInt(a.prep_time) || 0) + (parseInt(a.cook_time) || 0)) - ((parseInt(b.prep_time) || 0) + (parseInt(b.cook_time) || 0)));
 
       const presets = [
         {
-          id: 'preset-quick',
-          title: 'Hızlı Akşam Menüsü',
-          description: 'Az zamanda çok lezzet: pratik ve hızlı tariflerden seçki.',
-          recipes: pick(quick, 6),
-        },
-        {
-          id: 'preset-fit',
-          title: 'Fit & Hafif Menü',
-          description: 'Daha hafif seçenekler: salata, çorba ve yüksek puanlı tarifler.',
-          recipes: pick(fitPool, 6),
+          id: 'preset-aksam',
+          title: 'Türk Akşam Yemeği',
+          description: 'Çorba, et yemeği, pilav, salata ve sebze — klasik Türk sofrası.',
+          recipes: aksam.filter(r => r),
         },
         {
           id: 'preset-guest',
           title: 'Misafir Menüsü',
-          description: 'Masayı şenlendiren tarifler: ana yemek + tamamlayıcılar.',
-          recipes: pick(guestPool, 6),
+          description: 'Çorba, ana yemek, makarna, salata, tatlı ve içecek — misafirie layık.',
+          recipes: misafir.filter(r => r),
+        },
+        {
+          id: 'preset-quick',
+          title: 'Hızlı Akşam Menüsü',
+          description: 'Az zamanda çok lezzet: en hızlı pişen tariflerden seçki.',
+          recipes: pickRandom(quickAll.slice(0, 20), 6),
         },
       ].filter((m) => (m.recipes?.length || 0) > 0);
 
@@ -130,7 +142,7 @@ const Menus = () => {
       setLoadingPresets(true);
       setPresetsError('');
       try {
-        const res = await axios.get(`${apiBase}/api/recipes?limit=60`);
+        const res = await axios.get(`${apiBase}/api/recipes?limit=200`);
         const nextPresets = buildPresets(res.data || []);
         if (!cancelled) setPresetMenus(nextPresets);
       } catch {
@@ -146,46 +158,44 @@ const Menus = () => {
     };
   }, []);
 
+  // Kategorileri sadece bir kez çek
   useEffect(() => {
-    let cancelled = false;
+    axios.get(`${apiBase}/api/categories`)
+      .then(res => setCategories(res.data || []))
+      .catch(() => {});
+  }, []);
 
-    const fetchRecipes = async () => {
+  // Tarif arama: kullanıcı yazdıkça veya kategori seçtikçe sunucudan çek
+  useEffect(() => {
+    if (!isCreateOpen) return;
+
+    let cancelled = false;
+    const timeout = setTimeout(async () => {
       setLoadingRecipes(true);
       setRecipesError('');
       try {
-        const [recipesRes, categoriesRes] = await Promise.all([
-          axios.get(`${apiBase}/api/recipes?limit=1000`),
-          axios.get(`${apiBase}/api/categories`),
-        ]);
-        if (!cancelled) {
-          setAllRecipes(recipesRes.data || []);
-          setCategories(categoriesRes.data || []);
-        }
-      } catch (e) {
-        if (!cancelled) setRecipesError('Tarifler veya kategoriler yüklenemedi. Sunucu çalışıyor mu?');
+        let url = `${apiBase}/api/recipes?limit=50`;
+        if (recipeQuery.trim()) url += `&title=${encodeURIComponent(recipeQuery.trim())}`;
+        if (selectedCategoryId) url += `&category_id=${selectedCategoryId}`;
+
+        const res = await axios.get(url);
+        if (!cancelled) setAllRecipes(res.data || []);
+      } catch {
+        if (!cancelled) setRecipesError('Tarifler yüklenemedi.');
       } finally {
         if (!cancelled) setLoadingRecipes(false);
       }
-    };
+    }, 300); // 300ms debounce
 
-    fetchRecipes();
     return () => {
       cancelled = true;
+      clearTimeout(timeout);
     };
-  }, []);
+  }, [isCreateOpen, recipeQuery, selectedCategoryId]);
 
   const filteredRecipes = useMemo(() => {
-    const q = recipeQuery.trim().toLowerCase();
-    return allRecipes.filter((r) => {
-      const matchesText =
-        !q ||
-        (r.title || '').toLowerCase().includes(q) ||
-        (r.category_name || '').toLowerCase().includes(q);
-      const matchesCategory =
-        !selectedCategoryId || String(r.category_id) === String(selectedCategoryId);
-      return matchesText && matchesCategory;
-    });
-  }, [allRecipes, recipeQuery, selectedCategoryId]);
+    return allRecipes;
+  }, [allRecipes]);
 
   const selectedIds = useMemo(() => new Set(selectedRecipes.map((r) => r.id)), [selectedRecipes]);
 
@@ -195,8 +205,9 @@ const Menus = () => {
     setDescription('');
     setRecipeQuery('');
     setSelectedRecipes([]);
-    setAllRecipes([]);
+    setSelectedCategoryId('');
     setRecipesError('');
+
   };
 
   const closeCreate = () => setIsCreateOpen(false);
@@ -241,6 +252,7 @@ const Menus = () => {
       createdAt: new Date().toISOString(),
       recipes: preset.recipes || [],
       createdBy: creator,
+      copiedFrom: 'Tarifo Hazır Menü',
     };
     setMenus((prev) => [next, ...prev]);
   };
@@ -334,11 +346,11 @@ const Menus = () => {
               {presetMenus.map((m) => {
                 const cover = m.recipes?.find((r) => r.image_url)?.image_url;
                 return (
-                  <div key={m.id} className="bg-chefie-card rounded-[2.5rem] border border-chefie-border shadow-md overflow-hidden group">
+                  <div key={m.id} className="bg-chefie-card rounded-[2.5rem] border border-chefie-border shadow-md overflow-hidden group cursor-pointer" onClick={() => setOpenMenu(m)}>
                     <div className="relative h-40">
                       {cover ? (
                         <img
-                          src={cover.startsWith('/images/') ? cover : `${apiBase}${cover}`}
+                          src={getImageUrl(cover)}
                           alt={m.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
@@ -366,17 +378,16 @@ const Menus = () => {
 
                       <div className="mt-5 grid grid-cols-3 gap-3">
                         {(m.recipes || []).slice(0, 3).map((r) => (
-                          <button
+                          <div
                             key={r.id}
-                            onClick={() => navigate(`/recipes/${r.id}`)}
                             className="group/thumb relative rounded-2xl overflow-hidden border border-chefie-border shadow-sm text-left bg-chefie-cream"
                           >
                             <div className="h-16 bg-gray-50">
                               {r.image_url ? (
                                 <img
-                                  src={r.image_url.startsWith('/images/') ? r.image_url : `${apiBase}${r.image_url}`}
+                                  src={getImageUrl(r.image_url)}
                                   alt={r.title}
-                                  className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700"
+                                  className="w-full h-full object-cover"
                                 />
                               ) : (
                                 <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
@@ -390,12 +401,12 @@ const Menus = () => {
                               </div>
                               <div className="text-[11px] font-black text-chefie-text line-clamp-1 mt-1">{r.title}</div>
                             </div>
-                          </button>
+                          </div>
                         ))}
                       </div>
 
                       <button
-                        onClick={() => addPresetToMyMenus(m)}
+                        onClick={(e) => { e.stopPropagation(); addPresetToMyMenus(m); }}
                         className="mt-6 w-full group/btn inline-flex items-center justify-center gap-3 py-4 bg-chefie-cream text-chefie-text font-black text-[11px] tracking-widest rounded-[1.5rem] hover:bg-chefie-yellow hover:text-white transition-all duration-500 shadow-sm border border-chefie-border"
                       >
                         MENÜYÜ KOPYALA
@@ -439,10 +450,10 @@ const Menus = () => {
                   transition={{ delay: idx * 0.05 }}
                   className="bg-chefie-card rounded-[2.5rem] border border-chefie-border shadow-md overflow-hidden group"
                 >
-                  <div className="relative h-44">
+                  <div className="relative h-40 cursor-pointer" onClick={() => setOpenMenu(m)}>
                     {cover ? (
                       <img
-                        src={cover.startsWith('/images/') ? cover : `${apiBase}${cover}`}
+                        src={getImageUrl(cover)}
                         alt={m.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
@@ -465,16 +476,12 @@ const Menus = () => {
                     </div>
                   </div>
 
-                  <div className="p-8">
-                    <div className="flex items-center gap-3 mb-5">
+                  <div className="p-7">
+                    <div className="flex items-center gap-3 mb-4">
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-chefie-cream border border-chefie-border shadow-sm flex-shrink-0">
                         {m.createdBy?.profile_image ? (
                           <img
-                            src={
-                              m.createdBy.profile_image.startsWith('http')
-                                ? m.createdBy.profile_image
-                                : `${apiBase}${m.createdBy.profile_image}`
-                            }
+                            src={getImageUrl(m.createdBy.profile_image)}
                             alt={m.createdBy.full_name || m.createdBy.username}
                             className="w-full h-full object-cover"
                           />
@@ -487,30 +494,33 @@ const Menus = () => {
                         )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50">Menüyü Ekleyen</span>
-                        <span className="text-xs font-bold text-chefie-text">
-                          {m.createdBy?.full_name || m.createdBy?.username || 'Bu cihazdaki kullanıcı'}
+                        <span className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50">
+                          {m.copiedFrom ? 'Kopyalayan' : 'Menüyü Oluşturan'}
                         </span>
+                        <span className="text-xs font-bold text-chefie-text">
+                          {m.createdBy?.full_name || m.createdBy?.username || 'Konuk Kullanıcı'}
+                        </span>
+                        {m.copiedFrom && (
+                          <span className="text-[10px] text-chefie-secondary/60 font-medium">Kaynak: {m.copiedFrom}</span>
+                        )}
                       </div>
                     </div>
 
-                    {m.description ? (
-                      <p className="text-chefie-secondary font-medium leading-relaxed line-clamp-2">{m.description}</p>
-                    ) : (
-                      <p className="text-chefie-secondary/50 font-medium leading-relaxed">Açıklama eklenmemiş.</p>
+                    {m.description && (
+                      <p className="text-chefie-secondary font-medium leading-relaxed line-clamp-2 mb-4">{m.description}</p>
                     )}
 
-                    <div className="mt-6 grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-3">
                       {(m.recipes || []).slice(0, 3).map((r) => (
-                        <button
+                        <div
                           key={r.id}
                           onClick={() => navigate(`/recipes/${r.id}`)}
-                          className="group/thumb relative rounded-2xl overflow-hidden border border-chefie-border shadow-sm text-left bg-chefie-cream"
+                          className="group/thumb relative rounded-2xl overflow-hidden border border-chefie-border shadow-sm text-left bg-chefie-cream cursor-pointer"
                         >
-                          <div className="h-20 bg-gray-50">
+                          <div className="h-16 bg-gray-50">
                             {r.image_url ? (
                               <img
-                                src={r.image_url.startsWith('/images/') ? r.image_url : `${apiBase}${r.image_url}`}
+                                src={getImageUrl(r.image_url)}
                                 alt={r.title}
                                 className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700"
                               />
@@ -520,13 +530,13 @@ const Menus = () => {
                               </div>
                             )}
                           </div>
-                          <div className="p-3">
+                          <div className="p-2.5">
                             <div className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50 line-clamp-1">
                               {r.category_name || 'GENEL'}
                             </div>
-                            <div className="text-xs font-black text-chefie-text line-clamp-1 mt-1">{r.title}</div>
+                            <div className="text-[11px] font-black text-chefie-text line-clamp-1 mt-1">{r.title}</div>
                           </div>
-                        </button>
+                        </div>
                       ))}
                       {Math.max(0, (m.recipes?.length || 0) - 3) > 0 && (
                         <div className="rounded-2xl border border-chefie-border bg-chefie-cream flex items-center justify-center">
@@ -540,7 +550,7 @@ const Menus = () => {
                       )}
                     </div>
 
-                    <div className="mt-8 flex items-center gap-3">
+                    <div className="mt-6 flex items-center gap-3">
                       <button
                         onClick={() => removeMenu(m.id)}
                         className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-red-50 text-red-500 font-black text-[11px] tracking-widest hover:bg-red-500 hover:text-white transition-all"
@@ -603,11 +613,7 @@ const Menus = () => {
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-chefie-cream border border-chefie-border shadow-sm flex-shrink-0">
                       {openMenu.createdBy?.profile_image ? (
                         <img
-                          src={
-                            openMenu.createdBy.profile_image.startsWith('http')
-                              ? openMenu.createdBy.profile_image
-                              : `${apiBase}${openMenu.createdBy.profile_image}`
-                          }
+                          src={getImageUrl(openMenu.createdBy.profile_image)}
                           alt={openMenu.createdBy.full_name || openMenu.createdBy.username}
                           className="w-full h-full object-cover"
                         />
@@ -652,7 +658,7 @@ const Menus = () => {
                     >
                       <div className="w-16 h-16 rounded-2xl overflow-hidden bg-chefie-cream flex-shrink-0 border border-chefie-border">
                         <img
-                          src={r.image_url ? (r.image_url.startsWith('/images/') ? r.image_url : `${apiBase}${r.image_url}`) : '/default-recipe.png'}
+                          src={r.image_url ? getImageUrl(r.image_url) : '/default-recipe.png'}
                           alt={r.title}
                           className="w-full h-full object-cover"
                         />

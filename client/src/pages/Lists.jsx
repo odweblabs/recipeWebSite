@@ -478,29 +478,29 @@ const Lists = () => {
                                     )}
                                 </div>
 
-                                <div className="p-6 md:p-8 bg-chefie-cream dark:bg-chefie-card border-t border-chefie-border dark:border-chefie-border flex flex-col gap-4">
-                                    <div className="flex flex-col sm:flex-row gap-3">
-                                        <button
-                                            onClick={() => setIsCreateOpen(false)}
-                                            className="w-full px-6 py-4 bg-chefie-cream text-chefie-secondary font-black text-xs tracking-widest rounded-2xl hover:bg-chefie-border hover:text-chefie-text transition-all"
-                                        >
-                                            VAZGEÇ
-                                        </button>
+                                <div className="p-4 bg-chefie-cream dark:bg-chefie-card border-t border-chefie-border dark:border-chefie-border flex flex-col gap-3 pb-12 sm:pb-8 sm:p-8">
+                                    <div className="flex gap-3">
                                         <button
                                             onClick={() => handleShare(openList)}
-                                            className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl text-xs font-black hover:bg-blue-600 transition-all shadow-lg hover:scale-[1.02]"
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-chefie-yellow text-white rounded-xl text-xs font-black hover:bg-chefie-yellow/90 transition-all shadow-md active:scale-95"
                                         >
                                             <Share2 className="w-4 h-4" />
                                             {t('lists.actions.share')}
                                         </button>
                                         <button
                                             onClick={() => saveChanges(openList.id)}
-                                            className="flex items-center gap-2 px-6 py-3 bg-chefie-dark text-white rounded-xl text-xs font-black hover:bg-chefie-yellow hover:scale-[1.02] transition-all shadow-lg"
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-chefie-dark text-white rounded-xl text-xs font-black hover:bg-chefie-yellow transition-all shadow-md active:scale-95"
                                         >
                                             <Save className="w-4 h-4" />
                                             {t('lists.actions.save')}
                                         </button>
                                     </div>
+                                    <button
+                                        onClick={() => setOpenListId(null)}
+                                        className="w-full py-2.5 bg-transparent text-gray-400 hover:text-chefie-dark font-bold text-[10px] tracking-widest transition-all uppercase"
+                                    >
+                                        VAZGEÇ
+                                    </button>
                                 </div>
                             </motion.div>
                         </motion.div>

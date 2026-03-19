@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Shuffle, Clock, Star, Utensils, Users, ArrowRight, Flame, Salad, X, Filter, Sparkles, RefreshCw, MessageSquare } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 import API_BASE from '../utils/api';
 const apiBase = API_BASE;
@@ -12,6 +13,7 @@ const WhatToCook = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [allRecipes, setAllRecipes] = useState([]);
+    const [metadata, setMetadata] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -29,11 +31,11 @@ const WhatToCook = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [recipesRes, categoriesRes] = await Promise.all([
-                    axios.get(`${apiBase}/api/recipes?limit=500`),
+                const [metaRes, categoriesRes] = await Promise.all([
+                    axios.get(`${apiBase}/api/recipes/what-to-cook-metadata`),
                     axios.get(`${apiBase}/api/categories`),
                 ]);
-                setAllRecipes(recipesRes.data || []);
+                setMetadata(metaRes.data || []);
                 setCategories(categoriesRes.data || []);
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -44,12 +46,12 @@ const WhatToCook = () => {
         fetchData();
     }, []);
 
-    const filteredRecipes = useMemo(() => {
-        return allRecipes.filter(r => {
+    const filteredMetadata = useMemo(() => {
+        return metadata.filter(r => {
             if (selectedCategory) {
                 if (r.category_id !== selectedCategory) return false;
             } else {
-                // If no specific category is selected, exclude non-meal categories ("Tatlı", "İçecek" vs)
+                // If no specific category is selected, exclude non-meal categories
                 const catName = (r.category_name || '').toLowerCase();
                 if (catName.includes('tatlı') || catName.includes('tatli') || catName.includes('içecek') || catName.includes('icecek')) {
                     return false;
@@ -66,7 +68,40 @@ const WhatToCook = () => {
             }
             return true;
         });
-    }, [allRecipes, selectedCategory, maxTime, servingsFilter]);
+    }, [metadata, selectedCategory, maxTime, servingsFilter]);
+
+    useEffect(() => {
+        if (filteredMetadata.length === 0) {
+            setAllRecipes([]);
+            return;
+        }
+
+        const fetchFullRecipes = async () => {
+            setLoading(true);
+            try {
+                // Shuffle and pick up to 30 matching recipes
+                const shuffled = [...filteredMetadata].sort(() => Math.random() - 0.5);
+                const selectedIds = shuffled.slice(0, 30).map(r => r.id);
+                
+                if (selectedIds.length > 0) {
+                    const res = await axios.post(`${apiBase}/api/recipes/bulk`, { ids: selectedIds });
+                    setAllRecipes(res.data || []);
+                } else {
+                    setAllRecipes([]);
+                }
+            } catch(e) {
+                console.error('Error fetching bulk recipes', e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFullRecipes();
+    }, [filteredMetadata]);
+
+    const filteredRecipes = useMemo(() => {
+        return allRecipes;
+    }, [allRecipes]);
 
     const getRandomRecipe = () => {
         if (filteredRecipes.length === 0) return;
@@ -185,7 +220,7 @@ const WhatToCook = () => {
 
                         <div className="inline-flex items-center gap-2 px-5 py-3 bg-white dark:bg-chefie-card rounded-2xl border border-gray-100 dark:border-chefie-border text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
                             <Utensils className="w-4 h-4 text-chefie-yellow" />
-                            {filteredRecipes.length} {t('what_to_cook.actions.recipes_fit')}
+                            {filteredMetadata.length} {t('what_to_cook.actions.recipes_fit')}
                         </div>
                     </motion.div>
 
@@ -332,7 +367,7 @@ const WhatToCook = () => {
                                     <div className="relative h-56 md:h-72 overflow-hidden">
                                         {suggestion.image_url ? (
                                             <img
-                                                src={suggestion.image_url.startsWith('/images/') ? suggestion.image_url : `${apiBase}${suggestion.image_url}`}
+                                                src={getImageUrl(suggestion.image_url)}
                                                 alt={suggestion.title}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                             />
@@ -383,7 +418,7 @@ const WhatToCook = () => {
                                             <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-chefie-dark rounded-2xl mb-6 border border-transparent dark:border-chefie-border">
                                                 {suggestion.chef_image ? (
                                                     <img
-                                                        src={suggestion.chef_image.startsWith('http') ? suggestion.chef_image : `${apiBase}${suggestion.chef_image}`}
+                                                        src={getImageUrl(suggestion.chef_image)}
                                                         alt={suggestion.chef_name}
                                                         className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                                                     />
@@ -436,7 +471,7 @@ const WhatToCook = () => {
                                         >
                                             <div className="relative h-28 md:h-36 overflow-hidden">
                                                 <img
-                                                    src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${apiBase}${recipe.image_url}`) : '/default-recipe.png'}
+                                                    src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
                                                     alt={recipe.title}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                                 />

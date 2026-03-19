@@ -209,7 +209,9 @@ router.get('/', async (req, res) => {
         const { limit = 50, offset = 0, category_id } = req.query;
         let sql = `
             SELECT 
-                recipes.*, 
+                recipes.id, recipes.title, recipes.image_url, recipes.prep_time, 
+                recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
@@ -230,7 +232,7 @@ router.get('/', async (req, res) => {
         }
         if (req.query.title) {
             const searchTerm = `%${req.query.title}%`;
-            whereClauses.push(`(recipes.title ILIKE $${paramIndex} OR recipes.description ILIKE $${paramIndex} OR recipes.ingredients ILIKE $${paramIndex})`);
+            whereClauses.push(`(recipes.title ILIKE $${paramIndex})`);
             params.push(searchTerm);
             paramIndex++;
         }
@@ -255,7 +257,9 @@ router.get('/latest', async (req, res) => {
         const limit = parseInt(req.query.limit) || 12;
         const recipes = await executeQuery(`
             SELECT 
-                recipes.*, 
+                recipes.id, recipes.title, recipes.image_url, recipes.prep_time,
+                recipes.cook_time, recipes.servings, recipes.category_id,
+                recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
@@ -268,6 +272,59 @@ router.get('/latest', async (req, res) => {
             ORDER BY recipes.created_at DESC
             LIMIT $1
         `, [limit]);
+        res.json(recipes);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET metadata for WhatToCook
+router.get('/what-to-cook-metadata', async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                recipes.id, recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id,
+                categories.name as category_name
+            FROM recipes 
+            LEFT JOIN categories ON recipes.category_id = categories.id
+        `;
+        const recipes = await executeQuery(sql);
+        res.json(recipes);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST bulk fetch recipes
+router.post('/bulk', async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.json([]);
+        }
+
+        const safeIds = ids.slice(0, 50).filter(id => !isNaN(parseInt(id))).map(id => parseInt(id));
+        if (safeIds.length === 0) return res.json([]);
+
+        const placeholders = safeIds.map((_, i) => `$${i + 1}`).join(',');
+
+        const sql = `
+            SELECT 
+                recipes.id, recipes.title, recipes.image_url, recipes.prep_time,
+                recipes.cook_time, recipes.servings, recipes.category_id,
+                recipes.user_id, recipes.created_at,
+                categories.name as category_name,
+                users.username as chef_username,
+                users.full_name as chef_name,
+                users.profile_image as chef_image,
+                (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
+                (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
+            FROM recipes 
+            LEFT JOIN categories ON recipes.category_id = categories.id
+            LEFT JOIN users ON recipes.user_id = users.id
+            WHERE recipes.id IN (${placeholders})
+        `;
+        const recipes = await executeQuery(sql, safeIds);
         res.json(recipes);
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -1,5 +1,6 @@
 import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../../utils/storage';
 import API_BASE from '../../utils/api';
+import { formatStat } from '../../utils/formatUtils';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
@@ -133,6 +134,9 @@ const Dashboard = () => {
         title: '',
         message: ''
     });
+    const [notifUserSearch, setNotifUserSearch] = useState('');
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [confirmDeleteFeedbackId, setConfirmDeleteFeedbackId] = useState(null);
 
     useEffect(() => {
         if (!token) {
@@ -322,6 +326,19 @@ const Dashboard = () => {
         }
     };
 
+    const handleDeleteFeedback = async (id) => {
+        try {
+            await axios.delete(`${API_BASE}/api/feedback/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setFeedback(prev => prev.filter(f => f.id !== id));
+            setConfirmDeleteFeedbackId(null);
+        } catch (err) {
+            console.error('Error deleting feedback:', err);
+            alert('Silinirken bir hata oluştu.');
+        }
+    };
+
     const handleSendNotification = async (e) => {
         e.preventDefault();
         if (!notifForm.title || !notifForm.message) return;
@@ -452,6 +469,25 @@ const Dashboard = () => {
         }
     };
 
+    const handleDeleteNotificationHistory = async (id) => {
+        try {
+            const token = safeGetToken();
+            await axios.delete(`${API_BASE}/api/notifications/admin-history/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Refresh the history list
+            const historyRes = await axios.get(`${API_BASE}/api/notifications/admin-history`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotificationHistory(historyRes.data);
+        } catch (err) {
+            console.error('Error deleting notification history:', err);
+            alert('Silme işlemi başarısız.');
+        } finally {
+            setConfirmDeleteId(null);
+        }
+    };
+
     const openEditUserModal = (u) => {
         setEditingUser(u);
         setEditFormData({ role: u.role, can_comment: u.can_comment !== undefined ? u.can_comment : 1 });
@@ -502,8 +538,6 @@ const Dashboard = () => {
 
     const handleLogout = () => {
         safeClearAuth();
-        safeClearAuth();
-        safeRemoveStorage('user');
         navigate('/admin/login');
     };
 
@@ -553,14 +587,16 @@ const Dashboard = () => {
                         <tr key={u.id} className="hover:bg-chefie-cream/80 transition-colors group">
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center gap-4">
-                                    <Link to={`/profile/${u.id}`}>
-                                        {u.profile_image ? (
-                                            <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name} className="w-10 h-10 rounded-full object-cover border border-chefie-border hover:border-[#10B981] transition-colors" />
-                                        ) : (
-                                            <div className="w-10 h-10 rounded-full bg-chefie-cream flex items-center justify-center text-chefie-secondary border border-chefie-border hover:border-[#10B981] transition-colors uppercase font-bold text-lg">
-                                                {(u.full_name || u.username).charAt(0)}
-                                            </div>
-                                        )}
+                                    <Link to={`/profile/${u.id}`} className="flex-shrink-0">
+                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-border hover:border-[#10B981] transition-colors bg-chefie-cream flex-shrink-0">
+                                            {u.profile_image ? (
+                                                <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name} className="w-full h-full object-cover block" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-chefie-secondary uppercase font-bold text-lg">
+                                                    {(u.full_name || u.username).charAt(0)}
+                                                </div>
+                                            )}
+                                        </div>
                                     </Link>
                                     <div>
                                         <Link to={`/profile/${u.id}`} className="text-sm font-bold text-chefie-text hover:text-[#10B981] transition-colors block">
@@ -580,7 +616,9 @@ const Dashboard = () => {
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-400">
                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => openEditUserModal(u)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></button>
-                                    <button onClick={() => handleDeleteUser(u.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                    {u.role !== 'admin' && (
+                                        <button onClick={() => handleDeleteUser(u.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                    )}
                                 </div>
                             </td>
                         </tr>
@@ -682,31 +720,31 @@ const Dashboard = () => {
                             {/* Totals Grid */}
                             <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                                 <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                    <div className="text-xl sm:text-2xl font-black text-blue-600 truncate px-1">{stats?.counts?.recipes || 0}</div>
+                                    <div className="text-xl sm:text-2xl font-black text-blue-600 truncate px-1">{formatStat(stats?.counts?.recipes)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-blue-500/60 mt-1 break-words">Tarif</div>
                                 </div>
                                 <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                    <div className="text-xl sm:text-2xl font-black text-green-600 truncate px-1">{stats?.counts?.users || 0}</div>
+                                    <div className="text-xl sm:text-2xl font-black text-green-600 truncate px-1">{formatStat(stats?.counts?.users)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-green-500/60 mt-1 break-words">Üye</div>
                                 </div>
                                 <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                    <div className="text-xl sm:text-2xl font-black text-orange-600 truncate px-1">{stats?.counts?.categories || 0}</div>
+                                    <div className="text-xl sm:text-2xl font-black text-orange-600 truncate px-1">{formatStat(stats?.counts?.categories)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-orange-500/60 mt-1 break-words">Kategori</div>
                                 </div>
                                 <div className="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                    <div className="text-xl sm:text-2xl font-black text-purple-600 truncate px-1">{stats?.counts?.comments || 0}</div>
+                                    <div className="text-xl sm:text-2xl font-black text-purple-600 truncate px-1">{formatStat(stats?.counts?.comments)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-purple-500/60 mt-1 break-words">Yorum</div>
                                 </div>
                                 <div className="bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                    <div className="text-xl sm:text-2xl font-black text-rose-600 truncate px-1">{stats?.counts?.favorites || 0}</div>
+                                    <div className="text-xl sm:text-2xl font-black text-rose-600 truncate px-1">{formatStat(stats?.counts?.favorites)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-rose-500/60 mt-1 break-words">Favori</div>
                                 </div>
                                 <div className="bg-yellow-500/10 p-4 rounded-xl border border-yellow-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                    <div className="text-xl sm:text-2xl font-black text-yellow-600 truncate px-1">{stats?.counts?.ratings || 0}</div>
+                                    <div className="text-xl sm:text-2xl font-black text-yellow-600 truncate px-1">{formatStat(stats?.counts?.ratings)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-600/60 mt-1 break-words">Puan</div>
                                 </div>
                                 <div className="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 text-center flex flex-col justify-center min-h-[90px]">
-                                    <div className="text-xl sm:text-2xl font-black text-indigo-600 truncate px-1">{stats?.counts?.friendships || 0}</div>
+                                    <div className="text-xl sm:text-2xl font-black text-indigo-600 truncate px-1">{formatStat(stats?.counts?.friendships)}</div>
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-500/60 mt-1 break-words">Takip</div>
                                 </div>
                             </div>
@@ -724,30 +762,53 @@ const Dashboard = () => {
                                 </div>
                                 <div className="space-y-2">
                                     {userActivity.activities?.length > 0 ? userActivity.activities.map((a) => {
-                                        const lastActiveTime = a.last_active ? new Date(a.last_active) : null;
+                                        const parseDateUTC = (str) => {
+                                            if (!str) return null;
+                                            if (typeof str === 'string' && str.includes(' ') && !str.includes('T')) return new Date(str.replace(' ', 'T') + 'Z');
+                                            if (typeof str === 'string' && !str.endsWith('Z')) return new Date(str + 'Z');
+                                            return new Date(str);
+                                        };
+                                        const lastActiveTime = parseDateUTC(a.last_active);
                                         const isOnline = lastActiveTime && (Date.now() - lastActiveTime.getTime()) < 2 * 60 * 1000;
                                         const timeStr = lastActiveTime ? lastActiveTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '';
                                         
                                         return (
                                             <div key={a.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-cream border border-chefie-border group/activity hover:shadow-sm transition-all">
-                                                <div className="relative">
-                                                    {a.profile_image ? (
-                                                        <img src={(a.profile_image.startsWith('http') || a.profile_image.startsWith('data:')) ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-10 h-10 rounded-full object-cover border border-chefie-border" />
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold text-sm uppercase border border-chefie-border">{(a.full_name || a.username).charAt(0)}</div>
-                                                    )}
+                                                <div className="relative flex-shrink-0">
+                                                    <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 bg-chefie-cream">
+                                                        {a.profile_image ? (
+                                                            <img src={(a.profile_image.startsWith('http') || a.profile_image.startsWith('data:')) ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-full h-full object-cover block" alt="" />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold text-sm uppercase">{(a.full_name || a.username).charAt(0)}</div>
+                                                        )}
+                                                    </div>
                                                     <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-chefie-card ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} title={isOnline ? 'Çevrimiçi' : 'Çevrimdışı'} />
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="text-sm font-bold text-chefie-text truncate">
-                                                        {a.full_name || a.username}
+                                                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <div className="text-sm font-bold text-chefie-text truncate tracking-tight pr-2">
+                                                            {a.full_name || a.username}
+                                                        </div>
+                                                        {(() => {
+                                                            const sec = a.total_seconds || 0;
+                                                            const h = Math.floor(sec / 3600);
+                                                            const m = Math.floor((sec % 3600) / 60);
+                                                            const displayTime = sec < 60 ? '< 1dk' : (h > 0 ? `${h}sa ${m}dk` : `${m}dk`);
+                                                            return (
+                                                                <div className="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-100 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0" title="Toplam Aktif Süre">
+                                                                    <Clock className="w-3 h-3 text-cyan-500" />
+                                                                    {displayTime}
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </div>
-                                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                                        <span className={`text-[10px] font-black uppercase tracking-wider ${isOnline ? 'text-green-500' : 'text-chefie-secondary'}`}>
+                                                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                                        <span className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${isOnline ? 'text-green-500' : 'text-chefie-secondary'}`}>
+                                                            {isOnline && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
                                                             {isOnline ? 'ÇEVRİMİÇİ' : 'SON AKTİF'}
                                                         </span>
                                                         {lastActiveTime && !isOnline && (
-                                                            <span className="text-[10px] text-chefie-secondary font-medium">
+                                                            <span className="text-[10px] text-chefie-secondary font-medium whitespace-nowrap">
                                                                 · {lastActiveTime.toLocaleDateString('tr-TR')} {lastActiveTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                                                             </span>
                                                         )}
@@ -897,15 +958,29 @@ const Dashboard = () => {
                                                 {new Date(item.created_at).toLocaleDateString('tr-TR')} {new Date(item.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
-                                        <select
-                                            value={item.status}
-                                            onChange={(e) => handleUpdateFeedbackStatus(item.id, e.target.value)}
-                                            className="text-xs font-bold bg-chefie-cream border border-chefie-border rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-chefie-yellow transition-all"
-                                        >
-                                            <option value="pending">🕒 Beklemede</option>
-                                            <option value="reviewed">👀 İncelendi</option>
-                                            <option value="resolved">✅ Çözüldü</option>
-                                        </select>
+                                        <div className="flex items-center gap-2">
+                                            <select
+                                                value={item.status}
+                                                onChange={(e) => handleUpdateFeedbackStatus(item.id, e.target.value)}
+                                                className="text-xs font-bold bg-chefie-cream border border-chefie-border rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-chefie-yellow transition-all"
+                                            >
+                                                <option value="pending">🕒 Beklemede</option>
+                                                <option value="reviewed">👀 İncelendi</option>
+                                                <option value="resolved">✅ Çözüldü</option>
+                                            </select>
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setConfirmDeleteFeedbackId(item.id);
+                                                }}
+                                                className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                                                title="Geri Bildirimi Sil"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="bg-chefie-cream/50 p-4 rounded-xl border border-chefie-border mb-4">
                                         <div className="text-xs font-bold text-chefie-secondary uppercase tracking-[0.1em] mb-2 opacity-50">Mesaj İçeriği:</div>
@@ -913,9 +988,9 @@ const Dashboard = () => {
                                     </div>
                                     <div className="flex items-center justify-between pt-4 border-t border-chefie-border">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden border border-gray-200">
+                                            <div className="w-8 h-8 rounded-full bg-chefie-cream flex items-center justify-center text-[10px] font-bold uppercase overflow-hidden border border-gray-200 flex-shrink-0">
                                                 {item.profile_image ? (
-                                                    <img src={(item.profile_image.startsWith('http') || item.profile_image.startsWith('data:')) ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover" />
+                                                    <img src={(item.profile_image.startsWith('http') || item.profile_image.startsWith('data:')) ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover block" alt="" />
                                                 ) : (
                                                     <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
                                                         {(item.full_name || item.username).charAt(0)}
@@ -975,37 +1050,82 @@ const Dashboard = () => {
                                         </div>
 
                                         {notifForm.target === 'specific' && (
-                                            <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-                                                <label className="block text-sm font-bold text-chefie-text mb-3 uppercase tracking-wider">Kullanıcı Seçin ({notifForm.userIds.length})</label>
+                                            <div className="animate-in fade-in slide-in-from-top-4 duration-300 space-y-4">
+                                                <div className="flex flex-col gap-3">
+                                                    <label className="block text-sm font-bold text-chefie-text uppercase tracking-wider">Kullanıcı Seçin ({notifForm.userIds.length})</label>
+                                                    <div className="relative">
+                                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                        <input
+                                                            type="text"
+                                                            placeholder="İsim veya kullanıcı adı ile ara..."
+                                                            value={notifUserSearch}
+                                                            onChange={(e) => setNotifUserSearch(e.target.value)}
+                                                            className="w-full pl-9 pr-4 py-3 bg-chefie-cream border border-chefie-border rounded-xl focus:ring-2 focus:ring-chefie-yellow outline-none text-sm transition-all text-chefie-text shadow-inner"
+                                                        />
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const filtered = users.filter(u => 
+                                                                    u.username.toLowerCase().includes(notifUserSearch.toLowerCase()) || 
+                                                                    (u.full_name && u.full_name.toLowerCase().includes(notifUserSearch.toLowerCase()))
+                                                                ).map(u => u.id);
+                                                                setNotifForm({ ...notifForm, userIds: [...new Set([...notifForm.userIds, ...filtered])] });
+                                                            }}
+                                                            className="px-3 py-1.5 bg-chefie-card border border-chefie-border text-[10px] font-bold text-chefie-secondary rounded-lg hover:border-chefie-yellow hover:text-chefie-yellow transition-all"
+                                                        >
+                                                            Görünenleri Seç
+                                                        </button>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setNotifForm({ ...notifForm, userIds: [] })}
+                                                            className="px-3 py-1.5 bg-chefie-card border border-chefie-border text-[10px] font-bold text-chefie-secondary rounded-lg hover:border-red-500 hover:text-red-500 transition-all"
+                                                        >
+                                                            Seçimleri Temizle
+                                                        </button>
+                                                    </div>
+                                                </div>
                                                 <div className="max-h-[300px] overflow-y-auto border border-chefie-border rounded-2xl bg-chefie-cream p-4 space-y-2 scrollbar-thin">
-                                                    {users.map(u => (
-                                                        <label key={u.id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-card border border-chefie-border/50 hover:border-chefie-yellow transition-all cursor-pointer group">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={notifForm.userIds.includes(u.id)}
-                                                                onChange={(e) => {
-                                                                    const newIds = e.target.checked
-                                                                        ? [...notifForm.userIds, u.id]
-                                                                        : notifForm.userIds.filter(id => id !== u.id);
-                                                                    setNotifForm({ ...notifForm, userIds: newIds });
-                                                                }}
-                                                                className="w-4 h-4 rounded border-chefie-border text-chefie-yellow focus:ring-chefie-yellow"
-                                                            />
-                                                            <div className="w-8 h-8 rounded-full overflow-hidden border border-chefie-border flex-shrink-0">
-                                                                {u.profile_image ? (
-                                                                    <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} className="w-full h-full object-cover" />
-                                                                ) : (
-                                                                    <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-xs uppercase">
-                                                                        {(u.full_name || u.username).charAt(0)}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="text-xs font-bold text-chefie-text truncate">@{u.username}</div>
-                                                                <div className="text-[10px] text-chefie-secondary truncate">{u.full_name}</div>
-                                                            </div>
-                                                        </label>
-                                                    ))}
+                                                    {users
+                                                        .filter(u => 
+                                                            u.username.toLowerCase().includes(notifUserSearch.toLowerCase()) || 
+                                                            (u.full_name && u.full_name.toLowerCase().includes(notifUserSearch.toLowerCase()))
+                                                        )
+                                                        .map(u => (
+                                                            <label key={u.id} className="flex items-center gap-3 p-3 rounded-xl bg-chefie-card border border-chefie-border/50 hover:border-chefie-yellow transition-all cursor-pointer group">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={notifForm.userIds.includes(u.id)}
+                                                                    onChange={(e) => {
+                                                                        const newIds = e.target.checked
+                                                                            ? [...notifForm.userIds, u.id]
+                                                                            : notifForm.userIds.filter(id => id !== u.id);
+                                                                        setNotifForm({ ...notifForm, userIds: newIds });
+                                                                    }}
+                                                                    className="w-4 h-4 rounded border-chefie-border text-chefie-yellow focus:ring-chefie-yellow"
+                                                                />
+                                                                <div className="w-8 h-8 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 bg-chefie-cream">
+                                                                    {u.profile_image ? (
+                                                                        <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} className="w-full h-full object-cover block" alt="" />
+                                                                    ) : (
+                                                                        <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-xs uppercase">
+                                                                            {(u.full_name || u.username).charAt(0)}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="text-xs font-bold text-chefie-text truncate">@{u.username}</div>
+                                                                    <div className="text-[10px] text-chefie-secondary truncate">{u.full_name}</div>
+                                                                </div>
+                                                            </label>
+                                                        ))}
+                                                    {users.filter(u => 
+                                                        u.username.toLowerCase().includes(notifUserSearch.toLowerCase()) || 
+                                                        (u.full_name && u.full_name.toLowerCase().includes(notifUserSearch.toLowerCase()))
+                                                    ).length === 0 && (
+                                                        <div className="py-8 text-center text-xs font-bold text-chefie-secondary uppercase tracking-widest">Kullanıcı bulunamadı</div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}
@@ -1230,6 +1350,15 @@ const Dashboard = () => {
                                                                 <Users className="w-3.5 h-3.5 text-purple-400" />
                                                                 <span className="text-chefie-text underline decoration-chefie-yellow/30 underline-offset-2">{item.recipient_count} Alıcı</span>
                                                             </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(item.id); }}
+                                                                className="flex items-center gap-1.5 text-[10px] font-bold text-red-500/70 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-50 ml-auto"
+                                                                title="Bildirimi Sil"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                                <span>SİL</span>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1460,9 +1589,9 @@ const Dashboard = () => {
                 <div className="flex items-center gap-3">
                     <NotificationBell isMobile={true} />
 
-                    <Link to={user?.id ? `/profile/${user.id}` : '#'}>
+                    <Link to={user?.id ? `/profile/${user.id}` : '#'} className="flex-shrink-0">
                         {user.profile_image ? (
-                            <img src={(user.profile_image.startsWith('http') || user.profile_image.startsWith('data:')) ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-chefie-border" />
+                            <img src={(user.profile_image.startsWith('http') || user.profile_image.startsWith('data:')) ? user.profile_image : `${API_BASE}${user.profile_image}`} alt="User" className="w-8 h-8 rounded-full object-cover border border-chefie-border block" />
                         ) : (
                             <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-dark flex items-center justify-center font-bold text-xs border border-chefie-border">{(user.full_name || user.username || 'A').charAt(0).toUpperCase()}</div>
                         )}
@@ -1693,82 +1822,173 @@ const Dashboard = () => {
             )}
 
             {/* Recipients Modal */}
-            {viewingHistoryId && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-chefie-card rounded-[32px] w-full max-w-lg border border-chefie-border shadow-2xl overflow-hidden"
-                    >
-                        <div className="p-6 border-b border-chefie-border flex items-center justify-between bg-chefie-cream/30">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
-                                    <Users className="w-5 h-5" />
+            <AnimatePresence>
+                {viewingHistoryId && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-chefie-card rounded-[32px] w-full max-w-lg border border-chefie-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-chefie-border flex items-center justify-between bg-chefie-cream/30">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                                        <Users className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-black text-chefie-text uppercase tracking-tight">Alıcı Listesi</h3>
+                                        <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-widest">{recipientsList.length} Kullanıcı bulundu</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-black text-chefie-text uppercase tracking-tight">Alıcı Listesi</h3>
-                                    <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-widest">{recipientsList.length} Kullanıcı bulundu</p>
+                                <button 
+                                    onClick={() => { setViewingHistoryId(null); setRecipientsList([]); }}
+                                    className="w-10 h-10 rounded-xl bg-chefie-card border border-chefie-border flex items-center justify-center text-chefie-secondary hover:text-red-500 hover:border-red-500/20 transition-all shadow-sm"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="p-6 max-h-[60vh] overflow-y-auto scrollbar-thin">
+                                {isRecipientsLoading ? (
+                                    <div className="py-20 flex flex-col items-center justify-center gap-4">
+                                        <Loader2 className="w-10 h-10 text-chefie-yellow animate-spin" />
+                                        <p className="text-sm font-bold text-chefie-secondary uppercase tracking-widest">Yükleniyor...</p>
+                                    </div>
+                                ) : recipientsList.length > 0 ? (
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {recipientsList.map((rec) => (
+                                            <div key={rec.id} className="flex items-center gap-4 p-4 rounded-2xl bg-chefie-cream/50 border border-chefie-border/50 hover:bg-chefie-card hover:border-chefie-yellow/30 transition-all group">
+                                                <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border shadow-sm flex-shrink-0 bg-chefie-cream">
+                                                    {rec.profile_image ? (
+                                                        <img src={(rec.profile_image.startsWith('http') || rec.profile_image.startsWith('data:')) ? rec.profile_image : `${API_BASE}${rec.profile_image}`} className="w-full h-full object-cover block" alt="" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-sm uppercase">
+                                                            {(rec.full_name || rec.username).charAt(0)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-sm font-black text-chefie-text group-hover:text-chefie-yellow transition-colors truncate">
+                                                        {rec.full_name || 'İsimsiz Kullanıcı'}
+                                                    </div>
+                                                    <div className="text-[11px] font-bold text-chefie-secondary truncate">@{rec.username}</div>
+                                                </div>
+                                                <div className="text-[10px] font-black text-chefie-secondary/40 uppercase tracking-tighter">ID: #{rec.id}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-20 text-center space-y-4">
+                                        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto text-gray-400">
+                                            <Users className="w-8 h-8" />
+                                        </div>
+                                        <p className="text-sm font-bold text-chefie-secondary">Henüz taranmış bir alıcı verisi bulunamadı.</p>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="p-6 border-t border-chefie-border bg-chefie-cream/30">
+                                <button 
+                                    onClick={() => { setViewingHistoryId(null); setRecipientsList([]); }}
+                                    className="w-full py-4 bg-chefie-dark text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:bg-black transition-all"
+                                >
+                                    Pencereyi Kapat
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Custom Delete Confirmation Modal */}
+            <AnimatePresence>
+                {confirmDeleteId && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-chefie-card w-full max-w-md rounded-[2.5rem] border border-chefie-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 text-center space-y-6">
+                                <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                                    <Trash2 className="w-10 h-10" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight text-red-500">BİLDİRİMİ SİL?</h3>
+                                    <p className="text-sm font-bold text-chefie-secondary uppercase tracking-tight leading-relaxed px-4">
+                                        Bu bildirim kaydını ve ilgili tüm bildirimleri silmek istediğinize emin misiniz?
+                                    </p>
+                                    <p className="text-[10px] font-black text-red-500/50 uppercase tracking-widest pt-2">Bu işlem geri alınamaz.</p>
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmDeleteId(null)}
+                                        className="flex-1 py-4 bg-chefie-cream text-chefie-secondary rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-chefie-border transition-colors border border-chefie-border shadow-sm active:scale-95"
+                                    >
+                                        VAZGEÇ
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDeleteNotificationHistory(confirmDeleteId)}
+                                        className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 active:scale-95"
+                                    >
+                                        EVET, SİL
+                                    </button>
                                 </div>
                             </div>
-                            <button 
-                                onClick={() => { setViewingHistoryId(null); setRecipientsList([]); }}
-                                className="w-10 h-10 rounded-xl bg-chefie-card border border-chefie-border flex items-center justify-center text-chefie-secondary hover:text-red-500 hover:border-red-500/20 transition-all shadow-sm"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        
-                        <div className="p-6 max-h-[60vh] overflow-y-auto scrollbar-thin">
-                            {isRecipientsLoading ? (
-                                <div className="py-20 flex flex-col items-center justify-center gap-4">
-                                    <Loader2 className="w-10 h-10 text-chefie-yellow animate-spin" />
-                                    <p className="text-sm font-bold text-chefie-secondary uppercase tracking-widest">Yükleniyor...</p>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Custom Delete Feedback Confirmation Modal */}
+            <AnimatePresence>
+                {confirmDeleteFeedbackId && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-chefie-card w-full max-w-md rounded-[2.5rem] border border-chefie-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 text-center space-y-6">
+                                <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                                    <Trash2 className="w-10 h-10" />
                                 </div>
-                            ) : recipientsList.length > 0 ? (
-                                <div className="grid grid-cols-1 gap-3">
-                                    {recipientsList.map((rec) => (
-                                        <div key={rec.id} className="flex items-center gap-4 p-4 rounded-2xl bg-chefie-cream/50 border border-chefie-border/50 hover:bg-chefie-card hover:border-chefie-yellow/30 transition-all group">
-                                            <div className="w-12 h-12 rounded-xl overflow-hidden border border-chefie-border shadow-sm flex-shrink-0">
-                                                {rec.profile_image ? (
-                                                    <img src={(rec.profile_image.startsWith('http') || rec.profile_image.startsWith('data:')) ? rec.profile_image : `${API_BASE}${rec.profile_image}`} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-sm uppercase">
-                                                        {(rec.full_name || rec.username).charAt(0)}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-sm font-black text-chefie-text group-hover:text-chefie-yellow transition-colors truncate">
-                                                    {rec.full_name || 'İsimsiz Kullanıcı'}
-                                                </div>
-                                                <div className="text-[11px] font-bold text-chefie-secondary truncate">@{rec.username}</div>
-                                            </div>
-                                            <div className="text-[10px] font-black text-chefie-secondary/40 uppercase tracking-tighter">ID: #{rec.id}</div>
-                                        </div>
-                                    ))}
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight text-red-500">GERİ BİLDİRİMİ SİL?</h3>
+                                    <p className="text-sm font-bold text-chefie-secondary uppercase tracking-tight leading-relaxed px-4">
+                                        Bu geri bildirimi kalıcı olarak silmek istediğinize emin misiniz?
+                                    </p>
+                                    <p className="text-[10px] font-black text-red-500/50 uppercase tracking-widest pt-2">Bu işlem geri alınamaz.</p>
                                 </div>
-                            ) : (
-                                <div className="py-20 text-center space-y-4">
-                                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto text-gray-400">
-                                        <Users className="w-8 h-8" />
-                                    </div>
-                                    <p className="text-sm font-bold text-chefie-secondary">Henüz taranmış bir alıcı verisi bulunamadı.</p>
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmDeleteFeedbackId(null)}
+                                        className="flex-1 py-4 bg-chefie-cream text-chefie-secondary rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-chefie-border transition-colors border border-chefie-border shadow-sm active:scale-95"
+                                    >
+                                        VAZGEÇ
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDeleteFeedback(confirmDeleteFeedbackId)}
+                                        className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 active:scale-95"
+                                    >
+                                        EVET, SİL
+                                    </button>
                                 </div>
-                            )}
-                        </div>
-                        
-                        <div className="p-6 border-t border-chefie-border bg-chefie-cream/30">
-                            <button 
-                                onClick={() => { setViewingHistoryId(null); setRecipientsList([]); }}
-                                className="w-full py-4 bg-chefie-dark text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:bg-black transition-all"
-                            >
-                                Pencereyi Kapat
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
+
+
     );
 };
 

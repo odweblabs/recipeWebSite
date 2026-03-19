@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Clock, Mic, ChevronLeft, Utensils, Flame, Plus } from 'lucide-react';
+import { Search, X, Clock, ChefHat, ChevronLeft, Utensils, Flame, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import API_BASE from '../utils/api';
@@ -301,13 +301,9 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                         </button>
                                     )}
                                 </div>
-                                <button
-                                    onClick={handleVoiceSearch}
-                                    className={`p-2 rounded-xl transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-white hover:bg-white/10'}`}
-                                    title={t('search.voice_error')}
-                                >
-                                    <Mic className="w-5 h-5" />
-                                </button>
+                                <div className="p-2 text-white/90">
+                                    <ChefHat className="w-5 h-5" />
+                                </div>
                             </div>
 
                             {/* Modal Body */}

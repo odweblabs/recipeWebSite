@@ -117,6 +117,48 @@ router.get('/admin-history', authenticateToken, adminOnly, async (req, res) => {
     }
 });
 
+// Delete admin notification history record and all related notifications (Admin only)
+router.delete('/admin-history/:id', authenticateToken, adminOnly, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // 1. Delete associated notifications
+        await executeQuery('DELETE FROM notifications WHERE history_id = $1', [id]);
+        
+        // 2. Delete the history record
+        const result = await executeQuery('DELETE FROM admin_notification_history WHERE id = $1', [id]);
+        
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Notification history record not found' });
+        }
+        
+        res.json({ message: 'Notification history and related notifications deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting notification history:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update welcome notification template (Admin only)
+router.post('/welcome-template', authenticateToken, adminOnly, async (req, res) => {
+    const { title, message } = req.body;
+    if (!title || !message) {
+        return res.status(400).json({ error: 'Title and message are required' });
+    }
+
+    try {
+        await executeQuery(
+            "INSERT INTO site_settings (key, value) VALUES ('welcome_notif_title', $1), ('welcome_notif_message', $2) " +
+            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+            [title, message]
+        );
+        res.json({ message: 'Welcome notification template updated successfully' });
+    } catch (err) {
+        console.error('Error updating welcome template:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Get recipients for a specific history record (Admin only)
 router.get('/admin-history/:id/recipients', authenticateToken, adminOnly, async (req, res) => {
     try {
@@ -169,24 +211,5 @@ router.get('/welcome-template', authenticateToken, adminOnly, async (req, res) =
     }
 });
 
-// Update welcome notification template (Admin only)
-router.post('/welcome-template', authenticateToken, adminOnly, async (req, res) => {
-    const { title, message } = req.body;
-    if (!title || !message) {
-        return res.status(400).json({ error: 'Title and message are required' });
-    }
-
-    try {
-        await executeQuery(
-            "INSERT INTO site_settings (key, value) VALUES ('welcome_notif_title', $1), ('welcome_notif_message', $2) " +
-            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
-            [title, message]
-        );
-        res.json({ message: 'Welcome notification template updated successfully' });
-    } catch (err) {
-        console.error('Error updating welcome template:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
 module.exports = router;
+

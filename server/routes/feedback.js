@@ -80,4 +80,16 @@ router.put('/:id/status', adminOnly, async (req, res) => {
     }
 });
 
+// Delete feedback (Admin only)
+router.delete('/:id', adminOnly, async (req, res) => {
+    try {
+        const feedbackId = req.params.id;
+        await executeQuery('DELETE FROM feedback WHERE id = $1', [feedbackId]);
+        res.json({ message: 'Feedback deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting feedback:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

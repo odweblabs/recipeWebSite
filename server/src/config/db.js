@@ -32,9 +32,9 @@ const pool = new Pool({
     ssl: process.env.NODE_ENV === 'production' || process.env.VERCEL
         ? { rejectUnauthorized: false }
         : false,
-    max: 1, // Transaction mode + 1 connection is very efficient for serverless/small servers
+    max: 5, // Allow concurrent queries without timeout starvation
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 10000,
 });
 
 // Database connection check on startup

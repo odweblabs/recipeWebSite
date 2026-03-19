@@ -81,28 +81,36 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-[#FFFBF2] flex items-center justify-center p-4 relative">
+        <div className="min-h-screen w-full bg-[#FFFBF2] relative overflow-hidden font-inter">
+            {/* Arkaplan Dekorasyonu */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-[#10B981]/5 rounded-full blur-[120px]"></div>
+                <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-[#FFC107]/5 rounded-full blur-[120px]"></div>
+            </div>
+
             {/* Anasayfa Butonu */}
-            <Link to="/" className="absolute top-8 left-4 md:top-8 md:left-8 flex items-center gap-2 text-[#10B981] hover:text-[#059669] transition-colors font-medium bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg z-50">
-                <Home size={20} />
-                <span>Anasayfa</span>
+            <Link to="/" className="fixed top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-[#10B981] hover:text-[#059669] transition-all font-bold bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 z-50 group border border-chefie-border/50">
+                <Home size={18} className="group-hover:scale-110 transition-transform" />
+                <span className="text-sm">Anasayfa</span>
             </Link>
 
-            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row min-h-[600px]">
+            {/* Merkez Konteynırı */}
+            <div className="absolute inset-0 flex items-center justify-center p-4 min-[400px]:p-6 md:p-8 z-10">
+                <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-xl overflow-hidden max-w-[900px] w-full flex flex-col md:flex-row relative border border-chefie-border/10">
 
                 {/* Sol Taraf - Form */}
-                <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative z-10">
-                    <div className="mb-8">
-                        <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-12 block mt-12 md:mt-0">
-                            <img src="/bitarif_logo_1.png" alt="Logo" className="w-16 h-16" />
+                <div className="w-full md:w-1/2 px-6 py-8 min-[400px]:px-10 min-[400px]:py-10 md:px-10 md:py-12 flex flex-col justify-center relative z-10 bg-white">
+                    <div className="mb-4 md:mb-8">
+                        <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-4 md:mb-12 block mt-4 md:mt-0 group">
+                            <img src="/bitarif_logo_1.png" alt="Logo" className="w-16 min-[400px]:w-20 md:w-24 h-auto transform group-hover:scale-105 transition-transform drop-shadow-sm" />
                         </Link>
 
-                        <h1 className="text-4xl md:text-5xl font-serif text-[#1F2937] mb-3">
+                        <h1 className="text-3xl min-[400px]:text-4xl md:text-5xl lg:text-6xl font-black text-[#1F2937] mb-3 md:mb-6 leading-[1.1] tracking-tight">
                             {isLogin ? 'Hoş Geldiniz,' : 'Aramıza Katılın,'} <br />
                             <span className="text-[#10B981]">{isLogin ? 'Şef!' : 'Yeni Şef!'}</span>
                         </h1>
-                        <p className="text-gray-500 font-sans">
-                            {isLogin ? 'Yönetici paneline erişmek için lütfen giriş yapın.' : 'Tariflerinizi paylaşmak için hemen kayıt olun.'}
+                        <p className="text-gray-500 font-medium text-base min-[400px]:text-lg md:text-lg leading-relaxed max-w-sm">
+                            {isLogin ? 'En güzel tariflerinizi paylaşmak, favorilerinizi yönetmek ve şefler kulübüne katılmak için giriş yapın.' : 'Tariflerinizi binlerce kişiye ulaştırmak ve lezzet dolu bir dünyaya adım atmak için hemen şef profilinizi oluşturun.'}
                         </p>
                     </div>
 
@@ -118,15 +126,15 @@ const Login = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleAuth} className="space-y-6">
+                    <form onSubmit={handleAuth} className="space-y-4 md:space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Kullanıcı Adı</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">Kullanıcı Adı</label>
                             <input
                                 type="text"
                                 placeholder="kullaniciadi"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700"
+                                className="w-full px-4 py-2.5 md:px-5 md:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700 text-sm md:text-base"
                                 required
                                 autoComplete="username"
                                 autoCapitalize="none"
@@ -138,37 +146,37 @@ const Login = () => {
                         {!isLogin && (
                             <>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">İsim Soyisim</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">İsim Soyisim</label>
                                     <input
                                         type="text"
                                         placeholder="Ad Soyad"
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
-                                        className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700"
+                                        className="w-full px-4 py-2.5 md:px-5 md:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700 text-sm md:text-base"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Profil Resmi</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">Profil Resmi</label>
                                     <input
                                         type="file"
                                         accept="image/*"
                                         onChange={(e) => setProfileImage(e.target.files[0])}
-                                        className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#10B981]/10 file:text-[#10B981] hover:file:bg-[#10B981]/20"
+                                        className="w-full px-4 py-2.5 md:px-5 md:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 text-gray-700 file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#10B981]/10 file:text-[#10B981] hover:file:bg-[#10B981]/20 text-xs md:text-sm"
                                     />
                                 </div>
                             </>
                         )}
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">Şifre</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700 pr-12"
+                                    className="w-full px-4 py-2.5 md:px-5 md:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none transition-all duration-200 placeholder-gray-400 text-gray-700 pr-12 text-sm md:text-base"
                                     required
                                     autoComplete="current-password"
                                 />
@@ -177,7 +185,7 @@ const Login = () => {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
                                 >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
                         </div>
@@ -189,17 +197,17 @@ const Login = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-[#10B981] text-white py-3.5 rounded-xl font-semibold text-lg hover:bg-[#059669] transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-[#10B981]/30 focus:ring-4 focus:ring-[#10B981]/20 active:translate-y-0"
+                            className="w-full bg-[#10B981] text-white py-3 md:py-3.5 rounded-xl font-bold text-base md:text-lg hover:bg-[#059669] transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-[#10B981]/30 focus:ring-4 focus:ring-[#10B981]/20 active:translate-y-0 lg:mt-2"
                         >
                             {isLogin ? 'Giriş Yap' : 'Kayıt Ol'}
                         </button>
                     </form>
 
-                    <div className="mt-8 text-center text-sm text-gray-500 pb-12">
+                    <div className="mt-4 md:mt-8 text-center text-sm text-gray-500 pb-6 md:pb-12">
                         {isLogin ? 'Hesabınız yok mu?' : 'Zaten hesabınız var mı?'}
                         <span
                             onClick={toggleMode}
-                            className="text-[#10B981] font-medium cursor-pointer hover:underline ml-1"
+                            className="text-[#10B981] font-bold cursor-pointer hover:underline ml-1"
                         >
                             {isLogin ? 'Hemen Kayıt Olun' : 'Giriş Yapın'}
                         </span>
@@ -221,7 +229,7 @@ const Login = () => {
                         </svg>
                     </div>
 
-                    <div className="relative z-10 w-full h-full flex items-center justify-center p-12">
+                    <div className="relative z-30 w-full h-full flex items-center justify-center p-12">
                         <div className="relative w-full max-w-md aspect-square">
                             {/* Ana Görsel */}
                             <img
@@ -231,20 +239,21 @@ const Login = () => {
                             />
 
                             {/* Yüzen Kartlar (Dekoratif) */}
-                            <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl animate-bounce" style={{ animationDuration: '3s' }}>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-500">
-                                        🍔
+                            <div className="absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-md p-5 rounded-[24px] shadow-2xl animate-bounce border border-white/50" style={{ animationDuration: '4s' }}>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-[#10B981]/10 rounded-2xl flex items-center justify-center text-[#10B981] shadow-inner">
+                                        👨‍🍳
                                     </div>
                                     <div>
-                                        <div className="text-xs text-gray-400">Yeni Sipariş</div>
-                                        <div className="font-bold text-gray-700">Lezzetli Menü</div>
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-[#10B981]/60 mb-0.5">YENİ TARİFLER</div>
+                                        <div className="font-extrabold text-[#1F2937] text-lg tracking-tight">Şeflerin Sırları</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );
