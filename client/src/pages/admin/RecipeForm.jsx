@@ -97,6 +97,11 @@ const RecipeForm = () => {
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
+        if (file && file.size > 4 * 1024 * 1024) {
+            alert('Resim boyutu çok büyük (Maksimum 4MB olmalıdır).');
+            e.target.value = '';
+            return;
+        }
         setImage(file);
         if (file) {
             setPreviewImage(URL.createObjectURL(file));
@@ -410,28 +415,30 @@ const RecipeForm = () => {
                                                 <label className="block text-sm font-medium text-gray-400 mb-2">Hazırlama</label>
                                                 <div className="relative">
                                                     <input
-                                                        type="text"
+                                                        type="number"
                                                         name="prep_time"
                                                         value={formData.prep_time}
                                                         onChange={handleChange}
-                                                        placeholder="20 dk"
-                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none pl-10"
+                                                        placeholder="20"
+                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none pl-10 pr-10"
                                                     />
                                                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400 pointer-events-none">dk</span>
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-400 mb-2">Pişirme</label>
                                                 <div className="relative">
                                                     <input
-                                                        type="text"
+                                                        type="number"
                                                         name="cook_time"
                                                         value={formData.cook_time}
                                                         onChange={handleChange}
-                                                        placeholder="45 dk"
-                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none pl-10"
+                                                        placeholder="45"
+                                                        className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none pl-10 pr-10"
                                                     />
                                                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400 pointer-events-none">dk</span>
                                                 </div>
                                             </div>
                                         </div>

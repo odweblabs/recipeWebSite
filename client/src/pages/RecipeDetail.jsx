@@ -295,12 +295,16 @@ const RecipeDetail = () => {
                             <div className="bg-chefie-card p-4 rounded-xl shadow-sm border border-chefie-border text-center print:shadow-none print:bg-transparent print:border-none print:flex-1 print:p-2">
                                 <Clock className="w-6 h-6 text-chefie-yellow mx-auto mb-2 print:w-5 print:h-5" />
                                 <div className="text-xs text-gray-400 uppercase font-bold">{t('recipe_detail.stats.prep')}</div>
-                                <div className="font-bold text-chefie-text print:text-sm">{recipe.prep_time || `15 ${t('common.minutes')}`}</div>
+                                <div className="font-bold text-chefie-text print:text-sm">
+                                    {recipe.prep_time ? (String(recipe.prep_time).includes('dk') ? recipe.prep_time : `${recipe.prep_time} dk`) : `15 dk`}
+                                </div>
                             </div>
                             <div className="bg-chefie-card p-4 rounded-xl shadow-sm border border-chefie-border text-center print:shadow-none print:bg-transparent print:border-none print:flex-1 print:p-2">
                                 <Clock className="w-6 h-6 text-chefie-yellow mx-auto mb-2 print:w-5 print:h-5" />
                                 <div className="text-xs text-gray-400 uppercase font-bold">{t('recipe_detail.stats.cook')}</div>
-                                <div className="font-bold text-chefie-text print:text-sm">{recipe.cook_time || `30 ${t('common.minutes')}`}</div>
+                                <div className="font-bold text-chefie-text print:text-sm">
+                                    {recipe.cook_time ? (String(recipe.cook_time).includes('dk') ? recipe.cook_time : `${recipe.cook_time} dk`) : `30 dk`}
+                                </div>
                             </div>
                             <div className="bg-chefie-card p-4 rounded-xl shadow-sm border border-chefie-border text-center col-span-2 print:shadow-none print:bg-transparent print:border-none print:col-span-1 print:flex-1 print:p-2">
                                 <Users className="w-6 h-6 text-chefie-yellow mx-auto mb-2 print:w-5 print:h-5" />

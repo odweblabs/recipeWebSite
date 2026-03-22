@@ -240,7 +240,7 @@ const Recipes = () => {
                                     <div className="flex items-center justify-between text-[11px] text-gray-400 mb-4 font-black tracking-widest uppercase">
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-4 h-4 text-chefie-yellow" />
-                                            {recipe.prep_time || '30'} {t('common.prep_time_alt')}
+                                            {recipe.prep_time ? (String(recipe.prep_time).includes('dk') ? recipe.prep_time : `${recipe.prep_time} dk`) : `30 dk`}
                                         </div>
                                         <div className="flex items-center gap-2 text-gray-400">
                                             <Users className="w-4 h-4 text-chefie-yellow" />
