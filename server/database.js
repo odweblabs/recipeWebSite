@@ -12,7 +12,7 @@ const executeQuery = async (query, params = []) => {
     // 1. Array access: result[0]
     // 2. Object access: result.lastInsertRowid, result.changes
     const rows = result.rows || [];
-    
+
     // Add SQLite-style metadata to the array object
     rows.changes = result.rowCount;
     rows.lastInsertRowid = (rows.length > 0 && rows[0].id) ? rows[0].id : null;
