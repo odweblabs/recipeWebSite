@@ -199,15 +199,15 @@ const Settings = () => {
                     className="w-full bg-chefie-card p-4 rounded-3xl border border-chefie-border shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
                 >
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-chefie-border relative group">
+                        <div className="w-16 h-16 aspect-square rounded-full overflow-hidden border-2 border-chefie-border relative group">
                             {user.profile_image ? (
                                 <img
                                     src={getImageUrl(user.profile_image)}
                                     alt={user.full_name}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover rounded-full"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-chefie-green to-emerald-700 flex items-center justify-center text-white text-xl font-bold uppercase">
+                                <div className="w-full h-full rounded-full bg-gradient-to-br from-chefie-green to-emerald-700 flex items-center justify-center text-white text-xl font-bold uppercase">
                                     {(user.full_name || user.username).charAt(0)}
                                 </div>
                             )}
