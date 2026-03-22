@@ -452,32 +452,39 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
         `, [title, description, ingredients, instructions, finalCategoryId, userId, imageUrl, finalServings, finalPrepTime, finalCookTime]);
 
-        const recipeId = info[0].id;
+        const recipeId = info[0]?.id || info.lastInsertRowid;
 
-        // Trigger notification to all users about the new recipe
-        try {
-            const users = await executeQuery('SELECT id FROM users WHERE id != $1 AND (notifications_paused IS FALSE OR notifications_paused IS NULL)', [userId]);
-            const recipientIds = users.map(u => u.id);
+        // Trigger notification to all users about the new recipe (Non-blocking background task)
+        (async () => {
+            try {
+                const users = await executeQuery('SELECT id FROM users WHERE id != $1 AND (notifications_paused IS FALSE OR notifications_paused IS NULL)', [userId]);
+                const recipientIds = users.map(u => u.id);
 
-            if (recipientIds.length > 0) {
-                const values = [];
-                const placeholders = [];
-                let pIndex = 1;
-                const notifTitle = 'Yeni Tarif Eklendi!';
-                const notifMessage = `"${title}" adlı yeni bir tarif paylaşıldı. Hemen göz atın!`;
+                if (recipientIds.length > 0) {
+                    const notifTitle = 'Yeni Tarif Eklendi!';
+                    const notifMessage = `"${title}" adlı yeni bir tarif paylaşıldı. Hemen göz atın!`;
 
-                recipientIds.forEach(rId => {
-                    placeholders.push(`($${pIndex++}, $${pIndex++}, $${pIndex++}, $${pIndex++})`);
-                    values.push(rId, 'new_recipe', notifTitle, notifMessage);
-                });
+                    // Batch inserts to stay well within Postgres parameter limits (max 65535, but let's be conservative)
+                    const BATCH_SIZE = 500;
+                    for (let i = 0; i < recipientIds.length; i += BATCH_SIZE) {
+                        const batch = recipientIds.slice(i, i + BATCH_SIZE);
+                        const values = [];
+                        const placeholders = [];
+                        let pIndex = 1;
 
-                const notifQuery = `INSERT INTO notifications (user_id, type, title, message) VALUES ${placeholders.join(', ')}`;
-                await executeQuery(notifQuery, values);
+                        batch.forEach(rId => {
+                            placeholders.push(`($${pIndex++}, $${pIndex++}, $${pIndex++}, $${pIndex++})`);
+                            values.push(rId, 'new_recipe', notifTitle, notifMessage);
+                        });
+
+                        const notifQuery = `INSERT INTO notifications (user_id, type, title, message) VALUES ${placeholders.join(', ')}`;
+                        await executeQuery(notifQuery, values);
+                    }
+                }
+            } catch (notifErr) {
+                console.error('Failed to send new recipe notifications:', notifErr);
             }
-        } catch (notifErr) {
-            console.error('Failed to send new recipe notifications:', notifErr);
-            // Don't fail the recipe creation if notification fails
-        }
+        })();
 
         res.json({ id: recipeId });
     } catch (err) {

@@ -7,19 +7,18 @@ const executeQuery = async (query, params = []) => {
   try {
     const result = await pool.query(query, params);
 
-    // SQLite's stmt.all() returns an array of rows
-    if (query.trim().toUpperCase().startsWith('SELECT')) {
-      return result.rows;
-    }
+    // Create a hybrid result: an array of rows that also has SQLite-style properties.
+    // This maintains compatibility with both:
+    // 1. Array access: result[0]
+    // 2. Object access: result.lastInsertRowid, result.changes
+    const rows = result.rows || [];
+    
+    // Add SQLite-style metadata to the array object
+    rows.changes = result.rowCount;
+    rows.lastInsertRowid = (rows.length > 0 && rows[0].id) ? rows[0].id : null;
+    rows.__rawPgResult = result;
 
-    // SQLite's stmt.run() returned an object with properties
-    // like `lastInsertRowid` and `changes`. We mock that here.
-    return {
-      changes: result.rowCount,
-      // If we used a RETURNING id clause, simulate lastInsertRowid
-      lastInsertRowid: result.rows.length > 0 && result.rows[0].id ? result.rows[0].id : null,
-      __rawPgResult: result // Keep raw result around just in case
-    };
+    return rows;
   } catch (error) {
     throw error;
   }
