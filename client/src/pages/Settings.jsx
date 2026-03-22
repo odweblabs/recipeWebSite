@@ -143,18 +143,24 @@ const Settings = () => {
     };
 
     const Toggle = ({ active, onToggle }) => (
-        <button
+        <div
+            role="button"
+            tabIndex={0}
             onClick={onToggle}
-            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${active ? 'bg-chefie-green' : 'bg-chefie-border'}`}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onToggle(e)}
+            className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors duration-200 ease-in-out ${active ? 'bg-chefie-green' : 'bg-chefie-border'}`}
         >
             <div className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out ${active ? 'translate-x-6' : 'translate-x-0'}`} />
-        </button>
+        </div>
     );
 
     const MenuItem = ({ icon: Icon, title, rightElement, onClick }) => (
-        <button
+        <div
+            role={onClick ? "button" : undefined}
+            tabIndex={onClick ? 0 : undefined}
             onClick={onClick}
-            className="w-full flex items-center justify-between p-4 hover:bg-chefie-cream/50 transition-colors group"
+            onKeyDown={(e) => onClick && (e.key === 'Enter' || e.key === ' ') && onClick(e)}
+            className={`w-full flex items-center justify-between p-4 transition-colors group ${onClick ? 'hover:bg-chefie-cream/50 cursor-pointer' : ''}`}
         >
             <div className="flex items-center gap-3">
                 <div className="p-2 bg-chefie-cream rounded-lg text-chefie-secondary group-hover:text-chefie-green transition-colors">
@@ -163,7 +169,7 @@ const Settings = () => {
                 <span className="text-[15px] font-medium text-chefie-text text-left">{title}</span>
             </div>
             {rightElement || <ChevronRight className="w-5 h-5 text-chefie-secondary/50" />}
-        </button>
+        </div>
     );
 
     if (loading) return (
