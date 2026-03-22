@@ -16,7 +16,15 @@ const executeQuery = async (query, params = []) => {
     // Add SQLite-style metadata to the array object
     rows.changes = result.rowCount;
     rows.lastInsertRowid = (rows.length > 0 && rows[0].id) ? rows[0].id : null;
-    rows.__rawPgResult = result;
+    
+    // Crucial: Use defineProperty to add __rawPgResult as non-enumerable
+    // to prevent JSON serialization from recursing infinitely.
+    Object.defineProperty(rows, '__rawPgResult', {
+      value: result,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    });
 
     return rows;
   } catch (error) {
