@@ -7,7 +7,10 @@ const multer = require('multer');
 const path = require('path');
 const { authenticateToken, adminOnly } = require('../middleware/auth');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey';
+const SECRET_KEY = process.env.JWT_SECRET;
+if (!SECRET_KEY) {
+    throw new Error('FATAL ERROR: JWT_SECRET is not defined.');
+}
 
 // Configure Multer for profile image upload
 const storage = multer.memoryStorage();

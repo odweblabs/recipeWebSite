@@ -81,7 +81,7 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-[#FFFBF2] relative overflow-hidden font-inter">
+        <div className="h-screen w-full bg-[#FFFBF2] relative overflow-hidden font-inter">
             {/* Arkaplan Dekorasyonu */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-[#10B981]/5 rounded-full blur-[120px]"></div>
@@ -96,20 +96,20 @@ const Login = () => {
 
             {/* Merkez Konteynırı */}
             <div className="absolute inset-0 flex items-center justify-center p-4 min-[400px]:p-6 md:p-8 z-10">
-                <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-xl overflow-hidden max-w-[900px] w-full flex flex-col md:flex-row relative border border-chefie-border/10">
+                <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-xl overflow-hidden max-w-[900px] w-full h-[650px] min-[400px]:h-[700px] md:h-[720px] flex flex-col md:flex-row relative border border-chefie-border/10">
 
                 {/* Sol Taraf - Form */}
-                <div className="w-full md:w-1/2 px-6 py-8 min-[400px]:px-10 min-[400px]:py-10 md:px-10 md:py-12 flex flex-col justify-center relative z-10 bg-white">
-                    <div className="mb-4 md:mb-8">
-                        <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-4 md:mb-12 block mt-4 md:mt-0 group">
+                <div className="w-full md:w-1/2 px-6 py-8 min-[400px]:px-10 min-[400px]:py-10 md:px-10 md:py-12 flex flex-col justify-center relative z-10 bg-white h-full">
+                    <div className="mb-4 md:mb-6">
+                        <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-4 md:mb-8 block mt-4 md:mt-0 group">
                             <img src="/bitarif_logo_1.png" alt="Logo" className="w-16 min-[400px]:w-20 md:w-24 h-auto transform group-hover:scale-105 transition-transform drop-shadow-sm" />
                         </Link>
 
-                        <h1 className="text-3xl min-[400px]:text-4xl md:text-5xl lg:text-6xl font-black text-[#1F2937] mb-3 md:mb-6 leading-[1.1] tracking-tight">
+                        <h1 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black text-[#1F2937] mb-2 md:mb-4 leading-[1.1] tracking-tight">
                             {isLogin ? 'Hoş Geldiniz,' : 'Aramıza Katılın,'} <br />
                             <span className="text-[#10B981]">{isLogin ? 'Şef!' : 'Yeni Şef!'}</span>
                         </h1>
-                        <p className="text-gray-500 font-medium text-base min-[400px]:text-lg md:text-lg leading-relaxed max-w-sm">
+                        <p className="text-gray-500 font-medium text-sm md:text-base leading-relaxed max-w-sm">
                             {isLogin ? 'En güzel tariflerinizi paylaşmak, favorilerinizi yönetmek ve şefler kulübüne katılmak için giriş yapın.' : 'Tariflerinizi binlerce kişiye ulaştırmak ve lezzet dolu bir dünyaya adım atmak için hemen şef profilinizi oluşturun.'}
                         </p>
                     </div>
@@ -126,9 +126,9 @@ const Login = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleAuth} className="space-y-4 md:space-y-6">
+                    <form onSubmit={handleAuth} className="space-y-4 md:space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">Kullanıcı Adı</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2">Kullanıcı Adı</label>
                             <input
                                 type="text"
                                 placeholder="kullaniciadi"
@@ -146,7 +146,7 @@ const Login = () => {
                         {!isLogin && (
                             <>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">İsim Soyisim</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2">İsim Soyisim</label>
                                     <input
                                         type="text"
                                         placeholder="Ad Soyad"
@@ -157,7 +157,7 @@ const Login = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">Profil Resmi</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2">Profil Resmi</label>
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -169,7 +169,7 @@ const Login = () => {
                         )}
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2 text-xs md:text-sm">Şifre</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2">Şifre</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -197,13 +197,13 @@ const Login = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-[#10B981] text-white py-3 md:py-3.5 rounded-xl font-bold text-base md:text-lg hover:bg-[#059669] transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-[#10B981]/30 focus:ring-4 focus:ring-[#10B981]/20 active:translate-y-0 lg:mt-2"
+                            className="w-full bg-[#10B981] text-white py-3 md:py-3.5 rounded-xl font-bold text-base md:text-lg hover:bg-[#059669] transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-[#10B981]/30 focus:ring-4 focus:ring-[#10B981]/20 active:translate-y-0"
                         >
                             {isLogin ? 'Giriş Yap' : 'Kayıt Ol'}
                         </button>
                     </form>
 
-                    <div className="mt-4 md:mt-8 text-center text-sm text-gray-500 pb-6 md:pb-12">
+                    <div className="mt-4 md:mt-8 text-center text-sm text-gray-500 pb-2">
                         {isLogin ? 'Hesabınız yok mu?' : 'Zaten hesabınız var mı?'}
                         <span
                             onClick={toggleMode}
@@ -254,8 +254,8 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-            </div>
         </div>
+    </div>
     );
 };
 

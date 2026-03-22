@@ -1,30 +1,58 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 const { initDb } = require('./database');
 const fs = require('fs');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 5050; // Uses assigned port or 5050 for local development
+const PORT = process.env.PORT || 5050;
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+// Trust proxy (required for Vercel/proxies to get real IP/host)
+app.set('trust proxy', 1);
+
+// Security & Middleware
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP if it interferes with inline scripts/styles in dev
+    crossOriginEmbedderPolicy: false
+}));
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:5173'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Helper to fix image URLs in results
 app.use((req, res, next) => {
     const originalJson = res.json;
     res.json = function (data) {
-        const fullUrl = `${req.protocol}://${req.get('host')}`;
+        // Use APP_URL from env if available, otherwise fallback to req host
+        const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+        
         const fixUrl = (obj) => {
             if (!obj || typeof obj !== 'object') return obj;
             for (let key in obj) {
                 if (typeof obj[key] === 'string' && obj[key].startsWith('/uploads/') && !obj[key].startsWith('data:')) {
-                    obj[key] = fullUrl + obj[key];
+                    obj[key] = baseUrl + obj[key];
                 } else if (typeof obj[key] === 'object') {
                     fixUrl(obj[key]);
                 }

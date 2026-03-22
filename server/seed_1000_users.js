@@ -4,7 +4,8 @@ const bcrypt = require('bcryptjs');
 async function seedUsers() {
     console.log('🧹 Eski Test Kullanıcıları temizleniyor...');
     const client = await pool.connect();
-    const hashedPassword = bcrypt.hashSync('123456', 10);
+    const testPassword = process.env.TEST_USER_PASSWORD || 'TestUser_2026!';
+    const hashedPassword = bcrypt.hashSync(testPassword, 10);
 
     const firstNames = [
         'Ahmet', 'Mehmet', 'Mustafa', 'Can', 'Ali', 'Ömer', 'Emre', 'Burak', 'Hüseyin', 'Deniz',

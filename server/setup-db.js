@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { pool } = require('./database');
 const fs = require('fs');
 const path = require('path');
@@ -53,12 +54,13 @@ async function setup() {
         console.log('4. Admin kullanıcısı kontrol ediliyor...');
         const adminCheck = await client.query("SELECT 1 FROM users WHERE role = 'admin'");
         if (adminCheck.rows.length === 0) {
-            const hashedPassword = bcrypt.hashSync('admin123', 10);
+            const adminPassword = process.env.ADMIN_PASSWORD || 'ChangeMe123!';
+            const hashedPassword = bcrypt.hashSync(adminPassword, 10);
             await client.query(
                 "INSERT INTO users (username, password, full_name, role) VALUES ($1, $2, $3, $4)",
                 ['admin', hashedPassword, 'Sistem Yöneticisi', 'admin']
             );
-            console.log('   - Varsayılan admin oluşturuldu: admin / admin123');
+            console.log('   - Varsayılan admin oluşturuldu.');
         } else {
             console.log('   - Admin kullanıcısı zaten mevcut.');
         }

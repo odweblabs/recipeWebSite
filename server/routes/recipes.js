@@ -443,12 +443,14 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
         }
         const finalCategoryId = category_id && category_id !== '' ? category_id : null;
         const finalServings = servings && servings !== '' ? parseInt(servings) : null;
+        const finalPrepTime = prep_time && prep_time !== '' ? parseInt(prep_time) : null;
+        const finalCookTime = cook_time && cook_time !== '' ? parseInt(cook_time) : null;
         const userId = req.user.id;
 
         const info = await executeQuery(`
             INSERT INTO recipes (title, description, ingredients, instructions, category_id, user_id, image_url, servings, prep_time, cook_time)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
-        `, [title, description, ingredients, instructions, finalCategoryId, userId, imageUrl, finalServings, prep_time, cook_time]);
+        `, [title, description, ingredients, instructions, finalCategoryId, userId, imageUrl, finalServings, finalPrepTime, finalCookTime]);
 
         const recipeId = info[0].id;
 
@@ -502,8 +504,11 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
         }
 
         const finalServings = servings && servings !== '' ? parseInt(servings) : null;
+        const finalPrepTime = prep_time && prep_time !== '' ? parseInt(prep_time) : null;
+        const finalCookTime = cook_time && cook_time !== '' ? parseInt(cook_time) : null;
+        
         let sql = `UPDATE recipes SET title = $1, description = $2, ingredients = $3, instructions = $4, category_id = $5, servings = $6, prep_time = $7, cook_time = $8`;
-        let params = [title, description, ingredients, instructions, category_id || null, finalServings, prep_time, cook_time];
+        let params = [title, description, ingredients, instructions, category_id || null, finalServings, finalPrepTime, finalCookTime];
         let paramIndex = 9;
 
         if (req.file) {

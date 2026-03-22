@@ -1,29 +1,35 @@
-const { db } = require('./database');
+const { executeQuery } = require('./database');
 const bcrypt = require('bcryptjs');
+require('dotenv').config();
 
-const resetAdmin = () => {
+const resetAdmin = async () => {
     const username = 'admin';
-    const password = 'password123';
+    const password = process.env.ADMIN_PASSWORD || 'RecipeChefSecret_2026!';
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     try {
+        console.log('🔄 Admin şifresi sıfırlanıyor...');
+        
         // Check if admin exists
-        const stmtCheck = db.prepare('SELECT * FROM users WHERE username = ?');
-        const user = stmtCheck.get(username);
+        const users = await executeQuery('SELECT * FROM users WHERE username = $1', [username]);
+        const user = users[0];
 
         if (user) {
             // Update password
-            const stmtUpdate = db.prepare('UPDATE users SET password = ? WHERE username = ?');
-            stmtUpdate.run(hashedPassword, username);
-            console.log('Existing admin password reset to: password123');
+            await executeQuery('UPDATE users SET password = $1 WHERE username = $2', [hashedPassword, username]);
+            console.log('✅ Mevcut admin şifresi başarıyla güncellendi.');
         } else {
             // Create admin
-            const stmtInsert = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-            stmtInsert.run(username, hashedPassword);
-            console.log('Admin user created with password: password123');
+            await executeQuery(
+                'INSERT INTO users (username, password, full_name, role) VALUES ($1, $2, $3, $4)', 
+                [username, hashedPassword, 'Sistem Yöneticisi', 'admin']
+            );
+            console.log('✅ Admin kullanıcısı oluşturuldu.');
         }
     } catch (err) {
-        console.error('Error resetting admin:', err);
+        console.error('❌ Admin sıfırlama hatası:', err.message);
+    } finally {
+        process.exit(0);
     }
 };
 
