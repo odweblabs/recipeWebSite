@@ -473,11 +473,11 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
                         let pIndex = 1;
 
                         batch.forEach(rId => {
-                            placeholders.push(`($${pIndex++}, $${pIndex++}, $${pIndex++}, $${pIndex++})`);
-                            values.push(rId, 'new_recipe', notifTitle, notifMessage);
+                            placeholders.push(`($${pIndex++}, $${pIndex++}, $${pIndex++}, $${pIndex++}, $${pIndex++})`);
+                            values.push(rId, 'new_recipe', notifTitle, notifMessage, recipeId);
                         });
 
-                        const notifQuery = `INSERT INTO notifications (user_id, type, title, message) VALUES ${placeholders.join(', ')}`;
+                        const notifQuery = `INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ${placeholders.join(', ')}`;
                         await executeQuery(notifQuery, values);
                     }
                 }

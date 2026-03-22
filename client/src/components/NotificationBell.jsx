@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, Check, MessageCircle, UserPlus, Trash2, X, Clock } from 'lucide-react';
+import { Bell, Check, MessageCircle, UserPlus, Trash2, X, Clock, ChefHat } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
@@ -186,7 +186,7 @@ const NotificationBell = ({ isMobile = false }) => {
                                                 className={`p-4 hover:bg-chefie-cream transition-colors group/item flex gap-3 cursor-pointer ${notification.is_read ? 'opacity-60' : 'bg-chefie-yellow/[0.02]'}`}
                                             >
                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border ${notification.is_read ? 'bg-gray-50 border-gray-100 text-gray-400' : 'bg-chefie-yellow/10 border-chefie-yellow/20 text-chefie-yellow'}`}>
-                                                    {notification.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : notification.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                                                    {notification.type === 'feedback_update' ? <MessageCircle className="w-4 h-4" /> : notification.type === 'friend_request' ? <UserPlus className="w-4 h-4" /> : notification.type === 'new_recipe' ? <ChefHat className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex justify-between items-start">
@@ -229,7 +229,7 @@ const NotificationBell = ({ isMobile = false }) => {
                             <div className="p-6 bg-chefie-cream border-b border-chefie-border flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
                                 <div className="flex items-center gap-4 min-w-0">
                                     <div className="w-12 h-12 rounded-2xl bg-chefie-yellow/10 flex items-center justify-center text-chefie-yellow flex-shrink-0">
-                                        {selectedNotification.type === 'feedback_update' ? <MessageCircle className="w-6 h-6" /> : selectedNotification.type === 'friend_request' ? <UserPlus className="w-6 h-6" /> : <Bell className="w-6 h-6" />}
+                                        {selectedNotification.type === 'feedback_update' ? <MessageCircle className="w-6 h-6" /> : selectedNotification.type === 'friend_request' ? <UserPlus className="w-6 h-6" /> : selectedNotification.type === 'new_recipe' ? <ChefHat className="w-6 h-6" /> : <Bell className="w-6 h-6" />}
                                     </div>
                                     <div className="min-w-0">
                                         <h3 className="text-lg font-black text-chefie-text leading-tight truncate">{selectedNotification.title}</h3>
@@ -274,6 +274,19 @@ const NotificationBell = ({ isMobile = false }) => {
                                             <X className="w-5 h-5" />
                                             {t('profile.reject', 'REDDET')}
                                         </button>
+                                    </div>
+                                )}
+
+                                {selectedNotification.type === 'new_recipe' && selectedNotification.related_id && (
+                                    <div className="mt-8">
+                                        <Link
+                                            to={`/recipes/${selectedNotification.related_id}`}
+                                            onClick={() => setSelectedNotification(null)}
+                                            className="w-full py-4 bg-chefie-yellow text-white font-black rounded-2xl shadow-lg shadow-yellow-100/50 hover:bg-chefie-dark transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <ChefHat className="w-5 h-5" />
+                                            {t('common.go_to_recipe', 'TARİFE GİT')}
+                                        </Link>
                                     </div>
                                 )}
                                 
