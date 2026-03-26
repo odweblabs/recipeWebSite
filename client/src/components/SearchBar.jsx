@@ -19,7 +19,44 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
     const [activeIngredientCategory, setActiveIngredientCategory] = useState('all');
     const inputRef = useRef(null);
     const modalInputRef = useRef(null);
+    const containerRef = useRef(null);
     const navigate = useNavigate();
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    
+    // Drag to scroll for desktop
+    const categoryScrollRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeftState, setScrollLeftState] = useState(0);
+
+    const handleMouseDown = (e) => {
+        if (isMobile) return;
+        setIsDragging(true);
+        setStartX(e.pageX - categoryScrollRef.current.offsetLeft);
+        setScrollLeftState(categoryScrollRef.current.scrollLeft);
+    };
+
+    const handleMouseLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging || isMobile) return;
+        e.preventDefault();
+        const x = e.pageX - categoryScrollRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        categoryScrollRef.current.scrollLeft = scrollLeftState - walk;
+    };
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const currentPlaceholder = placeholder || t('search.placeholder');
 
@@ -121,7 +158,21 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                 setRecentSearches([]);
             }
         }
-    }, [isOpen, onOpenChange]);
+
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen && !isMobile) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onOpenChange, isMobile]);
 
     const handleVoiceSearch = () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -224,14 +275,14 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
     ];
 
     return (
-        <div className={`relative ${className}`}>
-            {/* Main Input (Closed State) */}
+        <div className={`relative ${className}`} ref={containerRef}>
+            {/* Main Input (Closed/Inline State) */}
             <div className={`relative group ${iconOnlyOnMobile ? 'w-auto flex items-center justify-start' : 'min-w-full'}`}>
                 <div className={`absolute inset-0 bg-chefie-yellow/10 blur-xl group-focus-within:bg-chefie-yellow/20 transition-all rounded-[2rem] ${iconOnlyOnMobile ? 'hidden md:block' : ''}`}></div>
 
                 <div
-                    className={`relative cursor-pointer ${iconOnlyOnMobile ? 'md:w-full flex items-center justify-center md:justify-start' : ''}`}
-                    onClick={() => setIsOpen(true)}
+                    className={`relative ${iconOnlyOnMobile ? 'md:w-full flex items-center justify-center md:justify-start' : ''}`}
+                    onClick={() => { if (isMobile) setIsOpen(true); }}
                 >
                     {/* Desktop View / Default Full Width */}
                     <div className={`${iconOnlyOnMobile ? 'hidden md:block w-full' : 'w-full block'}`}>
@@ -241,8 +292,14 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                             type="text"
                             placeholder={currentPlaceholder}
                             value={query}
-                            readOnly
-                            className="w-full pl-14 pr-6 py-4 bg-chefie-card border-0 rounded-2xl shadow-xl shadow-gray-100/50 dark:shadow-none text-chefie-text font-medium placeholder-gray-400 cursor-pointer outline-none cursor-text"
+                            onChange={(e) => {
+                                setQuery(e.target.value);
+                                if (!isMobile && !isOpen) setIsOpen(true);
+                            }}
+                            onKeyDown={handleKeyDown}
+                            onFocus={() => { if (!isMobile) setIsOpen(true); }}
+                            readOnly={isMobile}
+                            className={`w-full pl-14 pr-6 py-4 bg-chefie-card border-0 rounded-2xl shadow-xl shadow-gray-100/50 dark:shadow-none text-chefie-text font-medium placeholder-gray-400 outline-none ${isMobile ? 'cursor-pointer' : 'cursor-text'}`}
                         />
                     </div>
 
@@ -272,39 +329,44 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                         <div className="hidden md:block fixed inset-0 z-[100]" onClick={() => setIsOpen(false)}></div>
 
                         <motion.div
-                            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                            initial={isMobile ? { opacity: 0, y: -20, scale: 0.95 } : { opacity: 0, y: 10 }}
+                            animate={isMobile ? { opacity: 1, y: 0, scale: 1 } : { opacity: 1, y: 0 }}
+                            exit={isMobile ? { opacity: 0, y: -20, scale: 0.95 } : { opacity: 0, y: 10 }}
                             transition={{ duration: 0.2 }}
-                            className="fixed md:absolute inset-0 md:inset-auto md:top-0 md:left-0 md:right-0 w-full md:w-[500px] h-full md:h-auto md:max-h-[85vh] bg-chefie-card z-[101] md:rounded-[2rem] md:shadow-2xl overflow-hidden flex flex-col pt-0 md:pt-0"
+                            className={isMobile 
+                                ? "fixed inset-0 w-full h-full bg-chefie-card z-[101] overflow-hidden flex flex-col"
+                                : "absolute top-full left-0 right-0 mt-2 w-full max-h-[70vh] bg-chefie-card z-[101] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-chefie-border"
+                            }
                         >
-                            {/* Modal Header */}
-                            <div className="flex items-center gap-3 p-4 bg-chefie-yellow shadow-sm md:rounded-t-[2rem]">
-                                <button onClick={() => setIsOpen(false)} className="p-2 text-white hover:bg-white/10 rounded-xl transition-colors">
-                                    <ChevronLeft className="w-6 h-6" />
-                                </button>
-                                <div className="flex-1 relative">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        autoFocus
-                                        ref={modalInputRef}
-                                        value={query}
-                                        onChange={(e) => setQuery(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                        placeholder={recipeCount > 0 ? `${recipeCount} ${t('search.searching_in')}` : t('search.search_generic')}
-                                        className="w-full pl-10 pr-10 py-3 bg-white border-0 rounded-full text-sm font-medium text-chefie-dark focus:ring-2 focus:ring-white/50 outline-none"
-                                    />
-                                    {query && (
-                                        <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-chefie-dark">
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    )}
+                            {/* Modal Header (Only for Mobile) */}
+                            {isMobile && (
+                                <div className="flex items-center gap-3 p-4 bg-chefie-yellow shadow-sm">
+                                    <button onClick={() => setIsOpen(false)} className="p-2 text-white hover:bg-white/10 rounded-xl transition-colors">
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <div className="flex-1 relative">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            autoFocus
+                                            ref={modalInputRef}
+                                            value={query}
+                                            onChange={(e) => setQuery(e.target.value)}
+                                            onKeyDown={handleKeyDown}
+                                            placeholder={recipeCount > 0 ? `${recipeCount} ${t('search.searching_in')}` : t('search.search_generic')}
+                                            className="w-full pl-10 pr-10 py-3 bg-white border-0 rounded-full text-sm font-medium text-chefie-dark focus:ring-2 focus:ring-white/50 outline-none"
+                                        />
+                                        {query && (
+                                            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-chefie-dark">
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="p-2 text-white/90">
+                                        <ChefHat className="w-5 h-5" />
+                                    </div>
                                 </div>
-                                <div className="p-2 text-white/90">
-                                    <ChefHat className="w-5 h-5" />
-                                </div>
-                            </div>
+                            )}
 
                             {/* Modal Body */}
                             <div className="flex-1 overflow-y-auto w-full scrollbar-hide bg-chefie-cream/50">
@@ -334,7 +396,9 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                             <h3 className="text-sm font-black text-chefie-text flex items-center gap-2">
                                                 <Clock className="w-4 h-4 text-orange-400" /> {t('search.recent')}
                                             </h3>
-                                            <button onClick={clearRecent} className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors">{t('search.clear_recent')}</button>
+                                            <button onClick={clearRecent} className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors">
+                                                {i18n.language?.startsWith('tr') ? 'Temizle' : t('search.clear_recent')}
+                                            </button>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {recentSearches.map(item => (
@@ -356,9 +420,14 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                         <h3 className="text-sm font-black text-chefie-text flex items-center gap-2">
                                             <Search className="w-4 h-4 text-orange-400" /> {t('search.quick_access')}
                                         </h3>
-                                        <button className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors">{t('search.clear_recent')}</button>
+                                        <button 
+                                            onClick={() => navigate('/recipes')}
+                                            className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors"
+                                        >
+                                            {i18n.language?.startsWith('tr') ? 'Tümünü Gör' : t('common.view_all')}
+                                        </button>
                                     </div>
-                                    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6">
+                                    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
                                         {quickAccess.map((item, idx) => (
                                             <button
                                                 key={idx}
@@ -418,12 +487,19 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                     </div>
 
                                     {/* Category Tabs */}
-                                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4 -mx-6 px-6">
+                                    <div 
+                                        ref={categoryScrollRef}
+                                        onMouseDown={handleMouseDown}
+                                        onMouseLeave={handleMouseLeave}
+                                        onMouseUp={handleMouseUp}
+                                        onMouseMove={handleMouseMove}
+                                        className={`flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4 flex-nowrap ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                                    >
                                         {ingredientCategories.map(cat => (
                                             <button
                                                 key={cat.key}
                                                 onClick={() => setActiveIngredientCategory(cat.key)}
-                                                className={`whitespace-nowrap px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors border ${activeIngredientCategory === cat.key
+                                                className={`whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors border ${activeIngredientCategory === cat.key
                                                     ? 'bg-chefie-yellow text-white border-chefie-yellow shadow-sm'
                                                     : 'bg-chefie-cream text-gray-600 border-chefie-border hover:bg-chefie-cream/80'
                                                     }`}
@@ -443,7 +519,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                                     className={`flex flex-col items-center gap-1.5 cursor-pointer group`}
                                                     onClick={() => handleIngredientToggle(ing.name)}
                                                 >
-                                                    <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-2xl md:text-3xl transition-all border-2 ${isSelected
+                                                    <div className={`relative w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-xl md:text-2xl transition-all border-2 ${isSelected
                                                         ? 'bg-chefie-yellow/20 border-chefie-yellow shadow-md scale-105'
                                                         : 'bg-chefie-card border-chefie-border shadow-sm group-hover:border-chefie-yellow/50 group-hover:shadow-md'
                                                         }`}>

@@ -589,7 +589,10 @@ i18n
                                 butcher: "Kasap",
                                 pantry: "Kiler",
                                 drinks: "İçecek",
-                                cleaning: "Temizlik"
+                                cleaning: "Temizlik",
+                                breakfast: "Kahvaltılık",
+                                snacks: "Atıştırmalık",
+                                bakery: "Fırın"
                             }
                         },
                         actions: {
@@ -1168,7 +1171,10 @@ i18n
                                 butcher: "Butcher",
                                 pantry: "Pantry",
                                 drinks: "Drinks",
-                                cleaning: "Cleaning"
+                                cleaning: "Cleaning",
+                                breakfast: "Breakfast",
+                                snacks: "Snacks",
+                                bakery: "Bakery"
                             }
                         },
                         actions: {

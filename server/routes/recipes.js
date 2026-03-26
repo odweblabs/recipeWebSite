@@ -231,10 +231,16 @@ router.get('/', async (req, res) => {
             params.push(category_id);
         }
         if (req.query.title) {
-            const searchTerm = `%${req.query.title}%`;
-            whereClauses.push(`(recipes.title ILIKE $${paramIndex})`);
-            params.push(searchTerm);
-            paramIndex++;
+            const searchTerms = req.query.title.split(/\s+/).filter(t => t.trim() !== '');
+            if (searchTerms.length > 0) {
+                const termClauses = searchTerms.map(term => {
+                    const searchTerm = `%${term}%`;
+                    params.push(searchTerm);
+                    const idx = paramIndex++;
+                    return `(recipes.title ILIKE $${idx} OR recipes.ingredients ILIKE $${idx} OR recipes.description ILIKE $${idx})`;
+                });
+                whereClauses.push(`(${termClauses.join(' AND ')})`);
+            }
         }
 
         if (whereClauses.length > 0) {
@@ -615,6 +621,28 @@ router.get('/users/:id/comments', async (req, res) => {
     }
 });
 
+// GET all comments (Admin only)
+router.get('/admin/comments/all', adminOnly, async (req, res) => {
+    try {
+        const { limit = 50, offset = 0 } = req.query;
+        const comments = await executeQuery(`
+            SELECT 
+                comments.*, 
+                users.username, users.full_name, users.profile_image,
+                recipes.title as recipe_title,
+                recipes.id as recipe_id
+            FROM comments 
+            JOIN users ON comments.user_id = users.id
+            JOIN recipes ON comments.recipe_id = recipes.id
+            ORDER BY comments.created_at DESC
+            LIMIT $1 OFFSET $2
+        `, [parseInt(limit), parseInt(offset)]);
+        res.json(comments);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // PUT update comment (Owner only)
 router.put('/comments/:id', authenticateToken, async (req, res) => {
     const { content } = req.body;
@@ -631,7 +659,7 @@ router.put('/comments/:id', authenticateToken, async (req, res) => {
         const comment = comments[0];
 
         if (!comment) return res.status(404).json({ error: 'Yorum bulunamadı.' });
-        if (comment.user_id !== userId) return res.status(403).json({ error: 'Bu yorumu düzenleyemezsiniz.' });
+        if (req.user.role !== 'admin' && comment.user_id !== userId) return res.status(403).json({ error: 'Bu yorumu düzenleyemezsiniz.' });
 
         await executeQuery('UPDATE comments SET content = $1 WHERE id = $2', [content, commentId]);
         res.json({ message: 'Yorum güncellendi.' });

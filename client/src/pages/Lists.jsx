@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronRight, Plus, Trash2, Check, X, ShoppingCart,
-    Edit3, ListChecks, Package, ArrowRight, Save, Share2
+    Edit3, ListChecks, Package, ArrowRight, Save, Share2, ChevronLeft
 } from 'lucide-react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -18,28 +18,44 @@ const CATEGORIZED_INGREDIENTS = {
         { name: 'Süt', emoji: '🥛' }, { name: 'Yumurta', emoji: '🥚' }, { name: 'Ekmek', emoji: '🍞' },
         { name: 'Peynir', emoji: '🧀' }, { name: 'Tereyağı', emoji: '🧈' }, { name: 'Yoğurt', emoji: '🍦' },
         { name: 'Un', emoji: '🥡' }, { name: 'Şeker', emoji: '🍬' }, { name: 'Tuz', emoji: '🧂' },
-        { name: 'Zeytinyağı', emoji: '🫒' }, { name: 'Sıvı Yağ', emoji: '🧴' }
+        { name: 'Maya', emoji: '🥯' }, { name: 'Zeytinyağı', emoji: '🫒' }, { name: 'Sıvı Yağ', emoji: '🍶' }
     ],
     "Manav": [
         { name: 'Domates', emoji: '🍅' }, { name: 'Salatalık', emoji: '🥒' }, { name: 'Biber', emoji: '🫑' },
         { name: 'Soğan', emoji: '🧅' }, { name: 'Patates', emoji: '🥔' }, { name: 'Sarımsak', emoji: '🧄' },
-        { name: 'Elma', emoji: '🍎' }, { name: 'Muz', emoji: '🍌' }, { name: 'Limon', emoji: '🍋' }
+        { name: 'Limon', emoji: '🍋' }, { name: 'Marul', emoji: '🥬' }, { name: 'Maydanoz', emoji: '🌿' },
+        { name: 'Muz', emoji: '🍌' }, { name: 'Elma', emoji: '🍎' }, { name: 'Mantar', emoji: '🍄' }
     ],
     "Kasap": [
-        { name: 'Tavuk', emoji: '🍗' }, { name: 'Kıyma', emoji: '🥩' }, { name: 'Zeytin', emoji: '🫒' }
+        { name: 'Tavuk', emoji: '🍗' }, { name: 'Kıyma', emoji: '🥩' }, { name: 'Kuşbaşı', emoji: '🍖' },
+        { name: 'Sucuk', emoji: '🌭' }, { name: 'Salam', emoji: '🥓' }, { name: 'Sosis', emoji: '🌭' },
+        { name: 'Balık', emoji: '🐟' }
+    ],
+    "Kahvaltılık": [
+        { name: 'Zeytin', emoji: '🫒' }, { name: 'Bal', emoji: '🍯' }, { name: 'Reçel', emoji: '🍓' },
+        { name: 'Tahin', emoji: '🥣' }, { name: 'Pekmez', emoji: '🥣' }, { name: 'Labne', emoji: '🥣' },
+        { name: 'Krem Peynir', emoji: '🧀' }, { name: 'Kaymak', emoji: '🍚' }
     ],
     "Kiler": [
-        { name: 'Makarna', emoji: '🍝' }, { name: 'Pirinç', emoji: '🌾' }, { name: 'Makarna Sosu', emoji: '🥫' },
-        { name: 'Salça', emoji: '🥫' }, { name: 'Baharat', emoji: '🌿' }, { name: 'Ketçap', emoji: '🍅' },
-        { name: 'Mayonez', emoji: '🥚' }
+        { name: 'Makarna', emoji: '🍝' }, { name: 'Pirinç', emoji: '🌾' }, { name: 'Bulgur', emoji: '🍚' },
+        { name: 'Mercimek', emoji: '🫘' }, { name: 'Salça', emoji: '🥫' }, { name: 'Ketçap', emoji: '🥫' },
+        { name: 'Mayonez', emoji: '🧴' }, { name: 'Baharat', emoji: '🧂' }
+    ],
+    "Atıştırmalık": [
+        { name: 'Bisküvi', emoji: '🍪' }, { name: 'Çikolata', emoji: '🍫' }, { name: 'Cips', emoji: '🥔' },
+        { name: 'Kuruyemiş', emoji: '🥜' }, { name: 'Gofret', emoji: '🧇' }, { name: 'Kek', emoji: '🍰' }
     ],
     "İçecek": [
-        { name: 'Çay', emoji: '☕' }, { name: 'Kahve', emoji: '☕' }, { name: 'Meyve Suyu', emoji: '🧃' },
-        { name: 'Su', emoji: '💧' }
+        { name: 'Su', emoji: '💧' }, { name: 'Çay', emoji: '☕' }, { name: 'Kahve', emoji: '☕' },
+        { name: 'Soda', emoji: '🥤' }, { name: 'Ayran', emoji: '🥛' }, { name: 'Meyve Suyu', emoji: '🧃' }
     ],
     "Temizlik": [
-        { name: 'Deterjan', emoji: '🧼' }, { name: 'Sabun', emoji: '🧼' },
+        { name: 'Deterjan', emoji: '🧼' }, { name: 'Sabun', emoji: '🧼' }, { name: 'Şampuan', emoji: '🧴' },
         { name: 'T. Kağıdı', emoji: '🧻' }, { name: 'Havlu Kağıt', emoji: '🧻' }, { name: 'Diş Macunu', emoji: '🪥' }
+    ],
+    "Fırın": [
+        { name: 'Sıcak Ekmek', emoji: '🥖' }, { name: 'Simit', emoji: '🥨' }, { name: 'Poğaça', emoji: '🥐' },
+        { name: 'Börek', emoji: '🥧' }, { name: 'Yufka', emoji: '🌯' }, { name: 'Lavaş', emoji: '🫓' }
     ]
 };
 
@@ -59,6 +75,7 @@ const Lists = () => {
     const [editingMarket, setEditingMarket] = useState('');
     const [isPublic, setIsPublic] = useState(false);
     const [activeCategory, setActiveCategory] = useState('Temel');
+    const modalCategoriesRef = React.useRef(null);
 
     const token = safeGetToken();
 
@@ -406,37 +423,57 @@ const Lists = () => {
                                     </div>
 
                                     {/* Preset Ingredients (Quick Add) */}
-                                    <div className="mb-6 bg-chefie-cream/50 dark:bg-chefie-card/50 p-4 rounded-3xl border border-chefie-border dark:border-chefie-border">
-                                        <div className="flex items-center justify-between mb-4 px-1">
-                                            <p className="text-[10px] font-black tracking-widest uppercase text-chefie-dark/40">{t('lists.items.quick_add')}</p>
-                                            <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-[75%]">
-                                                {Object.keys(CATEGORIZED_INGREDIENTS).map(cat => {
-                                                    const catKeys = {
-                                                        "Temel": "basic",
-                                                        "Manav": "greengrocer",
-                                                        "Kasap": "butcher",
-                                                        "Kiler": "pantry",
-                                                        "İçecek": "drinks",
-                                                        "Temizlik": "cleaning"
-                                                    };
-                                                    return (
-                                                        <button
-                                                            key={cat}
-                                                            onClick={() => setActiveCategory(cat)}
-                                                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shadow-sm ${activeCategory === cat ? 'bg-chefie-yellow text-white shadow-chefie-yellow/20' : 'text-chefie-secondary dark:text-chefie-secondary bg-chefie-cream dark:bg-chefie-card hover:bg-chefie-border dark:hover:bg-chefie-border'}`}
-                                                        >
-                                                            {t(`lists.items.categories.${catKeys[cat]}`).toUpperCase()}
-                                                        </button>
-                                                    );
-                                                })}
+                                    <div className="mb-6 bg-chefie-cream/20 dark:bg-chefie-card/30 p-5 rounded-[2.5rem] border border-chefie-border/50 dark:border-chefie-border/20">
+                                        <div className="mb-5 px-1">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <Package className="w-3 h-3 text-chefie-yellow" />
+                                                <p className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/40">{t('lists.items.quick_add')}</p>
+                                            </div>
+                                            <div className="relative flex items-center group/modalpills">
+                                                <button 
+                                                    onClick={() => modalCategoriesRef.current?.scrollBy({ left: -100, behavior: 'smooth' })}
+                                                    className="absolute -left-2 z-10 w-6 h-6 bg-white dark:bg-chefie-card shadow-lg border border-chefie-border rounded-full items-center justify-center opacity-0 group-hover/modalpills:opacity-100 transition-opacity flex text-chefie-text hover:text-chefie-yellow"
+                                                >
+                                                    <ChevronLeft size={12} />
+                                                </button>
+                                                <div ref={modalCategoriesRef} className="flex gap-2 overflow-x-auto scrollbar-hide flex-1 scroll-smooth pb-1">
+                                                    {Object.keys(CATEGORIZED_INGREDIENTS).map(cat => {
+                                                        const catKeys = {
+                                                            "Temel": "basic",
+                                                            "Manav": "greengrocer",
+                                                            "Kasap": "butcher",
+                                                            "Kiler": "pantry",
+                                                            "Kahvaltılık": "breakfast",
+                                                            "Atıştırmalık": "snacks",
+                                                            "İçecek": "drinks",
+                                                            "Temizlik": "cleaning",
+                                                            "Fırın": "bakery"
+                                                        };
+                                                        return (
+                                                            <button
+                                                                key={cat}
+                                                                onClick={() => setActiveCategory(cat)}
+                                                                className={`text-[9px] font-black px-4 py-2 rounded-xl transition-all whitespace-nowrap border-2 ${activeCategory === cat ? 'bg-chefie-yellow border-chefie-yellow text-white shadow-lg shadow-chefie-yellow/20' : 'text-chefie-secondary/60 dark:text-chefie-secondary/40 bg-white dark:bg-chefie-card border-chefie-border dark:border-chefie-border/50 hover:border-chefie-yellow hover:text-chefie-yellow'}`}
+                                                            >
+                                                                {t(`lists.items.categories.${catKeys[cat]}`).toUpperCase()}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <button 
+                                                    onClick={() => modalCategoriesRef.current?.scrollBy({ left: 100, behavior: 'smooth' })}
+                                                    className="absolute -right-2 z-10 w-6 h-6 bg-white dark:bg-chefie-card shadow-lg border border-chefie-border rounded-full items-center justify-center opacity-0 group-hover/modalpills:opacity-100 transition-opacity flex text-chefie-text hover:text-chefie-yellow"
+                                                >
+                                                    <ChevronRight size={12} />
+                                                </button>
                                             </div>
                                         </div>
-                                        <div className="flex flex-wrap gap-2 py-1 max-h-[140px] overflow-y-auto scrollbar-hide">
+                                        <div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x pt-1 px-1">
                                             {CATEGORIZED_INGREDIENTS[activeCategory].map((item, idx) => (
                                                 <button
                                                     key={idx}
                                                     onClick={() => addItem(openList.id, item.name)}
-                                                    className="px-3 py-2 bg-chefie-cream dark:bg-chefie-card border border-chefie-border dark:border-chefie-border rounded-xl text-[12px] font-bold text-chefie-secondary dark:text-chefie-secondary hover:border-chefie-yellow hover:text-chefie-yellow transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 flex items-center gap-1.5"
+                                                    className="px-4 py-3 bg-white/50 dark:bg-chefie-card border border-chefie-border/60 dark:border-chefie-border/30 rounded-2xl text-[12px] font-bold text-chefie-secondary dark:text-chefie-secondary hover:border-chefie-yellow hover:text-chefie-yellow hover:bg-white transition-all whitespace-nowrap active:scale-95 flex items-center gap-2 snap-start"
                                                 >
                                                     <span className="text-base leading-none">{item.emoji}</span>
                                                     <span>{item.name}</span>

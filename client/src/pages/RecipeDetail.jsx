@@ -2,9 +2,10 @@ import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemove
 import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ChefLoader from '../components/ChefLoader';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Clock, Users, ArrowLeft, Printer, Share2, Heart, ChefHat, Star, MessageSquare, Send, Smartphone } from 'lucide-react';
+import { Clock, Users, ArrowLeft, Printer, Share2, Heart, ChefHat, Star, MessageSquare, Send, Smartphone, Flame } from 'lucide-react';
 
 const RecipeDetail = () => {
     const { t, i18n } = useTranslation();
@@ -214,7 +215,11 @@ const RecipeDetail = () => {
         };
     }, [wakeLock]);
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-chefie-cream text-lg font-medium text-gray-600">{t('common.loading')}</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-chefie-cream flex flex-col items-center justify-center p-6">
+            <ChefLoader text={t('common.loading') || 'Tarif Hazırlanıyor...'} />
+        </div>
+    );
     if (!recipe) return null;
 
     return (
@@ -300,7 +305,7 @@ const RecipeDetail = () => {
                                 </div>
                             </div>
                             <div className="bg-chefie-card p-4 rounded-xl shadow-sm border border-chefie-border text-center print:shadow-none print:bg-transparent print:border-none print:flex-1 print:p-2">
-                                <Clock className="w-6 h-6 text-chefie-yellow mx-auto mb-2 print:w-5 print:h-5" />
+                                <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2 print:w-5 print:h-5" />
                                 <div className="text-xs text-gray-400 uppercase font-bold">{t('recipe_detail.stats.cook')}</div>
                                 <div className="font-bold text-chefie-text print:text-sm">
                                     {recipe.cook_time ? (String(recipe.cook_time).includes('dk') ? recipe.cook_time : `${recipe.cook_time} dk`) : `30 dk`}

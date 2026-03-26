@@ -1,19 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChefHat } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import Logo from '../UI/Logo';
 
 const Footer = () => {
     const { t } = useTranslation();
 
     return (
-        <footer className="bg-white text-gray-900">
+        <footer className="bg-white text-gray-900 border-t border-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
-                        <Link to="/" className="flex items-center space-x-2 mb-4">
-                            <ChefHat className="h-8 w-8 text-orange-500" />
-                            <span className="text-xl font-bold">Tarifo</span>
+                        <Link to="/" className="inline-block mb-4">
+                            <Logo className="text-3xl" />
                         </Link>
                         <p className="text-gray-500 text-sm leading-relaxed">
                             {t('footer.description')}

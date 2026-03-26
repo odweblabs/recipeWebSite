@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { User, Calendar, MapPin, ChefHat, MessageSquare, Clock, Heart, Trash2, Edit, X, Save, UserPlus, UserCheck, UserX, Users, Check, Loader2, LogOut, ShoppingCart, ArrowRight, Bell, Globe, Flame, Settings, BadgeCheck, MessageCircle, Utensils, LayoutGrid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import ChefLoader from '../components/ChefLoader';
 
 // Country list with flag emojis
 const COUNTRY_LIST = [
@@ -86,19 +87,29 @@ const Profile = () => {
     const isOwner = currentUser.id === parseInt(id);
     const isLoggedIn = !!token && !!currentUser.id;
 
+    const fetchRecipesBatch = async (limit, offset) => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/recipes/users/${id}/recipes?limit=${limit}&offset=${offset}`);
+            return res.data;
+        } catch (err) {
+            console.error('Error fetching recipes batch:', err);
+            return [];
+        }
+    };
+
     const fetchRecipes = async (isLoadMore = false) => {
         try {
             const currentOffset = isLoadMore ? offset + LIMIT : 0;
-            const res = await axios.get(`${API_BASE}/api/recipes/users/${id}/recipes?limit=${LIMIT}&offset=${currentOffset}`);
+            const data = await fetchRecipesBatch(LIMIT, currentOffset);
 
             if (isLoadMore) {
-                setRecipes(prev => [...prev, ...res.data]);
+                setRecipes(prev => [...prev, ...data]);
                 setOffset(currentOffset);
             } else {
-                setRecipes(res.data);
+                setRecipes(data);
                 setOffset(0);
             }
-            setHasMore(res.data.length >= LIMIT);
+            setHasMore(data.length >= LIMIT);
         } catch (err) {
             console.error('Error fetching recipes:', err);
         }
@@ -226,9 +237,23 @@ const Profile = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Parallelize all initial profile data fetching
+                // Phase 1: Critical data only (Header & Recipes)
+                const [profileRes, recipesRes] = await Promise.all([
+                    axios.get(`${API_BASE}/api/auth/users/${id}/profile`),
+                    axios.get(`${API_BASE}/api/recipes/users/${id}/recipes?limit=${LIMIT}&offset=0`)
+                ]);
+
+                setProfile(profileRes.data);
+                const recipeData = recipesRes.data;
+                setRecipes(recipeData);
+                setHasMore(recipeData.length >= LIMIT);
+                setOffset(0);
+                
+                // Clear main loading state early for instant entry
+                setLoading(false);
+
+                // Phase 2: Background data (Comments, Friends, Lists, etc.)
                 const [
-                    profileRes,
                     commentsRes,
                     friendsRes,
                     friendStatusRes,
@@ -237,7 +262,6 @@ const Profile = () => {
                     userFavoritesRes,
                     notificationsRes
                 ] = await Promise.all([
-                    axios.get(`${API_BASE}/api/auth/users/${id}/profile`),
                     axios.get(`${API_BASE}/api/recipes/users/${id}/comments`),
                     axios.get(`${API_BASE}/api/friends/${id}`),
                     (isLoggedIn && !isOwner) ? axios.get(`${API_BASE}/api/friends/status/${id}`, {
@@ -255,7 +279,6 @@ const Profile = () => {
                     }) : Promise.resolve({ data: [] })
                 ]);
 
-                setProfile(profileRes.data);
                 setComments(commentsRes.data);
                 setFriends(friendsRes.data);
                 setFriendStatus(friendStatusRes.data);
@@ -263,9 +286,6 @@ const Profile = () => {
                 setUserLists(userListsRes.data);
                 setUserFavorites(userFavoritesRes.data);
                 setNotifications(notificationsRes.data);
-
-                // Fetch recipes separately as it might be larger or has its own logic
-                await fetchRecipes();
 
                 // Load menus from localStorage only for profile owner
                 try {
@@ -482,8 +502,22 @@ const Profile = () => {
         );
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-chefie-cream text-chefie-text">{t('profile.loading')}</div>;
-    if (!profile) return <div className="min-h-screen flex items-center justify-center bg-chefie-cream text-chefie-text">{t('profile.not_found')}</div>;
+    if (loading) return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-chefie-cream p-6">
+            <ChefLoader text={t('profile.loading') || 'Profil Hazırlanıyor...'} />
+        </div>
+    );
+    
+    if (!profile) return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-chefie-cream p-6 text-center">
+            <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mb-6">
+                <X className="w-10 h-10" />
+            </div>
+            <h2 className="text-xl font-black text-chefie-text mb-2">Eyvah!</h2>
+            <p className="text-chefie-secondary font-bold max-w-xs">{t('profile.not_found') || 'Kullanıcı bulunamadı veya bir hata oluştu.'}</p>
+            <Link to="/" className="mt-8 px-8 py-3 bg-chefie-yellow text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">Ana Sayfaya Dön</Link>
+        </div>
+    );
 
     const followersList = friends.filter(f => f.addressee_id === parseInt(id));
     const followingList = friends.filter(f => f.requester_id === parseInt(id));

@@ -5,6 +5,8 @@ import axios from 'axios';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Home, Eye, EyeOff } from 'lucide-react';
 
+import Logo from '../../components/UI/Logo';
+
 const Login = () => {
     const location = useLocation();
     const [isLogin, setIsLogin] = useState(!location.state?.isRegister);
@@ -102,7 +104,7 @@ const Login = () => {
                 <div className="w-full md:w-1/2 px-6 py-8 min-[400px]:px-10 min-[400px]:py-10 md:px-10 md:py-12 flex flex-col justify-center relative z-10 bg-white h-full">
                     <div className="mb-4 md:mb-6">
                         <Link to="/" className="hover:opacity-80 transition-opacity w-fit mb-4 md:mb-8 block mt-4 md:mt-0 group">
-                            <img src="/bitarif_logo_1.png" alt="Logo" className="w-16 min-[400px]:w-20 md:w-24 h-auto transform group-hover:scale-105 transition-transform drop-shadow-sm" />
+                            <Logo className="text-3xl min-[400px]:text-4xl md:text-5xl group-hover:scale-105 transition-transform" />
                         </Link>
 
                         <h1 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black text-[#1F2937] mb-2 md:mb-4 leading-[1.1] tracking-tight">

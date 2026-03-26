@@ -66,8 +66,14 @@ const Menus = () => {
     const buildPresets = (recipes) => {
       const safe = Array.isArray(recipes) ? recipes : [];
 
-      const byCategory = (keywords) =>
-        safe.filter((r) => keywords.some((k) => (r.category_name || '').toLowerCase().includes(k)));
+      const byKeywords = (keywords) => {
+        const lowerKeywords = keywords.map(k => k.toLowerCase());
+        return safe.filter((r) => {
+          const cat = (r.category_name || '').toLowerCase();
+          const title = (r.title || '').toLowerCase();
+          return lowerKeywords.some(k => cat.includes(k) || title.includes(k));
+        });
+      };
 
       const uniqById = (arr) => {
         const map = new Map();
@@ -79,8 +85,14 @@ const Menus = () => {
 
       const pickRandom = (pool, count) => {
         const unique = uniqById(pool);
-        const shuffled = [...unique].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, count).map((r) => ({
+        if (unique.length === 0) return [];
+        const result = [];
+        const copy = [...unique];
+        for (let i = 0; i < Math.min(count, unique.length); i++) {
+          const randIdx = Math.floor(Math.random() * copy.length);
+          result.push(copy.splice(randIdx, 1)[0]);
+        }
+        return result.map((r) => ({
           id: r.id,
           title: r.title,
           image_url: r.image_url,
@@ -89,64 +101,113 @@ const Menus = () => {
         }));
       };
 
-      // Türk Akşam Yemeği: çorba + et/tavuk + pilav + salata/turşu
-      const aksam = [
-        ...pickRandom(byCategory(['çorba', 'corba']), 1),
-        ...pickRandom(byCategory(['et yemek', 'tavuk']), 1),
-        ...pickRandom(byCategory(['pilav']), 1),
-        ...pickRandom(byCategory(['salata', 'meze', 'kanepe']), 1),
-        ...pickRandom(byCategory(['sebze']), 1),
-        ...pickRandom(byCategory(['turşu', 'tursu']), 1),
-      ];
-
-      // Misafir Menüsü: çorba + ana yemek + makarna/börek + salata + tatlı + içecek
-      const misafir = [
-        ...pickRandom(byCategory(['çorba', 'corba']), 1),
-        ...pickRandom(byCategory(['et yemek']), 1),
-        ...pickRandom(byCategory(['makarna', 'hamur', 'börek']), 1),
-        ...pickRandom(byCategory(['salata', 'meze', 'kanepe']), 1),
-        ...pickRandom(byCategory(['tatlı', 'tatli', 'kurabiye']), 1),
-        ...pickRandom(byCategory(['içecek', 'icecek']), 1),
-      ];
-
-      // Hızlı Akşam: en hızlı pişen tarifler
-      const quickAll = [...safe]
-        .filter(r => (parseInt(r.prep_time) || 0) + (parseInt(r.cook_time) || 0) > 0)
-        .sort((a, b) => ((parseInt(a.prep_time) || 0) + (parseInt(a.cook_time) || 0)) - ((parseInt(b.prep_time) || 0) + (parseInt(b.cook_time) || 0)));
-
+      // Hazır Kategoriler
       const presets = [
         {
           id: 'preset-aksam',
           title: 'Türk Akşam Yemeği',
-          description: 'Çorba, et yemeği, pilav, salata ve sebze — klasik Türk sofrası.',
-          recipes: aksam.filter(r => r),
+          description: 'Çorba, et yemeği, pilav ve salata — klasik bir Türk sofrası.',
+          recipes: [
+            ...pickRandom(byKeywords(['çorba', 'corba']), 1),
+            ...pickRandom(byKeywords(['et yemek', 'tavuk', 'kıymalı']), 1),
+            ...pickRandom(byKeywords(['pilav', 'makarna']), 1),
+            ...pickRandom(byKeywords(['salata', 'meze', 'turşu']), 1),
+          ],
+        },
+        {
+          id: 'preset-breakfast',
+          title: 'Hafta Sonu Kahvaltısı',
+          description: 'Peynir tabağı, sıcak atıştırmalıklar ve enfes yumurtalarla keyif dolu bir sabah.',
+          recipes: [
+            ...pickRandom(byKeywords(['kahvaltı', 'yumurta', 'menemen', 'omlet', 'pancake', 'krep', 'sucuk']), 5),
+          ],
+        },
+        {
+          id: 'preset-diet',
+          title: 'Diyet & Fit Menü',
+          description: 'Hafif, düşük kalorili ve besleyici tariflerle gününüzü zinde geçirin.',
+          recipes: [
+            ...pickRandom(byKeywords(['salata', 'diyet', 'fitness', 'smoothie', 'ızgara', 'fit']), 4),
+          ],
+        },
+        {
+          id: 'preset-vegetarian',
+          title: 'Vejetaryen Lezzetler',
+          description: 'Et içermeyen ama lezzet dolu sebze ve bakliyat tabakları.',
+          recipes: [
+            ...pickRandom(byKeywords(['vejetaryen', 'sebze', 'zeytinyağlı', 'bakliyat', 'falafel', 'mercimek', 'nohut']), 4),
+          ],
+        },
+        {
+          id: 'preset-kids',
+          title: 'Çocuklar İçin Menü',
+          description: 'Miniklerin severek yiyeceği, besleyici ve eğlenceli tarifler.',
+          recipes: [
+            ...pickRandom(byKeywords(['çocuk', 'köfte', 'makarna', 'püre', 'patates', 'ev yapımı', 'atıştırmalık']), 5),
+          ],
+        },
+        {
+          id: 'preset-tea-time',
+          title: 'Çay Saati İkramları',
+          description: 'Kekler, börekler ve taze demlenmiş çay eşliğinde keyifli sohbetler.',
+          recipes: [
+            ...pickRandom(byKeywords(['kek', 'kurabiye', 'börek', 'kısır', 'poğaça', 'tart', 'pasta']), 5),
+          ],
+        },
+        {
+          id: 'preset-seafood',
+          title: 'Deniz Ürünleri Akşamı',
+          description: 'Taze balıklar, hafif mezeler ve deniz esintili bir sofra.',
+          recipes: [
+            ...pickRandom(byKeywords(['balık', 'deniz', 'kalamar', 'karides', 'somon', 'çipura', 'levrek']), 4),
+          ],
         },
         {
           id: 'preset-guest',
           title: 'Misafir Menüsü',
-          description: 'Çorba, ana yemek, makarna, salata, tatlı ve içecek — misafirie layık.',
-          recipes: misafir.filter(r => r),
+          description: 'Ana yemekten tatlıya, misafirlerinize şölen yaşatacak özel bir seçki.',
+          recipes: [
+            ...pickRandom(byKeywords(['ana yemek', 'antrikot', 'kuzu', 'fırın', 'rost']), 1),
+            ...pickRandom(byKeywords(['ara sıcak', 'paçanga', 'mücver']), 1),
+            ...pickRandom(byKeywords(['tatlı', 'pasta', 'şerbetli']), 1),
+            ...pickRandom(byKeywords(['içecek', 'limonata', 'şerbet']), 1),
+          ],
         },
         {
           id: 'preset-quick',
           title: 'Hızlı Akşam Menüsü',
-          description: 'Az zamanda çok lezzet: en hızlı pişen tariflerden seçki.',
-          recipes: pickRandom(quickAll.slice(0, 20), 6),
+          description: 'Az zamanda çok lezzet: 30 dakikada sofraya koyabileceğiniz tarifler.',
+          recipes: pickRandom(safe.filter(r => (parseInt(r.prep_time) || 0) + (parseInt(r.cook_time) || 0) <= 30), 4),
         },
-      ].filter((m) => (m.recipes?.length || 0) > 0);
+      ];
 
-      return presets;
+      return presets.filter((m) => (m.recipes?.length || 0) > 0);
     };
 
     const fetchForPresets = async () => {
       setLoadingPresets(true);
       setPresetsError('');
       try {
-        const res = await axios.get(`${apiBase}/api/recipes?limit=200`);
-        const nextPresets = buildPresets(res.data || []);
-        if (!cancelled) setPresetMenus(nextPresets);
-      } catch {
-        if (!cancelled) setPresetsError('Hazır menüler yüklenemedi. Sunucu çalışıyor mu?');
+        // First try to fetch from the new menus API
+        const menuRes = await axios.get(`${apiBase}/api/menus?is_preset=true`);
+        if (menuRes.data && menuRes.data.length > 0) {
+          if (!cancelled) setPresetMenus(menuRes.data);
+        } else {
+          // Fallback to local generation if no menus in DB
+          const recipeRes = await axios.get(`${apiBase}/api/recipes?limit=200`);
+          const nextPresets = buildPresets(recipeRes.data || []);
+          if (!cancelled) setPresetMenus(nextPresets);
+        }
+      } catch (err) {
+        console.error('Error fetching presets:', err);
+        // Fallback on error
+        try {
+          const recipeRes = await axios.get(`${apiBase}/api/recipes?limit=200`);
+          const nextPresets = buildPresets(recipeRes.data || []);
+          if (!cancelled) setPresetMenus(nextPresets);
+        } catch {
+          if (!cancelled) setPresetsError('Hazır menüler yüklenemedi. Sunucu çalışıyor mu?');
+        }
       } finally {
         if (!cancelled) setLoadingPresets(false);
       }
@@ -326,8 +387,8 @@ const Menus = () => {
             <h2 className="text-2xl md:text-3xl font-black text-chefie-text flex items-center gap-3">
               Hazır Menüler <Sparkles className="text-chefie-yellow" />
             </h2>
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-chefie-card rounded-full border border-chefie-border text-[10px] font-black tracking-widest text-chefie-secondary">
-              <LayoutGrid className="w-3.5 h-3.5 text-chefie-yellow" /> SİTEDEN SEÇİLDİ
+            <div className="hidden md:flex items-center gap-2.5 px-5 py-2.5 bg-white/40 backdrop-blur-md rounded-2xl border border-white/20 text-[10px] font-black tracking-[0.2em] text-chefie-secondary shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-chefie-yellow animate-pulse" /> SİTEDEN SEÇİLDİ
             </div>
           </div>
 
@@ -347,25 +408,42 @@ const Menus = () => {
                 const cover = m.recipes?.find((r) => r.image_url)?.image_url;
                 return (
                   <div key={m.id} className="bg-chefie-card rounded-[2.5rem] border border-chefie-border shadow-md overflow-hidden group cursor-pointer" onClick={() => setOpenMenu(m)}>
-                    <div className="relative h-40">
+                    <div className="relative h-48">
                       {cover ? (
                         <img
                           src={getImageUrl(cover)}
                           alt={m.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                         />
                       ) : (
-                        <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                          <Utensils className="w-10 h-10 text-chefie-yellow/30" />
-                        </div>
+                        <img
+                          src="/images/menu-placeholder.jpg"
+                          alt={m.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                        />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-chefie-dark/70 via-chefie-dark/10 to-transparent"></div>
-                      <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between gap-4">
-                        <div>
-                          <div className="text-white/80 text-[10px] font-black tracking-widest uppercase">HAZIR MENÜ</div>
-                          <h3 className="text-2xl font-black text-white leading-tight">{m.title}</h3>
+                      
+                      {/* Richer Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                      
+                      <div className="absolute top-4 left-4">
+                        <div className="px-3 py-1.5 bg-chefie-yellow/90 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white shadow-lg border border-white/20 flex items-center gap-1.5">
+                          <Sparkles className="w-3 h-3" />
+                          HAZIR MENÜ
                         </div>
-                        <div className="px-4 py-2 bg-chefie-card/90 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-widest text-chefie-text shadow-xl border border-chefie-border">
+                      </div>
+
+                      <div className="absolute bottom-6 left-6 right-6">
+                        <div className="flex flex-col gap-1">
+                          <div className="text-white/60 text-[10px] font-black tracking-[0.2em] uppercase">
+                             SİTEDEN SEÇİLDİ • {m.author_name || 'Tarifo'}
+                          </div>
+                          <h3 className="text-3xl font-black text-white leading-tight tracking-tight drop-shadow-md">{m.title}</h3>
+                        </div>
+                      </div>
+                      
+                      <div className="absolute top-4 right-4">
+                        <div className="px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20 shadow-xl">
                           {(m.recipes?.length || 0)} Tarif
                         </div>
                       </div>
@@ -376,41 +454,35 @@ const Menus = () => {
                         {m.description || 'Siteden seçilmiş tariflerle hazırlanmış hazır menü.'}
                       </p>
 
-                      <div className="mt-5 grid grid-cols-3 gap-3">
+                      <div className="mt-6 grid grid-cols-3 gap-4">
                         {(m.recipes || []).slice(0, 3).map((r) => (
-                          <div
-                            key={r.id}
-                            className="group/thumb relative rounded-2xl overflow-hidden border border-chefie-border shadow-sm text-left bg-chefie-cream"
-                          >
-                            <div className="h-16 bg-gray-50">
-                              {r.image_url ? (
-                                <img
-                                  src={getImageUrl(r.image_url)}
-                                  alt={r.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                                  <Utensils className="w-5 h-5 text-chefie-yellow/30" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="p-2.5">
-                              <div className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50 line-clamp-1">
-                                {r.category_name || 'GENEL'}
-                              </div>
-                              <div className="text-[11px] font-black text-chefie-text line-clamp-1 mt-1">{r.title}</div>
-                            </div>
-                          </div>
+                           <div key={r.id} className="group/recipe relative">
+                             <div className="aspect-square rounded-2xl overflow-hidden border border-chefie-border shadow-sm bg-chefie-cream group-hover/recipe:border-chefie-yellow/50 transition-colors">
+                               {r.image_url ? (
+                                 <img
+                                   src={getImageUrl(r.image_url)}
+                                   alt={r.title}
+                                   className="w-full h-full object-cover group-hover/recipe:scale-110 transition-transform duration-700"
+                                 />
+                               ) : (
+                                 <div className="w-full h-full flex items-center justify-center bg-chefie-cream">
+                                   <Utensils className="w-5 h-5 text-chefie-yellow/20" />
+                                 </div>
+                               )}
+                             </div>
+                             <div className="mt-2 text-center">
+                               <div className="text-[10px] font-black text-chefie-text line-clamp-1 group-hover/recipe:text-chefie-yellow transition-colors">{r.title}</div>
+                             </div>
+                           </div>
                         ))}
                       </div>
 
                       <button
                         onClick={(e) => { e.stopPropagation(); addPresetToMyMenus(m); }}
-                        className="mt-6 w-full group/btn inline-flex items-center justify-center gap-3 py-4 bg-chefie-cream text-chefie-text font-black text-[11px] tracking-widest rounded-[1.5rem] hover:bg-chefie-yellow hover:text-white transition-all duration-500 shadow-sm border border-chefie-border"
+                        className="mt-8 w-full group/btn inline-flex items-center justify-center gap-4 py-4.5 bg-chefie-text text-white font-black text-[12px] tracking-[0.1em] rounded-2xl hover:bg-chefie-yellow transition-all duration-300 shadow-xl"
                       >
                         MENÜYÜ KOPYALA
-                        <div className="w-6 h-6 bg-chefie-yellow rounded-lg flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
+                        <div className="w-6 h-6 bg-white/10 rounded-lg flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
                           <ArrowRight className="w-3 h-3 text-white" />
                         </div>
                       </button>
@@ -450,27 +522,42 @@ const Menus = () => {
                   transition={{ delay: idx * 0.05 }}
                   className="bg-chefie-card rounded-[2.5rem] border border-chefie-border shadow-md overflow-hidden group"
                 >
-                  <div className="relative h-40 cursor-pointer" onClick={() => setOpenMenu(m)}>
+                  <div className="relative h-48 cursor-pointer" onClick={() => setOpenMenu(m)}>
                     {cover ? (
                       <img
                         src={getImageUrl(cover)}
                         alt={m.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                       />
                     ) : (
-                      <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
-                        <Utensils className="w-10 h-10 text-chefie-yellow/30" />
-                      </div>
+                      <img
+                        src="/images/menu-placeholder.jpg"
+                        alt={m.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                      />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-chefie-dark/70 via-chefie-dark/10 to-transparent"></div>
-                    <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between gap-4">
-                      <div>
-                        <div className="text-white/80 text-[10px] font-black tracking-widest uppercase">
+                    
+                    {/* Richer Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                    
+                    <div className="absolute top-4 left-4">
+                      <div className="px-3 py-1.5 bg-chefie-card/90 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-chefie-text shadow-lg border border-chefie-border flex items-center gap-1.5">
+                        <Star className="w-3 h-3 text-chefie-yellow" />
+                        KİŞİSEL MENÜ
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-6 left-6 right-6">
+                      <div className="flex flex-col gap-1">
+                        <div className="text-white/60 text-[10px] font-black tracking-[0.2em] uppercase">
                           {new Date(m.createdAt).toLocaleDateString('tr-TR')}
                         </div>
-                        <h3 className="text-2xl font-black text-white leading-tight">{m.title}</h3>
+                        <h3 className="text-3xl font-black text-white leading-tight tracking-tight drop-shadow-md">{m.title}</h3>
                       </div>
-                      <div className="px-4 py-2 bg-chefie-card/90 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-widest text-chefie-text shadow-xl border border-chefie-border">
+                    </div>
+                    
+                    <div className="absolute top-4 right-4">
+                      <div className="px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20 shadow-xl">
                         {(m.recipes?.length || 0)} Tarif
                       </div>
                     </div>
@@ -498,7 +585,7 @@ const Menus = () => {
                           {m.copiedFrom ? 'Kopyalayan' : 'Menüyü Oluşturan'}
                         </span>
                         <span className="text-xs font-bold text-chefie-text">
-                          {m.createdBy?.full_name || m.createdBy?.username || 'Konuk Kullanıcı'}
+                          {m.author_name || m.createdBy?.full_name || m.createdBy?.username || 'Konuk Kullanıcı'}
                         </span>
                         {m.copiedFrom && (
                           <span className="text-[10px] text-chefie-secondary/60 font-medium">Kaynak: {m.copiedFrom}</span>
@@ -510,19 +597,19 @@ const Menus = () => {
                       <p className="text-chefie-secondary font-medium leading-relaxed line-clamp-2 mb-4">{m.description}</p>
                     )}
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="mt-6 grid grid-cols-3 gap-4">
                       {(m.recipes || []).slice(0, 3).map((r) => (
                         <div
                           key={r.id}
                           onClick={() => navigate(`/recipes/${r.id}`)}
-                          className="group/thumb relative rounded-2xl overflow-hidden border border-chefie-border shadow-sm text-left bg-chefie-cream cursor-pointer"
+                          className="group/recipe relative cursor-pointer"
                         >
-                          <div className="h-16 bg-gray-50">
+                          <div className="aspect-square rounded-2xl overflow-hidden border border-chefie-border shadow-sm bg-chefie-cream group-hover/recipe:border-chefie-yellow/50 transition-colors">
                             {r.image_url ? (
                               <img
                                 src={getImageUrl(r.image_url)}
                                 alt={r.title}
-                                className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700"
+                                className="w-full h-full object-cover group-hover/recipe:scale-110 transition-transform duration-700"
                               />
                             ) : (
                               <div className="w-full h-full bg-chefie-cream flex items-center justify-center">
@@ -530,30 +617,27 @@ const Menus = () => {
                               </div>
                             )}
                           </div>
-                          <div className="p-2.5">
-                            <div className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50 line-clamp-1">
-                              {r.category_name || 'GENEL'}
-                            </div>
-                            <div className="text-[11px] font-black text-chefie-text line-clamp-1 mt-1">{r.title}</div>
+                          <div className="mt-2 text-center">
+                            <div className="text-[10px] font-black text-chefie-text line-clamp-1 group-hover/recipe:text-chefie-yellow transition-colors">{r.title}</div>
                           </div>
                         </div>
                       ))}
                       {Math.max(0, (m.recipes?.length || 0) - 3) > 0 && (
-                        <div className="rounded-2xl border border-chefie-border bg-chefie-cream flex items-center justify-center">
+                        <div className="aspect-square rounded-2xl border border-chefie-border bg-chefie-cream flex items-center justify-center shadow-sm">
                           <div className="text-center">
-                            <div className="text-2xl font-black text-chefie-text">
+                            <div className="text-xl font-black text-chefie-text">
                               +{Math.max(0, (m.recipes?.length || 0) - 3)}
                             </div>
-                            <div className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50">Daha</div>
+                            <div className="text-[8px] font-black tracking-widest uppercase text-chefie-secondary/50">Daha</div>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-6 flex items-center gap-3">
+                    <div className="mt-8 flex items-center gap-4">
                       <button
                         onClick={() => removeMenu(m.id)}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-red-50 text-red-500 font-black text-[11px] tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-red-50 text-red-500 font-black text-[12px] tracking-widest hover:bg-red-500 hover:text-white transition-all duration-300"
                         title="Menüyü sil"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -562,10 +646,10 @@ const Menus = () => {
 
                       <button
                         onClick={() => setOpenMenu(m)}
-                        className="ml-auto group/btn inline-flex items-center justify-center gap-3 px-6 py-3 rounded-2xl bg-chefie-cream text-chefie-text font-black text-[11px] tracking-widest hover:bg-chefie-yellow hover:text-white transition-all border border-chefie-border shadow-sm"
+                        className="ml-auto group/btn inline-flex items-center justify-center gap-4 px-8 py-4 rounded-2xl bg-chefie-text text-white font-black text-[12px] tracking-[0.1em] hover:bg-chefie-yellow transition-all duration-300 shadow-xl"
                       >
                         MENÜYÜ AÇ
-                        <div className="w-6 h-6 bg-chefie-yellow rounded-lg flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
+                        <div className="w-6 h-6 bg-white/10 rounded-lg flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
                           <ArrowRight className="w-3 h-3 text-white" />
                         </div>
                       </button>
@@ -593,10 +677,10 @@ const Menus = () => {
               transition={{ duration: 0.25 }}
               className="w-full max-w-3xl max-h-[90vh] bg-white dark:bg-chefie-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-white dark:border-chefie-border flex flex-col"
             >
-              <div className="p-6 md:p-8 border-b border-gray-50 dark:border-chefie-border flex items-center justify-between gap-4 flex-shrink-0">
+              <div className="p-8 md:p-10 border-b border-gray-50 dark:border-chefie-border flex items-center justify-between gap-6 flex-shrink-0 bg-chefie-cream/30">
                 <div className="min-w-0">
-                  <div className="text-[10px] font-black tracking-widest uppercase text-gray-400 dark:text-gray-500">Menü</div>
-                  <h2 className="text-2xl md:text-3xl font-black text-chefie-text line-clamp-1">{openMenu.title}</h2>
+                  <div className="text-[10px] font-black tracking-[0.2em] uppercase text-chefie-yellow mb-1">MENÜ DETAYLARI</div>
+                  <h2 className="text-3xl md:text-4xl font-black text-chefie-text leading-tight tracking-tight line-clamp-1">{openMenu.title}</h2>
                 </div>
                 <button
                   onClick={closeMenu}
@@ -626,26 +710,28 @@ const Menus = () => {
                       )}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50">Menüyü Ekleyen</span>
+                      <span className="text-[10px] font-black tracking-widest uppercase text-chefie-secondary/50">YAYINLAYAN</span>
                       <span className="text-sm font-bold text-chefie-text">
-                        {openMenu.createdBy?.full_name || openMenu.createdBy?.username || 'Bu cihazdaki kullanici'}
+                        {openMenu.author_name || openMenu.createdBy?.full_name || openMenu.createdBy?.username || 'Tarifo'}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="px-4 py-2 bg-chefie-cream rounded-2xl border border-chefie-border text-[10px] font-black tracking-widest text-chefie-secondary uppercase">
-                      {(openMenu.recipes?.length || 0)} Tarif
+                    <div className="px-4 py-2 bg-chefie-yellow text-white rounded-xl text-[10px] font-black tracking-widest uppercase shadow-md">
+                      {(openMenu.recipes?.length || 0)} TARİF
                     </div>
-                    <div className="px-4 py-2 bg-chefie-card rounded-2xl border border-chefie-border text-[10px] font-black tracking-widest text-chefie-secondary uppercase">
-                      {openMenu.createdAt ? new Date(openMenu.createdAt).toLocaleDateString('tr-TR') : ''}
-                    </div>
+                    {openMenu.createdAt && (
+                      <div className="px-4 py-2 bg-chefie-cream rounded-xl border border-chefie-border text-[10px] font-black tracking-widest text-chefie-secondary uppercase">
+                        {new Date(openMenu.createdAt).toLocaleDateString('tr-TR')}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {openMenu.description ? (
-                  <div className="mb-6 p-5 rounded-[2rem] bg-chefie-cream border border-chefie-border text-chefie-secondary font-medium leading-relaxed">
-                    {openMenu.description}
+                  <div className="mb-8 p-6 rounded-[2rem] bg-chefie-cream border border-chefie-border text-chefie-secondary font-medium leading-relaxed italic">
+                    "{openMenu.description}"
                   </div>
                 ) : null}
 
@@ -679,10 +765,10 @@ const Menus = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 border-t border-chefie-border flex items-center gap-4 flex-shrink-0">
+              <div className="p-8 md:p-10 border-t border-chefie-border flex items-center gap-4 flex-shrink-0 bg-chefie-cream/30">
                 <button
                   onClick={closeMenu}
-                  className="w-full sm:w-auto px-8 py-4 bg-chefie-cream text-chefie-secondary font-black text-xs tracking-widest rounded-2xl hover:bg-chefie-yellow hover:text-white transition-all border border-chefie-border shadow-sm"
+                  className="px-8 py-4 bg-white dark:bg-chefie-card text-chefie-secondary font-black text-xs tracking-widest rounded-2xl hover:bg-gray-50 transition-all border border-chefie-border shadow-sm uppercase"
                 >
                   KAPAT
                 </button>
@@ -694,7 +780,7 @@ const Menus = () => {
                     setDescription(openMenu.description || '');
                     setSelectedRecipes(openMenu.recipes || []);
                   }}
-                  className="w-full sm:w-auto ml-auto px-10 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 dark:shadow-none hover:scale-105 active:scale-95 transition-all"
+                  className="ml-auto px-10 py-4 bg-chefie-yellow text-white font-black text-xs tracking-widest rounded-2xl shadow-xl shadow-yellow-100 dark:shadow-none hover:scale-105 active:scale-95 transition-all uppercase"
                 >
                   DÜZENLE (KOPYA)
                 </button>

@@ -38,8 +38,20 @@ import {
     Info,
     Save,
     Bell,
-    Tag
+    Tag,
+    AlertCircle,
+    Send,
+    PieChart,
+    CheckCircle,
+    XCircle,
+    ChevronRight,
+    Check,
+    Flame,
+    Utensils,
+    ClipboardList,
+    BookOpen
 } from 'lucide-react';
+import ChefLoader from '../../components/ChefLoader';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '../../components/NotificationBell';
@@ -74,6 +86,8 @@ const COUNTRY_LIST = [
 
 const getCountryInfo = (code) => COUNTRY_LIST.find(c => c.code === code) || null;
 
+import Logo from '../../components/UI/Logo';
+
 const Dashboard = () => {
     const [recipes, setRecipes] = useState([]);
     const [favorites, setFavorites] = useState([]);
@@ -91,6 +105,7 @@ const Dashboard = () => {
     const LIMIT = 50;
 
     const [users, setUsers] = useState([]);
+    const [userCount, setUserCount] = useState(0);
     const [categories, setCategories] = useState([]);
     const [stats, setStats] = useState(null);
     const [profileData, setProfileData] = useState({ fullName: user.full_name || '', profileImage: null, country: user.country || '' });
@@ -135,6 +150,7 @@ const Dashboard = () => {
     const [templateMessage, setTemplateMessage] = useState({ type: '', text: '' });
     const [feedback, setFeedback] = useState([]);
     const [notificationHistory, setNotificationHistory] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [notifForm, setNotifForm] = useState({
         target: 'all',
         userIds: [],
@@ -143,7 +159,27 @@ const Dashboard = () => {
     });
     const [notifUserSearch, setNotifUserSearch] = useState('');
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [viewingNotif, setViewingNotif] = useState(null);
     const [confirmDeleteFeedbackId, setConfirmDeleteFeedbackId] = useState(null);
+    const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState(null);
+
+    // Menus Management State
+    const [menus, setMenus] = useState([]);
+    const [isMenusLoading, setIsMenusLoading] = useState(false);
+    const [menuForm, setMenuForm] = useState({ id: null, title: '', description: '', image_url: '', is_preset: true });
+    const [selectedMenuRecipes, setSelectedMenuRecipes] = useState([]);
+    const [menuRecipeSearch, setMenuRecipeSearch] = useState('');
+    const [menuSearchRecipes, setMenuSearchRecipes] = useState([]);
+    const [isSavingMenu, setIsSavingMenu] = useState(false);
+    const [menuMessage, setMenuMessage] = useState({ type: '', text: '' });
+    const [confirmDeleteMenuId, setConfirmDeleteMenuId] = useState(null);
+
+    // Comments Management State
+    const [comments, setComments] = useState([]);
+    const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+    const [editingComment, setEditingComment] = useState(null);
+    const [commentEditContent, setCommentEditContent] = useState('');
+    const [commentMessage, setCommentMessage] = useState({ type: '', text: '' });
 
     useEffect(() => {
         if (!token) {
@@ -152,21 +188,31 @@ const Dashboard = () => {
         }
 
         const initDashboard = async () => {
-            const basicFetches = [
-                fetchTotalCount(),
-                fetchFavorites(),
-                fetchCategories(),
-                fetchStats()
-            ];
+            setIsLoading(true);
+            try {
+                const basicFetches = [
+                    fetchTotalCount(),
+                    fetchUserCount(),
+                    fetchFavorites(),
+                    fetchCategories(),
+                    fetchStats()
+                ];
 
-            const adminFetches = user.role === 'admin' ? [
-                fetchUsers(),
-                fetchActivity(),
-                fetchRecommendation(),
-                fetchNotificationHistory()
-            ] : [];
+                const adminFetches = user.role === 'admin' ? [
+                    fetchUsers(),
+                    fetchActivity(),
+                    fetchRecommendation(),
+                    fetchNotificationHistory(),
+                    fetchAdminComments(),
+                    fetchAdminMenus()
+                ] : [];
 
-            await Promise.all([...basicFetches, ...adminFetches]);
+                await Promise.all([...basicFetches, ...adminFetches]);
+            } catch (err) {
+                console.error("Dashboard init error:", err);
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         initDashboard();
@@ -186,12 +232,22 @@ const Dashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback', 'send_notification'].includes(tab)) {
+        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback', 'send_notification', 'comments'].includes(tab)) {
             setActiveTab(tab);
         }
         // Always fetch template if target tab is send_notification or activeTab is changed to it
         if ((tab === 'send_notification' || activeTab === 'send_notification') && user.role === 'admin') {
             fetchWelcomeTemplate();
+        }
+        
+        // Fetch comments if current tab is comments
+        if (tab === 'comments' || activeTab === 'comments') {
+            fetchAdminComments();
+        }
+        
+        // Fetch menus if current tab is menus
+        if (tab === 'menus' || activeTab === 'menus') {
+            fetchAdminMenus();
         }
     }, [location.search, activeTab, user.role]);
 
@@ -240,8 +296,20 @@ const Dashboard = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(res.data);
+            setUserCount(res.data.length);
         } catch (err) {
             console.error('Error fetching users:', err);
+        }
+    };
+
+    const fetchUserCount = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/api/auth/count`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUserCount(res.data.count);
+        } catch (err) {
+            console.error('Error fetching user count:', err);
         }
     };
 
@@ -273,6 +341,24 @@ const Dashboard = () => {
             setCategories(res.data);
         } catch (err) {
             console.error('Error fetching categories:', err);
+        }
+    };
+
+    const fetchAdminComments = async () => {
+        setIsCommentsLoading(true);
+        try {
+            const endpoint = user.role === 'admin' 
+                ? `${API_BASE}/api/recipes/admin/comments/all?limit=100`
+                : `${API_BASE}/api/recipes/users/${user.id}/comments`;
+            
+            const res = await axios.get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setComments(res.data);
+        } catch (err) {
+            console.error('Error fetching comments:', err);
+        } finally {
+            setIsCommentsLoading(false);
         }
     };
 
@@ -377,6 +463,116 @@ const Dashboard = () => {
         } catch (err) {
             console.error('Error deleting feedback:', err);
             alert('Silinirken bir hata oluştu.');
+        }
+    };
+
+    const fetchAdminMenus = async () => {
+        setIsMenusLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE}/api/menus?all=true`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMenus(res.data);
+        } catch (err) {
+            console.error('Error fetching menus:', err);
+        } finally {
+            setIsMenusLoading(false);
+        }
+    };
+
+    const handleSaveMenu = async (e) => {
+        if (e) e.preventDefault();
+        setIsSavingMenu(true);
+        setMenuMessage({ type: '', text: '' });
+        try {
+            const payload = {
+                ...menuForm,
+                recipeIds: selectedMenuRecipes.map(r => r.id)
+            };
+
+            if (menuForm.id) {
+                await axios.put(`${API_BASE}/api/menus/${menuForm.id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+                setMenuMessage({ type: 'success', text: 'Menü güncellendi.' });
+            } else {
+                await axios.post(`${API_BASE}/api/menus`, payload, { headers: { Authorization: `Bearer ${token}` } });
+                setMenuMessage({ type: 'success', text: 'Yeni menü oluşturuldu.' });
+            }
+            fetchAdminMenus();
+            setMenuForm({ id: null, title: '', description: '', image_url: '', is_preset: true });
+            setSelectedMenuRecipes([]);
+        } catch (err) {
+            console.error('Error saving menu:', err);
+            setMenuMessage({ type: 'error', text: 'Menü kaydedilirken bir hata oluştu.' });
+        } finally {
+            setIsSavingMenu(false);
+            setTimeout(() => setMenuMessage({ type: '', text: '' }), 3000);
+        }
+    };
+
+    const handleApproveMenu = async (id) => {
+        try {
+            await axios.put(`${API_BASE}/api/menus/${id}`, { is_approved: true }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchAdminMenus();
+        } catch (err) {
+            console.error('Menü onaylanamadı:', err);
+            alert('Onaylama işlemi sırasında bir hata oluştu.');
+        }
+    };
+
+    const handleDeleteMenuConfirmed = async (id) => {
+        try {
+            await axios.delete(`${API_BASE}/api/menus/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            fetchAdminMenus();
+            setConfirmDeleteMenuId(null);
+        } catch (err) {
+            console.error('Menü silinemedi:', err);
+            alert('Menü silinirken bir hata oluştu');
+        }
+    };
+
+    const searchRecipesForMenu = async (query) => {
+        if (!query.trim()) {
+            setMenuSearchRecipes([]);
+            return;
+        }
+        try {
+            const res = await axios.get(`${API_BASE}/api/recipes?title=${query}&limit=5`);
+            setMenuSearchRecipes(res.data);
+        } catch (err) {
+            console.error('Search recipes error:', err);
+        }
+    };
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (activeTab === 'menus') searchRecipesForMenu(menuRecipeSearch);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [menuRecipeSearch, activeTab]);
+
+    const toggleRecipeToMenu = (recipe) => {
+        setSelectedMenuRecipes(prev => {
+            const exists = prev.find(r => r.id === recipe.id);
+            if (exists) return prev.filter(r => r.id !== recipe.id);
+            return [...prev, recipe];
+        });
+    };
+
+    const handleSeedMenus = async () => {
+        setIsMenusLoading(true);
+        try {
+            const res = await axios.post(`${API_BASE}/api/menus/seed`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert(res.data.message);
+            fetchAdminMenus();
+        } catch (err) {
+            console.error('Seed error:', err);
+            alert('Menüler içeri aktarılırken bir hata oluştu.');
+        } finally {
+            setIsMenusLoading(false);
         }
     };
 
@@ -611,6 +807,42 @@ const Dashboard = () => {
         }
     };
 
+    const handleDeleteComment = async (id) => {
+        try {
+            await axios.delete(`${API_BASE}/api/recipes/comments/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setComments(prev => prev.filter(c => c.id !== id));
+            setConfirmDeleteCommentId(null);
+        } catch (err) {
+            console.error('Error deleting comment:', err);
+            alert('Yorum silinirken bir hata oluştu.');
+        }
+    };
+
+    const openEditCommentModal = (comment) => {
+        setEditingComment(comment);
+        setCommentEditContent(comment.content);
+        setCommentMessage({ type: '', text: '' });
+    };
+
+    const handleUpdateComment = async (e) => {
+        e.preventDefault();
+        if (!commentEditContent.trim()) return;
+
+        try {
+            await axios.put(`${API_BASE}/api/recipes/comments/${editingComment.id}`, { content: commentEditContent }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setComments(prev => prev.map(c => c.id === editingComment.id ? { ...c, content: commentEditContent } : c));
+            setCommentMessage({ type: 'success', text: 'Yorum güncellendi!' });
+            setTimeout(() => setEditingComment(null), 1500);
+        } catch (err) {
+            console.error('Error updating comment:', err);
+            setCommentMessage({ type: 'error', text: 'Güncelleme başarısız.' });
+        }
+    };
+
     const filteredRecipes = (activeTab === 'all' ? recipes : favorites).filter(recipe =>
         recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -619,6 +851,13 @@ const Dashboard = () => {
         u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (u.full_name && u.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-chefie-cream">
+                <ChefLoader text="Yönetici Paneli Hazırlanıyor..." />
+            </div>
+        );
+    }
 
     const renderTableContent = () => {
         if (activeTab === 'users') {
@@ -655,10 +894,10 @@ const Dashboard = () => {
                                 </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-400">
-                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => openEditUserModal(u)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></button>
+                                <div className="flex items-center justify-end gap-2">
+                                    <button onClick={() => openEditUserModal(u)} className="p-2 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></button>
                                     {u.role !== 'admin' && (
-                                        <button onClick={() => handleDeleteUser(u.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                        <button onClick={() => handleDeleteUser(u.id)} className="p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
                                     )}
                                 </div>
                             </td>
@@ -941,7 +1180,7 @@ const Dashboard = () => {
                                             <div key={recipe.id} className="group p-4 bg-chefie-cream/50 hover:bg-chefie-card border border-chefie-border hover:border-[#10B981] rounded-2xl transition-all duration-300 flex items-center gap-4">
                                                 <div className="w-16 h-16 rounded-xl overflow-hidden border border-chefie-border flex-shrink-0">
                                                     <img
-                                                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                                        src={recipe.image_url ? (recipe.image_url.startsWith('data:') || recipe.image_url.startsWith('http') || recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
                                                         alt={recipe.title}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -1344,7 +1583,8 @@ const Dashboard = () => {
                                         notificationHistory.map((item) => (
                                             <div 
                                                 key={item.id} 
-                                                className="bg-chefie-card p-6 rounded-[2rem] border border-chefie-border shadow-md hover:shadow-xl hover:border-chefie-yellow/50 transition-all duration-300 group"
+                                                onClick={() => setViewingNotif(item)}
+                                                className="bg-chefie-card p-6 rounded-[2rem] border border-chefie-border shadow-md hover:shadow-xl hover:border-chefie-yellow/50 transition-all duration-300 group cursor-pointer"
                                             >
                                                 <div className="flex flex-col md:flex-row md:items-center gap-6">
                                                     <div className="flex-1 space-y-3">
@@ -1568,7 +1808,7 @@ const Dashboard = () => {
                         </div>
                         
                         {categoryMessage.text && (
-                            <div className={`mb-5 px-4 py-3 rounded-xl text-sm font-bold ${categoryMessage.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                            <div className={`mb-5 px-4 py-3 rounded-xl text-sm font-bold ${categoryMessage.type === 'success' ? 'bg-green-500/10 text-green-600 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
                                 {categoryMessage.text}
                             </div>
                         )}
@@ -1608,8 +1848,8 @@ const Dashboard = () => {
                     </div>
 
                     {/* Category List */}
-                    <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-hidden">
-                        <table className="w-full">
+                    <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-x-auto">
+                        <table className="w-full min-w-[500px]">
                             <thead className="bg-chefie-cream/50">
                                 <tr>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
@@ -1648,6 +1888,311 @@ const Dashboard = () => {
             );
         }
 
+        if (activeTab === 'menus') {
+            return (
+                <div className="p-4 md:p-8 space-y-8">
+                    {/* Add/Edit Menu Form */}
+                    <div className="bg-chefie-card p-6 rounded-3xl border border-chefie-border shadow-md">
+                        <div className="flex items-center gap-2 mb-6">
+                            <Utensils className="w-5 h-5 text-chefie-yellow" />
+                            <h2 className="text-xl font-bold text-chefie-text">
+                                {menuForm.id ? 'Menüyü Düzenle' : 'Yeni Menü Oluştur'}
+                            </h2>
+                        </div>
+
+                        {menuMessage.text && (
+                            <div className={`mb-5 px-4 py-3 rounded-xl text-sm font-bold ${menuMessage.type === 'success' ? 'bg-green-500/10 text-green-600 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                {menuMessage.text}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSaveMenu} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-chefie-secondary mb-2">Menü Başlığı</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={menuForm.title}
+                                            onChange={(e) => setMenuForm({ ...menuForm, title: e.target.value })}
+                                            placeholder="Hafta Sonu Kahvaltısı"
+                                            className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl outline-none text-chefie-text font-bold"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-chefie-secondary mb-2">Açıklama</label>
+                                        <textarea
+                                            value={menuForm.description}
+                                            onChange={(e) => setMenuForm({ ...menuForm, description: e.target.value })}
+                                            placeholder="Menü hakkında kısa bir bilgi..."
+                                            className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl outline-none text-chefie-text min-h-[100px]"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-3 bg-chefie-cream p-4 rounded-xl border border-chefie-border">
+                                        <input
+                                            type="checkbox"
+                                            id="is_preset"
+                                            checked={menuForm.is_preset}
+                                            onChange={(e) => setMenuForm({ ...menuForm, is_preset: e.target.checked })}
+                                            className="w-5 h-5 accent-chefie-yellow"
+                                        />
+                                        <label htmlFor="is_preset" className="text-sm font-bold text-chefie-text cursor-pointer">
+                                            Hazır Menü Olarak İşaretle (Tüm kullanıcılara görünür)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-chefie-secondary mb-2">Tarif Ekle</label>
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                value={menuRecipeSearch}
+                                                onChange={(e) => setMenuRecipeSearch(e.target.value)}
+                                                placeholder="Tarif ismine göre ara..."
+                                                className="w-full pl-10 pr-4 py-3 bg-chefie-cream border border-chefie-border rounded-xl outline-none"
+                                            />
+                                        </div>
+                                        
+                                        {menuSearchRecipes.length > 0 && (
+                                            <div className="mt-2 bg-white border border-chefie-border rounded-xl shadow-xl overflow-hidden z-20">
+                                                {menuSearchRecipes.map(r => (
+                                                    <button
+                                                        key={r.id}
+                                                        type="button"
+                                                        onClick={() => { toggleRecipeToMenu(r); setMenuRecipeSearch(''); setMenuSearchRecipes([]); }}
+                                                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-chefie-cream transition-colors text-left"
+                                                    >
+                                                        <img src={r.image_url ? (r.image_url.startsWith('http') ? r.image_url : `${API_BASE}${r.image_url}`) : '/default-recipe.png'} className="w-8 h-8 rounded object-cover" alt="" />
+                                                        <span className="text-xs font-bold text-chefie-text">{r.title}</span>
+                                                        <Plus className="w-3 h-3 ml-auto text-chefie-yellow" />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-chefie-secondary uppercase mb-3">Seçili Tarifler ({selectedMenuRecipes.length}/20)</label>
+                                        <div className="space-y-2 max-h-[180px] overflow-y-auto pr-2 scrollbar-thin">
+                                            {selectedMenuRecipes.length > 0 ? (
+                                                selectedMenuRecipes.map(r => (
+                                                    <div key={r.id} className="flex items-center gap-3 bg-chefie-cream p-2 rounded-lg border border-chefie-border">
+                                                        <img src={r.image_url ? (r.image_url.startsWith('http') ? r.image_url : `${API_BASE}${r.image_url}`) : '/default-recipe.png'} className="w-8 h-8 rounded object-cover" alt="" />
+                                                        <span className="text-xs font-bold text-chefie-text truncate flex-1">{r.title}</span>
+                                                        <button type="button" onClick={() => toggleRecipeToMenu(r)} className="p-1 text-red-400 hover:text-red-600 transition-colors">
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-center py-4 text-gray-400 text-xs italic">Henüz tarif seçilmedi</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 pt-4 border-t border-chefie-border">
+                                {menuForm.id && (
+                                    <button
+                                        type="button"
+                                        onClick={() => { setMenuForm({ id: null, title: '', description: '', image_url: '', is_preset: true }); setSelectedMenuRecipes([]); }}
+                                        className="px-8 py-3 rounded-xl font-bold bg-chefie-cream text-chefie-secondary hover:bg-chefie-border border border-chefie-border transition-colors"
+                                    >
+                                        Vazgeç
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={isSavingMenu || !menuForm.title.trim() || selectedMenuRecipes.length === 0}
+                                    className="px-10 py-3 rounded-xl font-bold bg-chefie-yellow text-white hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {isSavingMenu ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    {menuForm.id ? 'Menüyü Güncelle' : 'Menüyü Oluştur'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Menus List */}
+                    <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-x-auto">
+                        <table className="w-full min-w-[600px]">
+                            <thead className="bg-chefie-cream/50">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Menü Başlığı</th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarif Sayısı</th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Yazar</th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Durum</th>
+                                    <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-chefie-border">
+                                {isMenusLoading ? (
+                                    <tr><td colSpan="4" className="py-12"><ChefLoader /></td></tr>
+                                ) : menus.length > 0 ? (
+                                    menus.map(m => (
+                                        <tr key={m.id} className="hover:bg-chefie-cream transition-colors group">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg overflow-hidden border border-chefie-border bg-chefie-cream flex-shrink-0">
+                                                        <img src="/images/menu-placeholder.jpg" className="w-full h-full object-cover" alt="" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-chefie-text">{m.title}</div>
+                                                        <div className="text-[10px] text-chefie-secondary line-clamp-1 max-w-[200px]">{m.description}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="text-sm font-bold border border-chefie-border px-2 py-1 rounded bg-chefie-cream shadow-sm">{m.recipes?.length || 0} Tarif</span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-full bg-chefie-cream flex items-center justify-center text-[10px] font-black border border-chefie-border text-chefie-secondary">
+                                                        {(m.author_name || 'Ş').charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <span className="text-sm font-medium text-chefie-text">{m.author_name || 'Tarifo'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col gap-1">
+                                                    {m.is_preset ? (
+                                                        <span className="inline-flex px-2 py-0.5 rounded-full bg-chefie-yellow/10 text-chefie-yellow border border-chefie-yellow/20 text-[10px] font-black uppercase tracking-wider w-fit">HAZIR MENÜ</span>
+                                                    ) : (
+                                                        <span className="inline-flex px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 border border-gray-200 text-[10px] font-black uppercase tracking-wider w-fit">ÖZEL</span>
+                                                    )}
+                                                    {m.is_approved ? (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-green-500"><CheckCircle className="w-3 h-3" /> Yayında</span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500"><Clock className="w-3 h-3" /> Onay Bekliyor</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                <div className="flex items-center justify-end gap-2 text-gray-400">
+                                                    {!m.is_approved && (
+                                                        <button onClick={() => handleApproveMenu(m.id)} className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors" title="Onayla"><Check className="w-5 h-5" /></button>
+                                                    )}
+                                                    <button onClick={() => { setMenuForm({ ...m }); setSelectedMenuRecipes(m.recipes || []); }} className="p-2 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></button>
+                                                    <button onClick={() => setConfirmDeleteMenuId(m.id)} className="p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="4" className="px-6 py-12 text-center">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="text-gray-400">Henüz menü oluşturulmadı.</div>
+                                                <button 
+                                                    onClick={handleSeedMenus}
+                                                    className="px-6 py-2.5 bg-chefie-yellow/10 text-chefie-yellow border border-chefie-yellow/20 rounded-xl font-bold hover:bg-chefie-yellow/20 transition-all flex items-center gap-2"
+                                                >
+                                                    <Sparkles className="w-4 h-4" />
+                                                    Hazır Menüleri Veritabanına Yükle
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Delete Confirmation Modal for Menu */}
+                    <AnimatePresence>
+                        {confirmDeleteMenuId && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+                                    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6"><Trash2 className="w-8 h-8" /></div>
+                                    <h3 className="text-xl font-bold text-center mb-2">Menü Silinsin mi?</h3>
+                                    <p className="text-gray-500 text-center mb-8">Bu işlem geri alınamaz.</p>
+                                    <div className="flex gap-4">
+                                        <button onClick={() => setConfirmDeleteMenuId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:text-gray-600">İptal</button>
+                                        <button onClick={() => handleDeleteMenuConfirmed(confirmDeleteMenuId)} className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors">Evet, Sil</button>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        }
+
+        if (activeTab === 'comments') {
+            return (
+                <div className="bg-chefie-card rounded-3xl overflow-x-auto">
+                    <table className="w-full min-w-[700px]">
+                        <thead className="bg-chefie-cream/50">
+                            <tr>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Kullanıcı</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Yorum</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarif</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarih</th>
+                                <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-chefie-border">
+                            {comments.length > 0 ? (
+                                comments.map((comment) => (
+                                    <tr key={comment.id} className="hover:bg-chefie-cream/80 transition-colors group">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 bg-chefie-cream">
+                                                    {(comment.profile_image || user.profile_image) ? (
+                                                        <img src={((comment.profile_image || user.profile_image).startsWith('http') || (comment.profile_image || user.profile_image).startsWith('data:')) ? (comment.profile_image || user.profile_image) : `${API_BASE}${comment.profile_image || user.profile_image}`} className="w-full h-full object-cover block" alt="" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-xs uppercase">
+                                                            {(comment.full_name || comment.username || user.full_name || user.username || 'A').charAt(0)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold text-chefie-text truncate max-w-[120px]">
+                                                        {comment.full_name || comment.username || user.full_name || user.username}
+                                                    </span>
+                                                    <span className="text-[10px] text-chefie-secondary">@{comment.username || user.username}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm text-chefie-text line-clamp-2 max-w-md font-medium">
+                                                {comment.content}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <Link to={`/recipes/${comment.recipe_id}`} className="text-xs font-bold text-chefie-secondary hover:text-[#10B981] transition-colors line-clamp-1 max-w-[150px]">
+                                                {comment.recipe_title}
+                                            </Link>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-chefie-secondary font-medium">
+                                            {new Date(comment.created_at).toLocaleDateString('tr-TR')}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-2 text-gray-400">
+                                                <button onClick={() => openEditCommentModal(comment)} className="p-2 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></button>
+                                                <button onClick={() => setConfirmDeleteCommentId(comment.id)} className="p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="px-6 py-12 text-center text-gray-400">
+                                        {isCommentsLoading ? <ChefLoader className="py-8" /> : 'Henüz yorum bulunmuyor.'}
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
         return (
             filteredRecipes.length > 0 ? (
                 filteredRecipes.map((recipe) => (
@@ -1656,7 +2201,7 @@ const Dashboard = () => {
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden bg-chefie-cream border border-chefie-border">
                                     <img
-                                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
+                                        src={recipe.image_url ? (recipe.image_url.startsWith('data:') || recipe.image_url.startsWith('http') || recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
                                         alt={recipe.title}
                                         className="w-full h-full object-cover"
                                     />
@@ -1671,16 +2216,17 @@ const Dashboard = () => {
                             <span className="px-3 py-1 text-xs font-medium bg-blue-500/10 text-blue-500 rounded-full border border-blue-500/20">{recipe.category_name || 'Genel'}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-chefie-secondary">{new Date(recipe.created_at).toLocaleDateString('tr-TR')}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-chefie-secondary"><Clock className="w-4 h-4 inline mr-1" /> {recipe.prep_time || '30 dk'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-chefie-secondary"><Clock className="w-4 h-4 inline mr-1" /> {recipe.prep_time || '15 dk'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-chefie-secondary text-orange-500 font-bold"><Flame className="w-4 h-4 inline mr-1" /> {recipe.cook_time || '30 dk'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                                 {(user.role === 'admin' || recipe.user_id === user.id) && (
                                     <>
-                                        <Link to={`/admin/recipes/edit/${recipe.id}`} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></Link>
+                                        <Link to={`/admin/recipes/edit/${recipe.id}`} className="p-2 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit className="w-5 h-5" /></Link>
                                         {activeTab === 'favorites' ? (
-                                            <button onClick={() => handleRemoveFavorite(recipe.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                            <button onClick={() => handleRemoveFavorite(recipe.id)} className="p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
                                         ) : (
-                                            <button onClick={() => handleDelete(recipe.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                            <button onClick={() => handleDelete(recipe.id)} className="p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-5 h-5" /></button>
                                         )}
                                     </>
                                 )}
@@ -1702,7 +2248,7 @@ const Dashboard = () => {
             {/* Mobile Header Box */}
             <div className="md:hidden flex items-center justify-between p-4 bg-chefie-card border-b border-chefie-border sticky top-0 z-30 shadow-md md:shadow-none">
                 <Link to="/" className="flex items-center gap-2">
-                    <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
+                    <Logo className="text-4xl" />
                 </Link>
                 <div className="flex items-center gap-3">
                     <NotificationBell isMobile={true} />
@@ -1732,31 +2278,36 @@ const Dashboard = () => {
             )}
 
             <aside className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-300 w-64 bg-chefie-card border-r border-chefie-border flex flex-col fixed h-full z-50`}>
-                <div className="flex items-center justify-between p-6">
-                    <Link to="/" className="flex items-center gap-2 hover:bg-gray-50 transition-colors group">
-                        <img src="/bitarif_logo_1.png" alt="Bi Tarif Logo" className="h-14 w-auto object-contain" />
+                <div className="flex items-center justify-center p-6 relative">
+                    <Link to="/" className="flex items-center gap-2 hover:bg-gray-50/10 transition-colors group">
+                        <Logo className="text-4xl" />
                     </Link>
-                    <button className="md:hidden text-gray-500" onClick={() => setIsMobileMenuOpen(false)}>
+                    <button className="md:hidden text-gray-500 absolute right-6" onClick={() => setIsMobileMenuOpen(false)}>
                         <X className="w-6 h-6" />
                     </button>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 uppercase tracking-wide">Menu</div>
-                    <button onClick={() => { setActiveTab('all'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'all' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Folder className="w-5 h-5 mr-3" /> Tüm Tarifler</button>
-                    <button onClick={() => { setActiveTab('favorites'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'favorites' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Heart className="w-5 h-5 mr-3" /> Favorilerim</button>
+                    <button onClick={() => { setActiveTab('all'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'all' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Folder className="w-5 h-5 mr-3" /> Tüm Tarifler</button>
+                    <button onClick={() => { setActiveTab('favorites'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'favorites' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Heart className="w-5 h-5 mr-3" /> Favorilerim</button>
                     {user.role === 'admin' && (
                         <>
-                            <button onClick={() => { setActiveTab('stats'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'stats' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> İstatistikler</button>
-                            <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
-                            <button onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'categories' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Tag className="w-5 h-5 mr-3" /> Kategoriler</button>
-                            <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
-                            <button onClick={() => { setActiveTab('feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'feedback' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><MessageSquare className="w-5 h-5 mr-3" /> Öneriler & Hatalar</button>
-                            <button onClick={() => { setActiveTab('send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'send_notification' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Plus className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
+                            <button onClick={() => { setActiveTab('stats'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'stats' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> İstatistikler</button>
+                            <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
+                            <button onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'categories' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Tag className="w-5 h-5 mr-3" /> Kategoriler</button>
+                            <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
+                            <button onClick={() => { setActiveTab('feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors whitespace-nowrap overflow-hidden ${activeTab === 'feedback' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" /> Öneriler & Hatalar</button>
+                            <button onClick={() => { setActiveTab('comments'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'comments' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><MessageSquare className="w-5 h-5 mr-3" /> Yorum Yönetimi</button>
+                            <button onClick={() => { setActiveTab('menus'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'menus' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Utensils className="w-5 h-5 mr-3" /> Menü Yönetimi</button>
+                            <button onClick={() => { setActiveTab('send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'send_notification' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Send className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
                         </>
                     )}
+                    {user.role !== 'admin' && (
+                        <button onClick={() => { setActiveTab('comments'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'comments' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><MessageSquare className="w-5 h-5 mr-3" /> Yorumlarım</button>
+                    )}
                     <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
-                    <button onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'settings' ? 'bg-[#FFFBF2] text-[#10B981]' : 'text-gray-500 hover:bg-gray-50'}`}><Settings className="w-5 h-5 mr-3" /> Ayarlar</button>
+                    <button onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'settings' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Settings className="w-5 h-5 mr-3" /> Ayarlar</button>
                 </nav>
 
                 <div className="p-4 border-t border-chefie-border">
@@ -1768,7 +2319,7 @@ const Dashboard = () => {
                 <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-10 gap-4">
                     <div className="flex items-center gap-4 w-full max-w-xl">
                         <h1 className="text-2xl font-bold text-chefie-text">
-                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'categories' ? 'Kategoriler' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}
+                            {activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'categories' ? 'Kategoriler' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'menus' ? 'Menü Yönetimi' : activeTab === 'comments' ? (user.role === 'admin' ? 'Yorum Yönetimi' : 'Yorumlarım') : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}
                         </h1>
                         <div className="relative flex-1 hidden md:block ml-8">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -1810,7 +2361,7 @@ const Dashboard = () => {
                     </div>
                     <div className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-md flex items-center gap-4">
                         <div className="w-12 h-12 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center"><Users className="w-6 h-6" /></div>
-                        <div><div className="text-2xl font-bold text-chefie-text">{users.length}</div><div className="text-sm text-chefie-secondary">Kullanıcı</div></div>
+                        <div><div className="text-2xl font-bold text-chefie-text">{userCount}</div><div className="text-sm text-chefie-secondary">Kullanıcı</div></div>
                     </div>
                     <div className="bg-chefie-card p-6 rounded-2xl border border-chefie-border shadow-md flex items-center gap-4">
                         <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center"><Heart className="w-6 h-6" /></div>
@@ -1820,83 +2371,85 @@ const Dashboard = () => {
 
                 <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-md overflow-hidden w-full max-w-[calc(100vw-2rem)] md:max-w-full">
                     <div className="p-4 md:p-6 border-b border-chefie-border flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'categories' ? 'Kategoriler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}</h2>
+                        <h2 className="text-lg font-bold text-chefie-text">{activeTab === 'all' ? 'Tüm Tarifler' : activeTab === 'favorites' ? 'Favorilerim' : activeTab === 'categories' ? 'Kategoriler' : activeTab === 'users' ? 'Kullanıcılar' : activeTab === 'stats' ? 'İstatistikler' : activeTab === 'recommendation' ? 'Şefin Tavsiyesi' : activeTab === 'feedback' ? 'Öneriler & Hatalar' : activeTab === 'comments' ? 'Yorumlar' : activeTab === 'send_notification' ? 'Bildirim Gönder' : 'Ayarlar'}</h2>
                         {activeTab === 'all' && (
                             <Link to="/admin/recipes/new" className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold rounded-xl flex items-center gap-2"><Plus className="w-4 h-4" /> Yeni Ekle</Link>
                         )}
                     </div>
 
                     {['all', 'favorites', 'users'].includes(activeTab) ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                            {activeTab === 'all' && (
-                                <thead className="bg-chefie-cream/50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase relative" style={{ minWidth: '160px' }}>
-                                            <div className="relative">
-                                                <select
-                                                    value={selectedCategory}
-                                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                                    className="w-full px-3 py-2 bg-transparent border border-chefie-border rounded-lg text-xs font-semibold text-chefie-secondary uppercase focus:outline-none appearance-none cursor-pointer hover:border-[#10B981] transition-colors"
-                                                >
-                                                    <option value="">KATEGORİ / ID</option>
-                                                    {categories.map((cat) => (
-                                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
-                                            </div>
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarih</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Süre</th>
-                                        <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
-                                    </tr>
-                                </thead>
-                            )}
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full min-w-[900px]">
+                                {activeTab === 'all' && (
+                                    <thead className="bg-chefie-cream/50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase relative" style={{ minWidth: '160px' }}>
+                                                <div className="relative">
+                                                    <select
+                                                        value={selectedCategory}
+                                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                                        className="w-full px-3 py-2 bg-transparent border border-chefie-border rounded-lg text-xs font-semibold text-chefie-secondary uppercase focus:outline-none appearance-none cursor-pointer hover:border-[#10B981] transition-colors"
+                                                    >
+                                                        <option value="">KATEGORİ / ID</option>
+                                                        {categories.map((cat) => (
+                                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
+                                                </div>
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarih</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Hazırlama</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase text-orange-500">Pişirme</th>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                )}
 
-                            {activeTab === 'favorites' && (
-                                <thead className="bg-chefie-cream/50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase relative" style={{ minWidth: '160px' }}>
-                                            <div className="relative">
-                                                <select
-                                                    value={selectedCategory}
-                                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                                    className="w-full px-3 py-2 bg-transparent border border-chefie-border rounded-lg text-xs font-semibold text-chefie-secondary uppercase focus:outline-none appearance-none cursor-pointer hover:border-[#10B981] transition-colors"
-                                                >
-                                                    <option value="">KATEGORİ / ID</option>
-                                                    {categories.map((cat) => (
-                                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
-                                            </div>
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarih</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Süre</th>
-                                        <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
-                                    </tr>
-                                </thead>
-                            )}
+                                {activeTab === 'favorites' && (
+                                    <thead className="bg-chefie-cream/50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase relative" style={{ minWidth: '160px' }}>
+                                                <div className="relative">
+                                                    <select
+                                                        value={selectedCategory}
+                                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                                        className="w-full px-3 py-2 bg-transparent border border-chefie-border rounded-lg text-xs font-semibold text-chefie-secondary uppercase focus:outline-none appearance-none cursor-pointer hover:border-[#10B981] transition-colors"
+                                                    >
+                                                        <option value="">KATEGORİ / ID</option>
+                                                        {categories.map((cat) => (
+                                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
+                                                </div>
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarih</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Hazırlama</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase text-orange-500">Pişirme</th>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                )}
 
-                            {activeTab === 'users' && (
-                                <thead className="bg-chefie-cream/50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">ID</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarih</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Rol</th>
-                                        <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
-                                    </tr>
-                                </thead>
-                            )}
-                            <tbody className="divide-y divide-chefie-border">{renderTableContent()}</tbody>
-                        </table>
-                    </div>
+                                {activeTab === 'users' && (
+                                    <thead className="bg-chefie-cream/50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">İsim</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">ID</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Tarih</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-chefie-secondary uppercase">Rol</th>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold text-chefie-secondary uppercase">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                )}
+                                <tbody className="divide-y divide-chefie-border">{renderTableContent()}</tbody>
+                            </table>
+                        </div>
                     ) : (
-                        <div className="w-full overflow-hidden">
+                        <div className="w-full overflow-x-auto">
                             {renderTableContent()}
                         </div>
                     )}
@@ -2026,6 +2579,80 @@ const Dashboard = () => {
                 )}
             </AnimatePresence>
 
+            {/* Notification Details Modal */}
+            <AnimatePresence>
+                {viewingNotif && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4" onClick={() => setViewingNotif(null)}>
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-chefie-card rounded-[32px] w-full max-w-xl border border-chefie-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-chefie-border flex items-center justify-between bg-chefie-cream/30">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
+                                        <Bell className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-black text-chefie-text uppercase tracking-tight">Bildirim Detayı</h3>
+                                        <p className="text-[10px] font-bold text-chefie-secondary uppercase tracking-widest">
+                                            {new Date(viewingNotif.created_at).toLocaleDateString('tr-TR')} {new Date(viewingNotif.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => setViewingNotif(null)}
+                                    className="w-10 h-10 rounded-xl bg-chefie-card border border-chefie-border flex items-center justify-center text-chefie-secondary hover:text-red-500 hover:border-red-500/20 transition-all shadow-sm"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-thin">
+                                <div className="space-y-2">
+                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter inline-flex items-center gap-1.5 ${viewingNotif.target_type === 'all' ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
+                                        {viewingNotif.target_type === 'all' ? <Globe className="w-3 h-3" /> : <Users className="w-3 h-3" />}
+                                        {viewingNotif.target_type === 'all' ? 'TÜM KULLANICILAR' : 'ÖZEL LİSTE'}
+                                    </span>
+                                    <h2 className="text-2xl font-black text-chefie-text leading-tight">{viewingNotif.title}</h2>
+                                </div>
+
+                                <div className="p-6 bg-chefie-cream/50 rounded-2xl border border-chefie-border/50 text-chefie-text font-medium leading-relaxed whitespace-pre-wrap">
+                                    {viewingNotif.message}
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-chefie-border/50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-chefie-yellow/10 flex items-center justify-center text-chefie-yellow font-black text-xs">
+                                            {viewingNotif.sender_name?.charAt(0).toUpperCase() || 'A'}
+                                        </div>
+                                        <div className="text-xs">
+                                            <div className="font-black text-chefie-text">@{viewingNotif.sender_name || 'Admin'}</div>
+                                            <div className="text-chefie-secondary font-bold opacity-60">Gönderen Yetkili</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm font-black text-chefie-text">{viewingNotif.recipient_count}</div>
+                                        <div className="text-[10px] font-bold text-chefie-secondary uppercase tracking-widest opacity-60">Toplam Alıcı</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="p-6 border-t border-chefie-border bg-chefie-cream/30">
+                                <button 
+                                    onClick={() => setViewingNotif(null)}
+                                    className="w-full py-4 bg-chefie-dark text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:bg-black transition-all"
+                                >
+                                    KAPAT
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* Custom Delete Confirmation Modal */}
             <AnimatePresence>
                 {confirmDeleteId && (
@@ -2148,6 +2775,105 @@ const Dashboard = () => {
                                         EVET, SİL
                                     </button>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Custom Delete Comment Modal */}
+            <AnimatePresence>
+                {confirmDeleteCommentId && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-chefie-card w-full max-w-md rounded-[2.5rem] border border-chefie-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 text-center space-y-6">
+                                <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                                    <Trash2 className="w-10 h-10" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight text-red-500">YORUMU SİL?</h3>
+                                    <p className="text-sm font-bold text-chefie-secondary uppercase tracking-tight leading-relaxed px-4">
+                                        Bu yorumu kalıcı olarak silmek istediğinize emin misiniz?
+                                    </p>
+                                    <p className="text-[10px] font-black text-red-500/50 uppercase tracking-widest pt-2">Bu işlem geri alınamaz.</p>
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmDeleteCommentId(null)}
+                                        className="flex-1 py-4 bg-chefie-cream text-chefie-secondary rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-chefie-border transition-colors border border-chefie-border shadow-sm active:scale-95"
+                                    >
+                                        VAZGEÇ
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDeleteComment(confirmDeleteCommentId)}
+                                        className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 active:scale-95"
+                                    >
+                                        EVET, SİL
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Edit Comment Modal */}
+            <AnimatePresence>
+                {editingComment && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-chefie-card w-full max-w-md rounded-[2.5rem] border border-chefie-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-black text-chefie-text uppercase tracking-tight">Yorumu Düzenle</h3>
+                                    <button onClick={() => setEditingComment(null)} className="p-2 hover:bg-chefie-cream rounded-full transition-colors">
+                                        <X className="w-5 h-5 text-chefie-secondary" />
+                                    </button>
+                                </div>
+
+                                {commentMessage.text && (
+                                    <div className={`px-4 py-3 rounded-xl text-sm font-bold ${commentMessage.type === 'success' ? 'bg-green-500/10 text-green-600 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                        {commentMessage.text}
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleUpdateComment} className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-chefie-secondary uppercase tracking-widest mb-2">Yorum İçeriği</label>
+                                        <textarea
+                                            value={commentEditContent}
+                                            onChange={(e) => setCommentEditContent(e.target.value)}
+                                            className="w-full px-5 py-4 bg-chefie-cream border border-chefie-border rounded-2xl focus:ring-2 focus:ring-[#10B981] outline-none text-chefie-text min-h-[150px] resize-none font-medium"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex gap-4 pt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingComment(null)}
+                                            className="flex-1 py-4 bg-chefie-cream text-chefie-secondary rounded-2xl font-black uppercase tracking-widest text-[10px] border border-chefie-border hover:bg-chefie-border transition-colors"
+                                        >
+                                            İptal
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-1 py-4 bg-[#10B981] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-[#059669] transition-colors shadow-lg shadow-green-500/20"
+                                        >
+                                            Kaydet
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </motion.div>
                     </div>

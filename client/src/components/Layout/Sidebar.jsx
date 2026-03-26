@@ -7,6 +7,8 @@ import { ChefHat, Heart, BookOpen, Users, Settings, LogOut, LayoutDashboard, Ute
 import { useTranslation } from 'react-i18next';
 import NotificationBell from '../NotificationBell';
 
+import Logo from '../UI/Logo';
+
 const Sidebar = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -31,13 +33,9 @@ const Sidebar = () => {
     return (
         <aside className="w-64 bg-chefie-card min-h-screen fixed left-0 top-0 border-r border-chefie-border flex flex-col p-6 z-50 hidden md:flex shadow-2xl shadow-gray-100 dark:shadow-none">
             {/* Brand & Actions */}
-            <div className="mb-10 flex items-center">
-                <Link to="/" className="group flex-1">
-                    <img
-                        src="/bitarif_logo_1.png"
-                        alt="Bitarif Logo"
-                        className="h-20 w-auto group-hover:scale-105 transition-transform duration-300"
-                    />
+            <div className="mb-10 flex items-center justify-center">
+                <Link to="/" className="group">
+                    <Logo className="text-5xl group-hover:scale-105 transition-transform duration-300" />
                 </Link>
             </div>
 
@@ -67,7 +65,7 @@ const Sidebar = () => {
                     className={({ isActive }) =>
                         `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive
                             ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold'
-                            : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'
+                            : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-yellow transition-colors'
                         }`
                     }
                 >
@@ -78,7 +76,7 @@ const Sidebar = () => {
                 <NavLink
                     to="/menus"
                     className={({ isActive }) =>
-                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'}`
+                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-yellow transition-colors'}`
                     }
                 >
                     <BookOpen className="w-5 h-5 mr-3" />
@@ -88,7 +86,7 @@ const Sidebar = () => {
                 <NavLink
                     to="/trend"
                     className={({ isActive }) =>
-                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'}`
+                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-yellow transition-colors'}`
                     }
                 >
                     <Heart className="w-5 h-5 mr-3" />
@@ -98,7 +96,7 @@ const Sidebar = () => {
                 <NavLink
                     to="/what-to-cook"
                     className={({ isActive }) =>
-                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'}`
+                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-yellow transition-colors'}`
                     }
                 >
                     <ChefHat className="w-5 h-5 mr-3" />
@@ -108,7 +106,7 @@ const Sidebar = () => {
                 <NavLink
                     to="/blog"
                     className={({ isActive }) =>
-                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'}`
+                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-yellow transition-colors'}`
                     }
                 >
                     <BookOpen className="w-5 h-5 mr-3" />
@@ -118,7 +116,7 @@ const Sidebar = () => {
                 <NavLink
                     to="/lists"
                     className={({ isActive }) =>
-                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'}`
+                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-yellow transition-colors'}`
                     }
                 >
                     <ShoppingCart className="w-5 h-5 mr-3" />
@@ -128,7 +126,7 @@ const Sidebar = () => {
                 <NavLink
                     to="/calories"
                     className={({ isActive }) =>
-                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-dark'}`
+                        `flex items-center px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-chefie-yellow text-white shadow-lg shadow-yellow-100 font-bold' : 'text-gray-500 hover:bg-chefie-cream hover:text-chefie-yellow transition-colors'}`
                     }
                 >
                     <Settings className="w-5 h-5 mr-3" />

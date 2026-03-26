@@ -169,6 +169,16 @@ router.delete('/account', authenticateToken, async (req, res) => {
     }
 });
 
+// Get total user count
+router.get('/count', authenticateToken, async (req, res) => {
+    try {
+        const counts = await executeQuery('SELECT COUNT(*) as count FROM users');
+        res.json({ count: parseInt(counts[0].count, 10) });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Get Public User Profile
 router.get('/users/:id/profile', async (req, res) => {
     try {

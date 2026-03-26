@@ -2,6 +2,7 @@ import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemove
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import ChefLoader from '../components/ChefLoader';
 import {
     ChevronLeft,
     ChevronRight,
@@ -173,8 +174,8 @@ const Settings = () => {
     );
 
     if (loading) return (
-        <div className="min-h-screen bg-chefie-cream flex items-center justify-center">
-            <div className="animate-pulse text-chefie-green font-bold">Yükleniyor...</div>
+        <div className="min-h-screen bg-chefie-cream flex flex-col items-center justify-center p-6">
+            <ChefLoader text={t('common.loading') || 'Ayarlar Hazırlanıyor...'} />
         </div>
     );
 

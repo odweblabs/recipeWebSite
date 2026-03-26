@@ -9,6 +9,8 @@ import { getImageUrl } from '../../utils/imageUtils';
 import axios from 'axios';
 import API_BASE from '../../utils/api';
 
+import Logo from '../UI/Logo';
+
 const Navbar = () => {
     const { t } = useTranslation();
     const location = useLocation();
@@ -27,11 +29,7 @@ const Navbar = () => {
                 <div className="flex justify-between h-20 md:h-28">
                     <div className="flex items-center">
                         <Link to="/" className="flex items-center group">
-                            <img
-                                src="/bitarif_logo_1.png"
-                                alt="Bitarif Logo"
-                                className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
-                            />
+                            <Logo className="text-4xl md:text-5xl group-hover:scale-105 transition-transform duration-300" />
                         </Link>
                     </div>
 

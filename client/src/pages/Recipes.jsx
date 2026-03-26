@@ -4,9 +4,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Clock, Users, ArrowRight, Home, ChevronRight, Search, SlidersHorizontal, Utensils, Award, Filter, LayoutGrid } from 'lucide-react';
+import { Star, Clock, Users, ArrowRight, Home, ChevronRight, Search, SlidersHorizontal, Utensils, Award, Filter, LayoutGrid, Flame } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import { useTranslation } from 'react-i18next';
+import ChefLoader from '../components/ChefLoader';
 
 const Recipes = () => {
     const { t } = useTranslation();
@@ -179,7 +180,12 @@ const Recipes = () => {
             <main className="max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-10 px-2">
                     <h2 className="text-xl font-black text-chefie-text flex items-center gap-3">
-                        {loading ? t('recipes.results.loading') : (
+                        {loading ? (
+                            <div className="flex items-center gap-2">
+                                <ChefLoader className="scale-50" />
+                                <span className="text-gray-400 font-bold text-sm tracking-widest">{t('recipes.results.loading')}</span>
+                            </div>
+                        ) : (
                             <>
                                 <span className="bg-chefie-yellow text-white w-10 h-10 rounded-xl flex items-center justify-center text-sm shadow-md dark:shadow-none">
                                     {recipes.length}
@@ -197,13 +203,9 @@ const Recipes = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
                     {loading ? (
-                        Array(8).fill(0).map((_, i) => (
-                            <div key={`skeleton-${i}`} className="animate-pulse bg-chefie-card rounded-[2.5rem] h-[450px] shadow-sm border border-chefie-border p-6">
-                                <div className="bg-chefie-cream rounded-[2rem] h-60 mb-8"></div>
-                                <div className="h-6 bg-chefie-cream rounded-full w-3/4 mb-4"></div>
-                                <div className="h-6 bg-chefie-cream rounded-full w-1/2"></div>
-                            </div>
-                        ))
+                        <div className="col-span-full py-20 flex justify-center">
+                            <ChefLoader text={t('recipes.results.loading')} />
+                        </div>
                     ) : (
                         recipes.map((recipe, idx) => (
                             <div
@@ -211,7 +213,7 @@ const Recipes = () => {
                                 onClick={() => navigate(`/recipes/${recipe.id}`)}
                                 className="bg-chefie-card rounded-[2.5rem] shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-transform duration-300 transform hover:-translate-y-2 border border-chefie-border overflow-hidden flex flex-col group relative cursor-pointer"
                             >
-                                <div className="relative h-64 overflow-hidden">
+                                <div className="relative aspect-[16/11] overflow-hidden">
                                     <img
                                         src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
                                         alt={recipe.title}
@@ -232,23 +234,45 @@ const Recipes = () => {
                                     </div>
                                 </div>
 
-                                <div className="p-8 flex flex-col flex-1">
-                                    <h3 className="text-xl font-black text-chefie-text mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-chefie-yellow transition-colors leading-snug">
+                                <div className="p-6 flex flex-col flex-1">
+                                    <h3 className="text-lg font-black text-chefie-text mb-2 line-clamp-2 min-h-[2.8rem] group-hover:text-chefie-yellow transition-colors leading-snug">
                                         {recipe.title}
                                     </h3>
 
-                                    <div className="flex items-center justify-between text-[11px] text-gray-400 mb-4 font-black tracking-widest uppercase">
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4 text-chefie-yellow" />
-                                            {recipe.prep_time ? (String(recipe.prep_time).includes('dk') ? recipe.prep_time : `${recipe.prep_time} dk`) : `30 dk`}
+                                     <div className="mt-auto border-t border-chefie-border/30 pt-4 flex items-center justify-between mb-4">
+                                        <div className="flex flex-col items-center gap-1 flex-1">
+                                            <Users className="w-4 h-4 text-gray-300" />
+                                            <span className="text-[10px] font-black text-gray-400 whitespace-nowrap uppercase tracking-tighter">
+                                                {recipe.servings || '4'} {t('common.servings_alt')}
+                                            </span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-gray-400">
-                                            <Users className="w-4 h-4 text-chefie-yellow" />
-                                            {recipe.servings || '4'} {t('common.servings_alt')}
+
+                                        <div className="w-px h-6 bg-chefie-border/50" />
+
+                                        <div className="flex flex-col items-center gap-1 flex-1 px-1">
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="w-3.5 h-3.5 text-chefie-yellow" />
+                                                <span className="text-[10px] font-black text-chefie-text uppercase tracking-tighter">{t('common.prep_short')}</span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-gray-400 whitespace-nowrap uppercase tracking-tighter">
+                                                {recipe.prep_time || '15'} {t('common.minutes')}
+                                            </span>
+                                        </div>
+
+                                        <div className="w-px h-6 bg-chefie-border/50" />
+
+                                        <div className="flex flex-col items-center gap-1 flex-1">
+                                            <div className="flex items-center gap-1">
+                                                <Flame className="w-3.5 h-3.5 text-orange-500" />
+                                                <span className="text-[10px] font-black text-chefie-text uppercase tracking-tighter">{t('common.cook_short')}</span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-gray-400 whitespace-nowrap uppercase tracking-tighter">
+                                                {recipe.cook_time || '30'} {t('common.minutes')}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 mb-6 p-3 bg-chefie-cream rounded-2xl border border-chefie-border">
+                                    <div className="flex items-center gap-3 mb-4 p-2.5 bg-chefie-cream rounded-2xl border border-chefie-border">
                                         {recipe.chef_image ? (
                                             <img
                                                 src={getImageUrl(recipe.chef_image)}
@@ -273,7 +297,7 @@ const Recipes = () => {
                                     </div>
 
                                     <div
-                                        className="mt-auto group/btn inline-flex items-center justify-center gap-3 w-full py-4.5 bg-chefie-cream text-chefie-text font-black text-[11px] tracking-widest rounded-[1.5rem] hover:bg-chefie-yellow hover:text-white transition-all duration-500 shadow-sm border border-chefie-border"
+                                        className="mt-auto group/btn inline-flex items-center justify-center gap-3 w-full py-3 bg-chefie-cream text-chefie-text font-black text-[11px] tracking-widest rounded-[1.2rem] hover:bg-chefie-yellow hover:text-white transition-all duration-500 shadow-sm border border-chefie-border"
                                     >
                                         {t('common.examine_recipe')}
                                         <div className="w-6 h-6 bg-chefie-yellow rounded-lg flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">

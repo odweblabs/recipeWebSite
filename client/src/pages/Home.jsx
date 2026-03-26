@@ -9,6 +9,7 @@ import { blogPosts } from '../data/blogData';
 import SearchBar from '../components/SearchBar';
 import NotificationBell from '../components/NotificationBell';
 import { useTranslation } from 'react-i18next';
+import ChefLoader from '../components/ChefLoader';
 
 const Home = () => {
     const { t, i18n } = useTranslation();
@@ -245,10 +246,8 @@ const Home = () => {
                     className="flex gap-8 overflow-x-auto pb-12 -mx-4 px-12 md:px-4 md:mx-0 scroll-smooth scrollbar-hide snap-x snap-mandatory pt-32"
                 >
                     {loading ? (
-                        <div className="w-full flex gap-8">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="min-w-[320px] h-[400px] bg-white rounded-[2.5rem] animate-pulse"></div>
-                            ))}
+                        <div className="w-full flex items-center justify-center py-20">
+                            <ChefLoader text={t('common.loading') || 'Yükleniyor...'} />
                         </div>
                     ) : (
                         recipes.slice(0, 6).map((recipe, index) => (
@@ -298,7 +297,7 @@ const Home = () => {
                                         </div>
                                         <div className="flex flex-col items-center gap-1">
                                             <div className="flex items-center gap-1">
-                                                <Utensils className="w-4 h-4 text-chefie-yellow" />
+                                                <Flame className="w-4 h-4 text-orange-500" />
                                                 <span className="text-xs font-bold text-gray-600">{t('common.cook_short')}</span>
                                             </div>
                                             <span className="text-xs font-bold text-gray-400 whitespace-nowrap">{recipe.cook_time || 20} {t('common.minutes')}</span>
@@ -398,13 +397,11 @@ const Home = () => {
                             <h4 className="text-lg font-black text-chefie-text group-hover:text-chefie-yellow transition-colors">{chef.full_name || chef.username}</h4>
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{chef.recipe_count} {t('common.recipe_count').toUpperCase()}</span>
                         </motion.div>
-                    )) : Array(6).fill(0).map((_, i) => (
-                        <div key={i} className="min-w-[200px] flex flex-col items-center animate-pulse">
-                            <div className="w-32 h-32 bg-gray-100 rounded-full mb-6 shadow-inner"></div>
-                            <div className="h-4 bg-gray-100 rounded w-24 mb-2"></div>
-                            <div className="h-3 bg-gray-100 rounded w-16"></div>
+                    )) : (
+                        <div className="w-full flex items-center justify-center py-10">
+                            <ChefLoader className="scale-75" />
                         </div>
-                    ))}
+                    )}
                 </div>
             </section>
 
@@ -414,7 +411,7 @@ const Home = () => {
                     <h2 className="text-3xl font-black text-chefie-text flex items-center gap-3">
                         {t('home.sections.kitchen_secrets')} <Play className="w-5 h-5 text-chefie-yellow fill-current" />
                     </h2>
-                    <Link to="/blog" className="text-gray-400 font-bold text-xs uppercase hover:text-chefie-yellow transition-colors">{t('home.sections.all_blog')}</Link>
+                    <Link to="/blog" className="text-gray-500 dark:text-gray-400 font-bold text-xs uppercase hover:text-chefie-yellow transition-colors">{t('home.sections.all_blog')}</Link>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -427,12 +424,14 @@ const Home = () => {
                         >
                             <div className="relative h-60 overflow-hidden">
                                 <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                <div className="absolute top-5 left-5 px-4 py-2 bg-white/90 backdrop-blur-md rounded-2xl text-[10px] font-black">{post.category}</div>
+                                <div className="absolute top-5 left-5 px-4 py-2 bg-white/95 dark:bg-chefie-card/90 text-chefie-dark dark:text-chefie-yellow backdrop-blur-md rounded-2xl text-[10px] font-black shadow-sm">
+                                    {post.category}
+                                </div>
                             </div>
                             <div className="p-8">
                                 <h3 className="text-xl font-black text-chefie-text mb-4 leading-tight group-hover:text-chefie-yellow transition-colors">{post.title}</h3>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{post.author}</span>
+                                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{post.author}</span>
                                     <div className="flex items-center gap-1 text-chefie-yellow">
                                         <span className="text-[10px] font-black">{t('blog.read')}</span>
                                         <ArrowUpRight className="w-3 h-3" />
@@ -503,9 +502,11 @@ const Home = () => {
                             <p className="text-gray-600 text-sm font-medium leading-relaxed italic line-clamp-3">"{comment.content}"</p>
                             <span className="mt-auto pt-6 text-[10px] font-black text-gray-300 uppercase tracking-widest">{new Date(comment.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US')}</span>
                         </motion.div>
-                    )) : Array(4).fill(0).map((_, i) => (
-                        <div key={i} className="h-48 bg-white rounded-3xl animate-pulse shadow-sm"></div>
-                    ))}
+                    )) : (
+                        <div className="col-span-full py-10 flex justify-center">
+                            <ChefLoader className="scale-75" />
+                        </div>
+                    )}
                 </div>
             </section>
 
