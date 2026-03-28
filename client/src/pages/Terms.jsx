@@ -1,30 +1,32 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, FileText, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Terms = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const sections = [
         {
-            title: "1. Hizmetin Kabulü",
-            content: "Tarifo platformunu kullanarak, bu kullanım koşullarını tamamen kabul etmiş sayılırsınız. Eğer bu koşullardan herhangi birini kabul etmiyorsanız, lütfen hizmetimizi kullanmayınız."
+            title: t('terms.item1.title'),
+            content: t('terms.item1.content')
         },
         {
-            title: "2. Kullanım Lisansı",
-            content: "Bu web sitesindeki materyallerin (tarifler, resimler vb.) bir kopyasının sadece kişisel, ticari olmayan geçici görüntüleme için indirilmesine izin verilir. Bu bir mülkiyet transferi değil, bir lisans verilmesidir."
+            title: t('terms.item2.title'),
+            content: t('terms.item2.content')
         },
         {
-            title: "3. Kullanıcı Sorumlulukları",
-            content: "Kullanıcılar, paylaştıkları içeriklerin doğruluğundan ve telif haklarından sorumludur. Diğer kullanıcılara karşı saygılı ve etik kurallar çerçevesinde hareket etmek zorundadırlar."
+            title: t('terms.item3.title'),
+            content: t('terms.item3.content')
         },
         {
-            title: "4. İçerik ve Moderasyon",
-            content: "Tarifo, topluluk kurallarını ihlal eden, yanıltıcı veya zararlı içerikleri önceden haber vermeksizin silme hakkını saklı tutar."
+            title: t('terms.item4.title'),
+            content: t('terms.item4.content')
         },
         {
-            title: "5. Sorumluluk Reddi",
-            content: "Tarifo, platformdaki tariflerin uygulanması sonucu oluşabilecek herhangi bir sağlık sorunu, mutfak kazası veya malzeme israfından sorumlu tutulamaz. Tariflerin uygulanması tamamen kullanıcının kendi sorumluluğundadır."
+            title: t('terms.item5.title'),
+            content: t('terms.item5.content')
         }
     ];
 
@@ -38,7 +40,7 @@ const Terms = () => {
                 >
                     <ChevronLeft className="w-6 h-6" />
                 </button>
-                <h1 className="text-xl font-bold font-sans">Kullanım Koşulları</h1>
+                <h1 className="text-xl font-bold font-sans">{t('terms.title')}</h1>
                 <div className="w-10" />
             </div>
 
@@ -47,8 +49,8 @@ const Terms = () => {
                     <div className="w-16 h-16 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-500 mb-4">
                         <FileText className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif text-center dark:text-white">Yasal Bildirimler</h2>
-                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">Son güncelleme: 10 Mart 2026</p>
+                    <h2 className="text-2xl font-bold font-serif text-center dark:text-white">{t('terms.header')}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">{t('terms.last_update')}</p>
                 </div>
 
                 <div className="bg-white dark:bg-chefie-card rounded-[32px] border border-gray-100 dark:border-chefie-border shadow-sm p-6 md:p-8 space-y-8">
@@ -67,7 +69,7 @@ const Terms = () => {
 
                 <div className="mt-12 text-center">
                     <p className="text-sm text-gray-400 dark:text-gray-500">
-                        Bu belge Tarifo topluluk standartlarını korumak amacıyla hazırlanmıştır.
+                        {t('terms.footer_desc')}
                     </p>
                 </div>
             </div>

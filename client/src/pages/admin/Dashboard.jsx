@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../../utils/storage';
+import { safeGetUser, safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage} from '../../utils/storage';
 import API_BASE from '../../utils/api';
 import { formatStat } from '../../utils/formatUtils';
 import React, { useEffect, useState } from 'react';
@@ -97,7 +97,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const token = safeGetToken();
-    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
+    const user = JSON.parse(safeGetUser() || '{}');
 
     const [totalCount, setTotalCount] = useState(0);
     const [offset, setOffset] = useState(0);
@@ -1958,7 +1958,7 @@ const Dashboard = () => {
                                         </div>
                                         
                                         {menuSearchRecipes.length > 0 && (
-                                            <div className="mt-2 bg-white border border-chefie-border rounded-xl shadow-xl overflow-hidden z-20">
+                                            <div className="mt-2 bg-chefie-card border border-chefie-border rounded-xl shadow-xl overflow-hidden z-20">
                                                 {menuSearchRecipes.map(r => (
                                                     <button
                                                         key={r.id}
@@ -2107,12 +2107,12 @@ const Dashboard = () => {
                     <AnimatePresence>
                         {confirmDeleteMenuId && (
                             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+                                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-chefie-card rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-chefie-border">
                                     <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6"><Trash2 className="w-8 h-8" /></div>
-                                    <h3 className="text-xl font-bold text-center mb-2">Menü Silinsin mi?</h3>
-                                    <p className="text-gray-500 text-center mb-8">Bu işlem geri alınamaz.</p>
+                                    <h3 className="text-xl font-bold text-chefie-text text-center mb-2">Menü Silinsin mi?</h3>
+                                    <p className="text-chefie-secondary text-center mb-8">Bu işlem geri alınamaz.</p>
                                     <div className="flex gap-4">
-                                        <button onClick={() => setConfirmDeleteMenuId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:text-gray-600">İptal</button>
+                                        <button onClick={() => setConfirmDeleteMenuId(null)} className="flex-1 py-3 font-bold text-chefie-secondary hover:text-chefie-text transition-colors">İptal</button>
                                         <button onClick={() => handleDeleteMenuConfirmed(confirmDeleteMenuId)} className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors">Evet, Sil</button>
                                     </div>
                                 </motion.div>

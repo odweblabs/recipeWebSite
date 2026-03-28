@@ -10,53 +10,32 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
 import API_BASE from '../utils/api';
+import i18n from '../i18n';
 
 const API_URL = `${API_BASE}/api`;
 
-const CATEGORIZED_INGREDIENTS = {
-    "Temel": [
-        { name: 'Süt', emoji: '🥛' }, { name: 'Yumurta', emoji: '🥚' }, { name: 'Ekmek', emoji: '🍞' },
-        { name: 'Peynir', emoji: '🧀' }, { name: 'Tereyağı', emoji: '🧈' }, { name: 'Yoğurt', emoji: '🍦' },
-        { name: 'Un', emoji: '🥡' }, { name: 'Şeker', emoji: '🍬' }, { name: 'Tuz', emoji: '🧂' },
-        { name: 'Maya', emoji: '🥯' }, { name: 'Zeytinyağı', emoji: '🫒' }, { name: 'Sıvı Yağ', emoji: '🍶' }
-    ],
-    "Manav": [
-        { name: 'Domates', emoji: '🍅' }, { name: 'Salatalık', emoji: '🥒' }, { name: 'Biber', emoji: '🫑' },
-        { name: 'Soğan', emoji: '🧅' }, { name: 'Patates', emoji: '🥔' }, { name: 'Sarımsak', emoji: '🧄' },
-        { name: 'Limon', emoji: '🍋' }, { name: 'Marul', emoji: '🥬' }, { name: 'Maydanoz', emoji: '🌿' },
-        { name: 'Muz', emoji: '🍌' }, { name: 'Elma', emoji: '🍎' }, { name: 'Mantar', emoji: '🍄' }
-    ],
-    "Kasap": [
-        { name: 'Tavuk', emoji: '🍗' }, { name: 'Kıyma', emoji: '🥩' }, { name: 'Kuşbaşı', emoji: '🍖' },
-        { name: 'Sucuk', emoji: '🌭' }, { name: 'Salam', emoji: '🥓' }, { name: 'Sosis', emoji: '🌭' },
-        { name: 'Balık', emoji: '🐟' }
-    ],
-    "Kahvaltılık": [
-        { name: 'Zeytin', emoji: '🫒' }, { name: 'Bal', emoji: '🍯' }, { name: 'Reçel', emoji: '🍓' },
-        { name: 'Tahin', emoji: '🥣' }, { name: 'Pekmez', emoji: '🥣' }, { name: 'Labne', emoji: '🥣' },
-        { name: 'Krem Peynir', emoji: '🧀' }, { name: 'Kaymak', emoji: '🍚' }
-    ],
-    "Kiler": [
-        { name: 'Makarna', emoji: '🍝' }, { name: 'Pirinç', emoji: '🌾' }, { name: 'Bulgur', emoji: '🍚' },
-        { name: 'Mercimek', emoji: '🫘' }, { name: 'Salça', emoji: '🥫' }, { name: 'Ketçap', emoji: '🥫' },
-        { name: 'Mayonez', emoji: '🧴' }, { name: 'Baharat', emoji: '🧂' }
-    ],
-    "Atıştırmalık": [
-        { name: 'Bisküvi', emoji: '🍪' }, { name: 'Çikolata', emoji: '🍫' }, { name: 'Cips', emoji: '🥔' },
-        { name: 'Kuruyemiş', emoji: '🥜' }, { name: 'Gofret', emoji: '🧇' }, { name: 'Kek', emoji: '🍰' }
-    ],
-    "İçecek": [
-        { name: 'Su', emoji: '💧' }, { name: 'Çay', emoji: '☕' }, { name: 'Kahve', emoji: '☕' },
-        { name: 'Soda', emoji: '🥤' }, { name: 'Ayran', emoji: '🥛' }, { name: 'Meyve Suyu', emoji: '🧃' }
-    ],
-    "Temizlik": [
-        { name: 'Deterjan', emoji: '🧼' }, { name: 'Sabun', emoji: '🧼' }, { name: 'Şampuan', emoji: '🧴' },
-        { name: 'T. Kağıdı', emoji: '🧻' }, { name: 'Havlu Kağıt', emoji: '🧻' }, { name: 'Diş Macunu', emoji: '🪥' }
-    ],
-    "Fırın": [
-        { name: 'Sıcak Ekmek', emoji: '🥖' }, { name: 'Simit', emoji: '🥨' }, { name: 'Poğaça', emoji: '🥐' },
-        { name: 'Börek', emoji: '🥧' }, { name: 'Yufka', emoji: '🌯' }, { name: 'Lavaş', emoji: '🫓' }
-    ]
+const CATEGORY_MAP = {
+    "Temel": "basic",
+    "Manav": "greengrocer",
+    "Kasap": "butcher",
+    "Kiler": "pantry",
+    "Kahvaltılık": "breakfast",
+    "Atıştırmalık": "snacks",
+    "İçecek": "drinks",
+    "Temizlik": "cleaning",
+    "Fırın": "bakery"
+};
+
+const CATEGORIZED_INGREDIENTS_EMOJIS = {
+    "basic": ['🥛', '🥚', '🍞', '🧀', '🧈', '🍦', '🥡', '🍬', '🧂', '🥯', '🫒', '🍶'],
+    "greengrocer": ['🍅', '🥒', '🫑', '🧅', '🥔', '🧄', '🍋', '🥬', '🌿', '🍌', '🍎', '🍄'],
+    "butcher": ['🍗', '🥩', '🍖', '🌭', '🥓', '🌭', '🐟'],
+    "breakfast": ['🫒', '🍯', '🍓', '🥣', '🥣', '🥣', '🧀', '🍚'],
+    "pantry": ['🍝', '🌾', '🍚', '🫘', '🥫', '🥫', '🧴', '🧂'],
+    "snacks": ['🍪', '🍫', '🥔', '🥜', '🧇', '🍰'],
+    "drinks": ['💧', '☕', '☕', '🥤', '🥛', '🧃'],
+    "cleaning": ['🧼', '🧼', '🧴', '🧻', '🧻', '🪥'],
+    "bakery": ['🥖', '🥨', '🥐', '🥧', '🌯', '🫓']
 };
 
 const Lists = () => {
@@ -94,7 +73,7 @@ const Lists = () => {
             });
             setLists(res.data);
         } catch (err) {
-            console.error('Listeler yüklenemedi:', err);
+            console.error(t('lists.actions.error_fetch'), err);
         } finally {
             setLoading(false);
         }
@@ -117,8 +96,8 @@ const Lists = () => {
             setIsCreateOpen(false);
             fetchLists();
         } catch (err) {
-            console.error('Liste oluşturulamadı:', err);
-            alert('Liste oluşturulurken bir hata oluştu: ' + (err.response?.data?.error || err.message));
+            console.error(t('lists.actions.error_create'), err);
+            alert(t('lists.actions.error_create') + ' ' + (err.response?.data?.error || err.message));
         }
     };
 
@@ -131,7 +110,7 @@ const Lists = () => {
             if (openListId === id) setOpenListId(null);
             fetchLists();
         } catch (err) {
-            console.error('Liste silinemedi:', err);
+            console.error(t('lists.actions.error_delete'), err);
         }
     };
 
@@ -152,7 +131,7 @@ const Lists = () => {
             setOpenListId(null);
             fetchLists();
         } catch (err) {
-            console.error('Değişiklikler kaydedilemedi:', err);
+            console.error(t('lists.actions.error_save'), err);
         }
     };
 
@@ -185,8 +164,8 @@ const Lists = () => {
             }
 
             const shareData = {
-                title: `${list.name} - Alışveriş Listem`,
-                text: `${list.market_name ? list.market_name + ' için ' : ''}oluşturduğum alışveriş listesine göz at!`,
+                title: t('lists.actions.share_title', { name: list.name }),
+                text: t('lists.actions.share_text', { market: list.market_name ? list.market_name + (i18n.language === 'tr' ? ' için ' : ' for ') : '' }),
                 url: `${window.location.origin}/liste/${list.id}`,
             };
 
@@ -198,7 +177,7 @@ const Lists = () => {
             }
         } catch (err) {
             console.error('Share failed', err);
-            alert('Paylaşırken bir hata oluştu.');
+            alert(t('lists.actions.share_error'));
         }
     };
 
@@ -276,7 +255,7 @@ const Lists = () => {
                         </button>
                         <div className="inline-flex items-center gap-2 px-5 py-3 bg-chefie-card rounded-2xl border border-chefie-border text-[10px] font-black tracking-widest text-gray-400 shadow-sm w-full sm:w-auto justify-center">
                             <ListChecks className="w-4 h-4 text-chefie-yellow" />
-                            {lists.length} {t('lists.header.lists_count') || "LİSTE"} · {totalItems} {t('lists.header.items_count') || "ÜRÜN"}
+                            {lists.length} {t('lists.header.lists_count')} · {totalItems} {t('lists.header.items_count')}
                         </div>
                     </div>
                 </motion.div>
@@ -437,25 +416,15 @@ const Lists = () => {
                                                     <ChevronLeft size={12} />
                                                 </button>
                                                 <div ref={modalCategoriesRef} className="flex gap-2 overflow-x-auto scrollbar-hide flex-1 scroll-smooth pb-1">
-                                                    {Object.keys(CATEGORIZED_INGREDIENTS).map(cat => {
-                                                        const catKeys = {
-                                                            "Temel": "basic",
-                                                            "Manav": "greengrocer",
-                                                            "Kasap": "butcher",
-                                                            "Kiler": "pantry",
-                                                            "Kahvaltılık": "breakfast",
-                                                            "Atıştırmalık": "snacks",
-                                                            "İçecek": "drinks",
-                                                            "Temizlik": "cleaning",
-                                                            "Fırın": "bakery"
-                                                        };
+                                                    {Object.keys(CATEGORY_MAP).map(catName => {
+                                                        const catKey = CATEGORY_MAP[catName];
                                                         return (
                                                             <button
-                                                                key={cat}
-                                                                onClick={() => setActiveCategory(cat)}
-                                                                className={`text-[9px] font-black px-4 py-2 rounded-xl transition-all whitespace-nowrap border-2 ${activeCategory === cat ? 'bg-chefie-yellow border-chefie-yellow text-white shadow-lg shadow-chefie-yellow/20' : 'text-chefie-secondary/60 dark:text-chefie-secondary/40 bg-white dark:bg-chefie-card border-chefie-border dark:border-chefie-border/50 hover:border-chefie-yellow hover:text-chefie-yellow'}`}
+                                                                key={catKey}
+                                                                onClick={() => setActiveCategory(catName)}
+                                                                className={`text-[9px] font-black px-4 py-2 rounded-xl transition-all whitespace-nowrap border-2 ${activeCategory === catName ? 'bg-chefie-yellow border-chefie-yellow text-white shadow-lg shadow-chefie-yellow/20' : 'text-chefie-secondary/60 dark:text-chefie-secondary/40 bg-white dark:bg-chefie-card border-chefie-border dark:border-chefie-border/50 hover:border-chefie-yellow hover:text-chefie-yellow'}`}
                                                             >
-                                                                {t(`lists.items.categories.${catKeys[cat]}`).toUpperCase()}
+                                                                {t(`lists.items.categories.${catKey}`).toUpperCase()}
                                                             </button>
                                                         );
                                                     })}
@@ -469,14 +438,14 @@ const Lists = () => {
                                             </div>
                                         </div>
                                         <div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x pt-1 px-1">
-                                            {CATEGORIZED_INGREDIENTS[activeCategory].map((item, idx) => (
+                                            {(t('lists.items.presets', { returnObjects: true })[CATEGORY_MAP[activeCategory]] || []).map((itemName, idx) => (
                                                 <button
                                                     key={idx}
-                                                    onClick={() => addItem(openList.id, item.name)}
+                                                    onClick={() => addItem(openList.id, itemName)}
                                                     className="px-4 py-3 bg-white/50 dark:bg-chefie-card border border-chefie-border/60 dark:border-chefie-border/30 rounded-2xl text-[12px] font-bold text-chefie-secondary dark:text-chefie-secondary hover:border-chefie-yellow hover:text-chefie-yellow hover:bg-white transition-all whitespace-nowrap active:scale-95 flex items-center gap-2 snap-start"
                                                 >
-                                                    <span className="text-base leading-none">{item.emoji}</span>
-                                                    <span>{item.name}</span>
+                                                    <span className="text-base leading-none">{CATEGORIZED_INGREDIENTS_EMOJIS[CATEGORY_MAP[activeCategory]]?.[idx] || '🛒'}</span>
+                                                    <span>{itemName}</span>
                                                 </button>
                                             ))}
                                         </div>
@@ -536,7 +505,7 @@ const Lists = () => {
                                         onClick={() => setOpenListId(null)}
                                         className="w-full py-2.5 bg-transparent text-gray-400 hover:text-chefie-dark font-bold text-[10px] tracking-widest transition-all uppercase"
                                     >
-                                        VAZGEÇ
+                                        {t('common.cancel')}
                                     </button>
                                 </div>
                             </motion.div>
@@ -579,7 +548,7 @@ const Lists = () => {
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="text-[10px] font-black tracking-widest uppercase text-gray-300">
-                                                        {new Date(list.created_at).toLocaleDateString('tr-TR')}
+                                                        {new Date(list.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US')}
                                                     </span>
                                                     {list.is_public && <Share2 className="w-3 h-3 text-chefie-yellow" />}
                                                 </div>
@@ -611,7 +580,7 @@ const Lists = () => {
                                                     </span>
                                                 </div>
                                             ))}
-                                            {totalCount > 3 && <div className="text-[10px] font-black text-gray-300 pl-5">+{totalCount - 3} daha</div>}
+                                            {totalCount > 3 && <div className="text-[10px] font-black text-gray-300 pl-5">+{totalCount - 3} {t('lists.card.more')}</div>}
                                         </div>
 
                                         {totalCount > 0 && (

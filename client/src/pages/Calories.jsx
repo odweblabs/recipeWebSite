@@ -35,16 +35,7 @@ const Calories = () => {
         });
     };
 
-    const foodData = [
-        { name: "Yumurta (1 adet)", calories: 78, protein: "6g", category: "Protein" },
-        { name: "Tavuk Göğsü (100g)", calories: 165, protein: "31g", category: "Protein" },
-        { name: "Pirinç Pilavı (100g)", calories: 130, carbs: "28g", category: "Karbonhidrat" },
-        { name: "Elma (Orta Boy)", calories: 95, vitamins: "C", category: "Meyve" },
-        { name: "Zeytinyağı (1 y.k.)", calories: 119, fats: "14g", category: "Yağ" },
-        { name: "Badem (10 adet)", calories: 70, protein: "2.5g", category: "Kuruyemiş" },
-        { name: "Mercimek Çorbası (1 kase)", calories: 140, fiber: "8g", category: "Çorba" },
-        { name: "Yulaf Ezmesi (100g)", calories: 389, fiber: "10g", category: "Karbonhidrat" },
-    ];
+    const foodData = t('calories.guide.items', { returnObjects: true }) || [];
 
     return (
         <div className="min-h-screen pb-20 px-4 md:px-6">
@@ -261,12 +252,12 @@ const Calories = () => {
                                     <h4 className="font-black text-chefie-text mb-4">{food.name}</h4>
                                     <div className="flex items-center justify-between">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] text-gray-400 font-bold uppercase">Kalori</span>
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase">{t('common.calories')}</span>
                                             <span className="text-xl font-black text-chefie-text">{food.calories} kcal</span>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[10px] text-gray-400 font-bold uppercase">{food.protein ? 'Protein' : food.carbs ? 'Karbonhidrat' : 'Fiber'}</span>
-                                            <p className="font-black text-xs text-chefie-yellow">{food.protein || food.carbs || food.fiber || '-'}</p>
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase">{food.protein ? t('common.protein') : food.carbs ? t('common.carbs') : food.fats ? t('common.fat') : food.fiber ? t('common.fiber') : food.vitamins ? t('common.vitamins') : '-'}</span>
+                                            <p className="font-black text-xs text-chefie-yellow">{food.protein || food.carbs || food.fats || food.fiber || food.vitamins || '-'}</p>
                                         </div>
                                     </div>
                                 </div>

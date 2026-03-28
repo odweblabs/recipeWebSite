@@ -66,11 +66,15 @@ router.put('/accept/:friendshipId', authenticateToken, async (req, res) => {
         }
 
         await executeQuery('UPDATE friendships SET status = $1 WHERE id = $2', ['accepted', friendshipId]);
+        
+        // Fetch requester username for notification
+        const requester = await executeQuery('SELECT username FROM users WHERE id = $1', [friendship.requester_id]);
+        const requesterUsername = requester[0]?.username || 'Kullanıcı';
 
         // Update notification
         await executeQuery(
             'UPDATE notifications SET message = $1, is_read = TRUE WHERE related_id = $2 AND type = $3',
-            ['Takip isteğini kabul ettin.', friendshipId, 'friend_request']
+            [`@${requesterUsername} kullanıcısının takip isteğini kabul ettin.`, friendshipId, 'friend_request']
         );
 
         res.json({ message: 'Arkadaşlık isteği kabul edildi.' });
@@ -96,10 +100,14 @@ router.delete('/reject/:friendshipId', authenticateToken, async (req, res) => {
 
         await executeQuery('DELETE FROM friendships WHERE id = $1', [friendshipId]);
 
+        // Fetch requester username for notification
+        const requester = await executeQuery('SELECT username FROM users WHERE id = $1', [friendship.requester_id]);
+        const requesterUsername = requester[0]?.username || 'Kullanıcı';
+
         // Update notification instead of deleting it (to persist until user deletes it)
         await executeQuery(
             'UPDATE notifications SET message = $1, is_read = TRUE WHERE related_id = $2 AND type = $3',
-            ['Takip isteğini reddettin.', friendshipId, 'friend_request']
+            [`@${requesterUsername} kullanıcısının takip isteğini reddettin.`, friendshipId, 'friend_request']
         );
 
         res.json({ message: 'Arkadaşlık isteği reddedildi.' });
@@ -167,6 +175,7 @@ router.get('/status/:userId', authenticateToken, async (req, res) => {
             SELECT * FROM friendships 
             WHERE (requester_id = $1 AND addressee_id = $2) 
                OR (requester_id = $3 AND addressee_id = $4)
+            ORDER BY CASE WHEN status = 'accepted' THEN 0 ELSE 1 END ASC, created_at DESC
         `, [currentUserId, targetUserId, targetUserId, currentUserId]);
         const friendship = friendships[0];
 
@@ -183,8 +192,16 @@ router.get('/status/:userId', authenticateToken, async (req, res) => {
             });
         }
 
+        if (friendship.status === 'accepted') {
+            return res.json({
+                status: 'accepted',
+                friendship_id: friendship.id
+            });
+        }
+
+        // Fallback for any other status (though current schema only uses pending/accepted)
         res.json({
-            status: 'accepted',
+            status: friendship.status,
             friendship_id: friendship.id
         });
     } catch (err) {
@@ -206,7 +223,19 @@ router.delete('/remove/:userId', authenticateToken, async (req, res) => {
         `, [currentUserId, targetUserId, targetUserId, currentUserId]);
 
         if (result.changes === 0) {
-            return res.status(404).json({ error: 'Arkadaşlık bulunamadı.' });
+            // Check if it exists but is NOT accepted (pending)
+            const pending = await executeQuery(`
+                SELECT * FROM friendships 
+                WHERE ((requester_id = $1 AND addressee_id = $2) 
+                   OR (requester_id = $3 AND addressee_id = $4))
+                   AND status = 'pending'
+            `, [currentUserId, targetUserId, targetUserId, currentUserId]);
+
+            if (pending.length > 0) {
+                return res.status(400).json({ error: 'Bekleyen bir takip isteği var, lütfen önce iptal edin veya bekleyin.' });
+            }
+
+            return res.status(404).json({ error: 'Takip ilişkisi bulunamadı veya zaten sonlandırılmış.' });
         }
 
         res.json({ message: 'Arkadaşlıktan çıkarıldı.' });

@@ -4,7 +4,11 @@ require('dotenv').config();
 
 const resetAdmin = async () => {
     const username = 'admin';
-    const password = process.env.ADMIN_PASSWORD || 'RecipeChefSecret_2026!';
+    const password = process.env.ADMIN_PASSWORD;
+    if (!password) {
+        console.error('❌ HATA: ADMIN_PASSWORD environment değişkeni tanımlanmamış!');
+        process.exit(1);
+    }
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     try {

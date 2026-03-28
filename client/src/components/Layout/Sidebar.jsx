@@ -1,4 +1,4 @@
-import { safeGetSessionStorage, safeSetSessionStorage, safeRemoveStorage, safeClearAuth } from '../../utils/storage';
+import { safeGetUser, safeGetSessionStorage, safeSetSessionStorage, safeRemoveStorage, safeClearAuth} from '../../utils/storage';
 import API_BASE from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
@@ -16,7 +16,7 @@ const Sidebar = () => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const userData = safeGetSessionStorage('user');
+        const userData = safeGetUser();
         if (userData) {
             setUser(JSON.parse(userData));
         } else {
@@ -141,7 +141,7 @@ const Sidebar = () => {
                     className="flex items-center px-4 py-3 text-gray-400 hover:text-chefie-yellow hover:bg-chefie-cream/50 rounded-2xl transition-all text-sm group"
                 >
                     <LayoutDashboard className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
-                    {user ? 'Yönetici Paneli' : t('nav.admin_panel')}
+                    {user ? t('nav.dashboard') : t('nav.admin_panel')}
                 </NavLink>
                 {user && (
                     <button

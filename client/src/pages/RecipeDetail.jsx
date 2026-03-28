@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
+import { safeGetUser, safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage} from '../utils/storage';
 import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,12 +18,13 @@ const RecipeDetail = () => {
     const [newComment, setNewComment] = useState('');
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [hoverRating, setHoverRating] = useState(0);
+    const [myRating, setMyRating] = useState(0);
 
     const [isFavorited, setIsFavorited] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [isScreenAwake, setIsScreenAwake] = useState(false);
     const token = safeGetToken();
-    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
+    const user = JSON.parse(safeGetUser() || '{}');
 
     const fetchComments = async () => {
         try {
@@ -38,8 +39,48 @@ const RecipeDetail = () => {
         const fetchRecipe = async () => {
             try {
                 const res = await axios.get(`${API_BASE}/api/recipes/${id}`);
-                setRecipe(res.data);
+                const data = res.data;
+                setRecipe(data);
                 fetchComments();
+
+                // SEO: Dynamic Page Title
+                document.title = t('recipe_detail.seo_title', { title: data.title });
+
+                // SEO: JSON-LD Structured Data
+                const structuredData = {
+                    "@context": "https://schema.org/",
+                    "@type": "Recipe",
+                    "name": data.title,
+                    "image": data.image_url ? (data.image_url.startsWith('/images/') ? data.image_url : `${API_BASE}${data.image_url}`) : "https://tarifo.vercel.app/default-recipe.png",
+                    "description": data.description,
+                    "author": {
+                        "@type": "Person",
+                        "name": data.chef_name || data.chef_username || t('recipe_detail.chef_fallback')
+                    },
+                    "datePublished": data.created_at,
+                    "prepTime": `PT${data.prep_time || 15}M`,
+                    "cookTime": `PT${data.cook_time || 30}M`,
+                    "totalTime": `PT${(parseInt(data.prep_time) || 15) + (parseInt(data.cook_time) || 30)}M`,
+                    "recipeYield": `${data.servings || 4} ${t('recipe_detail.stats.servings').toLowerCase()}`,
+                    "recipeCategory": categoryName || t('common.general'),
+                    "recipeIngredient": data.ingredients.split('\n').filter(i => i.trim()),
+                    "recipeInstructions": data.instructions.split('\n').map((step, index) => ({
+                        "@type": "HowToStep",
+                        "text": step.trim(),
+                        "position": index + 1
+                    })),
+                    "aggregateRating": data.avg_rating ? {
+                        "@type": "AggregateRating",
+                        "ratingValue": data.avg_rating,
+                        "reviewCount": data.rating_count || 1
+                    } : undefined
+                };
+
+                const script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.id = 'recipe-structured-data';
+                script.innerHTML = JSON.stringify(structuredData);
+                document.head.appendChild(script);
 
                 if (token) {
                     try {
@@ -52,9 +93,9 @@ const RecipeDetail = () => {
                     }
                 }
 
-                if (res.data.category_id) {
+                if (data.category_id) {
                     const catRes = await axios.get(`${API_BASE}/api/categories`);
-                    const cat = catRes.data.find(c => c.id === res.data.category_id);
+                    const cat = catRes.data.find(c => c.id === data.category_id);
                     if (cat) setCategoryName(cat.name);
                 }
             } catch (err) {
@@ -66,6 +107,14 @@ const RecipeDetail = () => {
             }
         };
         fetchRecipe();
+
+        // Cleanup structured data on unmount
+        return () => {
+            const existingScript = document.getElementById('recipe-structured-data');
+            if (existingScript) {
+                existingScript.remove();
+            }
+        };
     }, [id, navigate, token]);
 
     const handleToggleFavorite = async () => {
@@ -100,6 +149,8 @@ const RecipeDetail = () => {
             // Refresh recipe to show updated average
             const res = await axios.get(`${API_BASE}/api/recipes/${id}`);
             setRecipe(res.data);
+            setMyRating(score);
+            alert(t('recipe_detail.rate.success') || 'Puanınız kaydedildi!');
         } catch (err) {
             alert(t('recipe_detail.rate.error'));
         }
@@ -217,7 +268,7 @@ const RecipeDetail = () => {
 
     if (loading) return (
         <div className="min-h-screen bg-chefie-cream flex flex-col items-center justify-center p-6">
-            <ChefLoader text={t('common.loading') || 'Tarif Hazırlanıyor...'} />
+            <ChefLoader text={t('common.loading')} />
         </div>
     );
     if (!recipe) return null;
@@ -282,7 +333,7 @@ const RecipeDetail = () => {
                                         className="transform hover:scale-110 transition-transform focus:outline-none"
                                     >
                                         <Star
-                                            className={`w-8 h-8 ${star <= (hoverRating || Math.round(recipe.avg_rating || 0))
+                                            className={`w-8 h-8 ${star <= (hoverRating || myRating || Math.round(recipe.avg_rating || 0))
                                                 ? 'text-chefie-yellow fill-current'
                                                 : 'text-chefie-cream border-chefie-border'
                                                 }`}
@@ -301,14 +352,14 @@ const RecipeDetail = () => {
                                 <Clock className="w-6 h-6 text-chefie-yellow mx-auto mb-2 print:w-5 print:h-5" />
                                 <div className="text-xs text-gray-400 uppercase font-bold">{t('recipe_detail.stats.prep')}</div>
                                 <div className="font-bold text-chefie-text print:text-sm">
-                                    {recipe.prep_time ? (String(recipe.prep_time).includes('dk') ? recipe.prep_time : `${recipe.prep_time} dk`) : `15 dk`}
+                                    {recipe.prep_time ? (String(recipe.prep_time).includes(t('common.minutes')) ? recipe.prep_time : `${recipe.prep_time} ${t('common.minutes')}`) : `15 ${t('common.minutes')}`}
                                 </div>
                             </div>
                             <div className="bg-chefie-card p-4 rounded-xl shadow-sm border border-chefie-border text-center print:shadow-none print:bg-transparent print:border-none print:flex-1 print:p-2">
                                 <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2 print:w-5 print:h-5" />
                                 <div className="text-xs text-gray-400 uppercase font-bold">{t('recipe_detail.stats.cook')}</div>
                                 <div className="font-bold text-chefie-text print:text-sm">
-                                    {recipe.cook_time ? (String(recipe.cook_time).includes('dk') ? recipe.cook_time : `${recipe.cook_time} dk`) : `30 dk`}
+                                    {recipe.cook_time ? (String(recipe.cook_time).includes(t('common.minutes')) ? recipe.cook_time : `${recipe.cook_time} ${t('common.minutes')}`) : `30 ${t('common.minutes')}`}
                                 </div>
                             </div>
                             <div className="bg-chefie-card p-4 rounded-xl shadow-sm border border-chefie-border text-center col-span-2 print:shadow-none print:bg-transparent print:border-none print:col-span-1 print:flex-1 print:p-2">

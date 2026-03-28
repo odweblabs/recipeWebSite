@@ -1,35 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const FAQ = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [activeIndex, setActiveIndex] = useState(null);
 
     const faqs = [
         {
-            question: "Tarifo nedir?",
-            answer: "Tarifo, yemek tutkunlarının tariflerini paylaştığı, yeni lezzetler keşfettiği ve birbirini takip edebildiği dijital bir yemek topluluğudur."
+            question: t('faq.q1'),
+            answer: t('faq.a1')
         },
         {
-            question: "Nasıl tarif ekleyebilirim?",
-            answer: "Giriş yaptıktan sonra navigasyon menüsündeki 'Tarif Ekle' ikonuna tıklayarak tarifinizi, malzemelerinizi ve hazırlanış aşamalarını paylaşabilirsiniz."
+            question: t('faq.q2'),
+            answer: t('faq.a2')
         },
         {
-            question: "Profil resmimi nasıl değiştirebilirim?",
-            answer: "Ayarlar -> Profil Düzenle bölümüne giderek avatarınızın üzerindeki kamera ikonuna tıklayıp yeni bir resim yükleyebilirsiniz."
+            question: t('faq.q3'),
+            answer: t('faq.a3')
         },
         {
-            question: "Şifremi unuttum, ne yapmalıyım?",
-            answer: "Şu an için şifre sıfırlama işlemi yönetici onayı ile yapılmaktadır. Lütfen bizimle iletişime geçin."
+            question: t('faq.q4'),
+            answer: t('faq.a4')
         },
         {
-            question: "Tariflerimi kimler görebilir?",
-            answer: "Paylaştığınız tüm tarifler 'Açık' statüsünde ise tüm kullanıcılar tarafından görülebilir ve favorilere eklenebilir."
+            question: t('faq.q5'),
+            answer: t('faq.a5')
         },
         {
-            question: "Hesabımı nasıl silebilirim?",
-            answer: "Ayarlar -> Profil Düzenle sayfasının en altında bulunan 'Hesabı Sil' butonunu kullanarak üyeliğinizi sonlandırabilirsiniz."
+            question: t('faq.q6'),
+            answer: t('faq.a6')
         }
     ];
 
@@ -47,7 +49,7 @@ const FAQ = () => {
                 >
                     <ChevronLeft className="w-6 h-6" />
                 </button>
-                <h1 className="text-xl font-bold font-sans">Sıkça Sorulan Sorular</h1>
+                <h1 className="text-xl font-bold font-sans">{t('faq.title')}</h1>
                 <div className="w-10" />
             </div>
 
@@ -56,8 +58,8 @@ const FAQ = () => {
                     <div className="w-16 h-16 bg-chefie-green/10 rounded-3xl flex items-center justify-center text-chefie-green mb-4">
                         <HelpCircle className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif dark:text-white">Size nasıl yardımcı olabiliriz?</h2>
-                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">Merak ettiğiniz konuların cevaplarını aşağıda bulabilirsiniz.</p>
+                    <h2 className="text-2xl font-bold font-serif dark:text-white">{t('faq.subtitle')}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">{t('faq.desc')}</p>
                 </div>
 
                 <div className="space-y-4">
@@ -89,9 +91,9 @@ const FAQ = () => {
                 </div>
 
                 <div className="mt-12 p-6 bg-white dark:bg-chefie-card rounded-3xl border border-dashed border-gray-200 dark:border-chefie-border text-center">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Aradığınız cevabı bulamadınız mı?</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('faq.no_answer')}</p>
                     <button className="mt-2 text-chefie-green font-bold hover:underline">
-                        Bize e-posta gönderin
+                        {t('faq.contact_us')}
                     </button>
                 </div>
             </div>

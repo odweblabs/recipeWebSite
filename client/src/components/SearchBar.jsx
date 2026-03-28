@@ -18,6 +18,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
     const [ingredientFilter, setIngredientFilter] = useState('');
     const [activeIngredientCategory, setActiveIngredientCategory] = useState('all');
     const inputRef = useRef(null);
+    const [chefRecoId, setChefRecoId] = useState(null);
     const modalInputRef = useRef(null);
     const containerRef = useRef(null);
     const navigate = useNavigate();
@@ -25,31 +26,36 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
     
     // Drag to scroll for desktop
     const categoryScrollRef = useRef(null);
+    const quickAccessScrollRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [activeRef, setActiveRef] = useState(null);
     const [startX, setStartX] = useState(0);
     const [scrollLeftState, setScrollLeftState] = useState(0);
 
-    const handleMouseDown = (e) => {
-        if (isMobile) return;
+    const handleMouseDown = (e, ref) => {
+        if (isMobile || !ref.current) return;
         setIsDragging(true);
-        setStartX(e.pageX - categoryScrollRef.current.offsetLeft);
-        setScrollLeftState(categoryScrollRef.current.scrollLeft);
+        setActiveRef(ref);
+        setStartX(e.pageX - ref.current.offsetLeft);
+        setScrollLeftState(ref.current.scrollLeft);
     };
 
     const handleMouseLeave = () => {
         setIsDragging(false);
+        setActiveRef(null);
     };
 
     const handleMouseUp = () => {
         setIsDragging(false);
+        setActiveRef(null);
     };
 
     const handleMouseMove = (e) => {
-        if (!isDragging || isMobile) return;
+        if (!isDragging || isMobile || !activeRef?.current) return;
         e.preventDefault();
-        const x = e.pageX - categoryScrollRef.current.offsetLeft;
+        const x = e.pageX - activeRef.current.offsetLeft;
         const walk = (x - startX) * 2;
-        categoryScrollRef.current.scrollLeft = scrollLeftState - walk;
+        activeRef.current.scrollLeft = scrollLeftState - walk;
     };
 
     useEffect(() => {
@@ -70,8 +76,9 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
     ];
 
     const quickAccess = [
-        { title: t('search.quick_access_items.daily_menu'), icon: <Utensils className="w-4 h-4 text-gray-500" />, query: t('search.quick_access_items.daily_menu').toLowerCase() },
-        { title: t('search.quick_access_items.practical_main'), icon: <Flame className="w-4 h-4 text-orange-500" />, query: t('search.quick_access_items.practical_main').toLowerCase() }
+        { title: t('search.quick_access_items.daily_menu'), icon: <Utensils className="w-4 h-4 text-gray-500" />, query: 'daily_menu' },
+        { title: t('search.quick_access_items.practical_main'), icon: <Flame className="w-4 h-4 text-orange-500" />, query: 'practical_main' },
+        { title: t('search.popular_items.milky_desserts'), icon: <ChefHat className="w-4 h-4 text-chefie-yellow" />, query: 'milky_desserts' }
     ];
 
     const ingredients = [
@@ -135,12 +142,19 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
     useEffect(() => {
         const fetchCount = async () => {
             try {
-                const res = await axios.get(`${API_BASE}/api/recipes/count`);
-                if (res.data && typeof res.data.count !== 'undefined') {
-                    setRecipeCount(res.data.count);
+                const [countRes, recoRes] = await Promise.all([
+                    axios.get(`${API_BASE}/api/recipes/count`),
+                    axios.get(`${API_BASE}/api/recipes/recommendation`)
+                ]);
+                
+                if (countRes.data && typeof countRes.data.count !== 'undefined') {
+                    setRecipeCount(countRes.data.count);
+                }
+                if (recoRes.data && recoRes.data.id) {
+                    setChefRecoId(recoRes.data.id);
                 }
             } catch (err) {
-                console.error("Failed to fetch recipe count", err);
+                console.error("Failed to fetch initial search data", err);
             }
         };
         fetchCount();
@@ -216,6 +230,29 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
 
     const handleSearch = (searchQuery) => {
         if (!searchQuery?.trim()) return;
+
+        // Custom handling for quick access queries
+        if (searchQuery === 'daily_menu') {
+            setIsOpen(false);
+            if (chefRecoId) {
+                navigate(`/recipes/${chefRecoId}`);
+            } else {
+                navigate('/recipes');
+            }
+            return;
+        }
+
+        if (searchQuery === 'practical_main') {
+            setIsOpen(false);
+            navigate('/recipes?category_id=18');
+            return;
+        }
+
+        if (searchQuery === 'milky_desserts') {
+            setIsOpen(false);
+            navigate(`/recipes?category_id=27&q=${encodeURIComponent(t('search.popular_items.milky_desserts'))}`);
+            return;
+        }
 
         // Save to recent
         const newRecent = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
@@ -397,7 +434,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                                 <Clock className="w-4 h-4 text-orange-400" /> {t('search.recent')}
                                             </h3>
                                             <button onClick={clearRecent} className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors">
-                                                {i18n.language?.startsWith('tr') ? 'Temizle' : t('search.clear_recent')}
+                                                {t('search.clear_recent')}
                                             </button>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
@@ -424,10 +461,17 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                             onClick={() => navigate('/recipes')}
                                             className="text-xs font-bold text-gray-400 hover:text-chefie-text transition-colors"
                                         >
-                                            {i18n.language?.startsWith('tr') ? 'Tümünü Gör' : t('common.view_all')}
+                                            {t('common.view_all')}
                                         </button>
                                     </div>
-                                    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+                                    <div 
+                                        ref={quickAccessScrollRef}
+                                        onMouseDown={(e) => handleMouseDown(e, quickAccessScrollRef)}
+                                        onMouseLeave={handleMouseLeave}
+                                        onMouseUp={handleMouseUp}
+                                        onMouseMove={handleMouseMove}
+                                        className={`flex gap-3 overflow-x-auto scrollbar-hide pb-2 ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                                    >
                                         {quickAccess.map((item, idx) => (
                                             <button
                                                 key={idx}
@@ -489,7 +533,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                     {/* Category Tabs */}
                                     <div 
                                         ref={categoryScrollRef}
-                                        onMouseDown={handleMouseDown}
+                                        onMouseDown={(e) => handleMouseDown(e, categoryScrollRef)}
                                         onMouseLeave={handleMouseLeave}
                                         onMouseUp={handleMouseUp}
                                         onMouseMove={handleMouseMove}
@@ -510,7 +554,7 @@ const SearchBar = ({ initialQuery = '', className = "", placeholder = null, onSe
                                     </div>
 
                                     {/* Ingredient Grid */}
-                                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 pb-6 max-h-[300px] overflow-y-auto scrollbar-hide">
+                                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 p-2 pb-6 max-h-[300px] overflow-y-auto scrollbar-hide">
                                         {filteredIngredients.map((ing, idx) => {
                                             const isSelected = selectedIngredients.includes(ing.name);
                                             return (

@@ -68,6 +68,10 @@ export const safeGetToken = () => {
     return safeGetStorage('token') || safeGetSessionStorage('token');
 };
 
+export const safeGetUser = () => {
+    return safeGetSessionStorage('user') || safeGetStorage('user');
+};
+
 export const safeClearAuth = () => {
     safeRemoveStorage('token');
     safeRemoveStorage('user');

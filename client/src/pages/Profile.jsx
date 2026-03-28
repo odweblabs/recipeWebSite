@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
+import { safeGetUser, safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage} from '../utils/storage';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
 import { formatStat } from '../utils/formatUtils';
@@ -13,29 +13,29 @@ import ChefLoader from '../components/ChefLoader';
 // Country list with flag emojis
 const COUNTRY_LIST = [
     { code: 'TR', name: 'Türkiye', flag: '🇹🇷' },
-    { code: 'US', name: 'ABD', flag: '🇺🇸' },
-    { code: 'DE', name: 'Almanya', flag: '🇩🇪' },
-    { code: 'FR', name: 'Fransa', flag: '🇫🇷' },
-    { code: 'GB', name: 'İngiltere', flag: '🇬🇧' },
-    { code: 'NL', name: 'Hollanda', flag: '🇳🇱' },
-    { code: 'BE', name: 'Belçika', flag: '🇧🇪' },
-    { code: 'AT', name: 'Avusturya', flag: '🇦🇹' },
-    { code: 'CH', name: 'İsviçre', flag: '🇨🇭' },
-    { code: 'SE', name: 'İsveç', flag: '🇸🇪' },
-    { code: 'NO', name: 'Norveç', flag: '🇳🇴' },
-    { code: 'DK', name: 'Danimarka', flag: '🇩🇰' },
-    { code: 'IT', name: 'İtalya', flag: '🇮🇹' },
-    { code: 'ES', name: 'İspanya', flag: '🇪🇸' },
-    { code: 'AZ', name: 'Azerbaycan', flag: '🇦🇿' },
-    { code: 'RU', name: 'Rusya', flag: '🇷🇺' },
-    { code: 'AU', name: 'Avustralya', flag: '🇦🇺' },
-    { code: 'CA', name: 'Kanada', flag: '🇨🇦' },
-    { code: 'JP', name: 'Japonya', flag: '🇯🇵' },
-    { code: 'KR', name: 'Güney Kore', flag: '🇰🇷' },
-    { code: 'SA', name: 'Suudi Arabistan', flag: '🇸🇦' },
-    { code: 'AE', name: 'BAE', flag: '🇦🇪' },
-    { code: 'BR', name: 'Brezilya', flag: '🇧🇷' },
-    { code: 'OTHER', name: 'Diğer', flag: '🌍' },
+    { code: 'US', name: 'USA', flag: '🇺🇸' },
+    { code: 'DE', name: 'Germany', flag: '🇩🇪' },
+    { code: 'FR', name: 'France', flag: '🇫🇷' },
+    { code: 'GB', name: 'UK', flag: '🇬🇧' },
+    { code: 'NL', name: 'Netherlands', flag: '🇳🇱' },
+    { code: 'BE', name: 'Belgium', flag: '🇧🇪' },
+    { code: 'AT', name: 'Austria', flag: '🇦🇹' },
+    { code: 'CH', name: 'Switzerland', flag: '🇨🇭' },
+    { code: 'SE', name: 'Sweden', flag: '🇸🇪' },
+    { code: 'NO', name: 'Norway', flag: '🇳🇴' },
+    { code: 'DK', name: 'Denmark', flag: '🇩🇰' },
+    { code: 'IT', name: 'Italy', flag: '🇮🇹' },
+    { code: 'ES', name: 'Spain', flag: '🇪🇸' },
+    { code: 'AZ', name: 'Azerbaijan', flag: '🇦🇿' },
+    { code: 'RU', name: 'Russia', flag: '🇷🇺' },
+    { code: 'AU', name: 'Australia', flag: '🇦🇺' },
+    { code: 'CA', name: 'Canada', flag: '🇨🇦' },
+    { code: 'JP', name: 'Japan', flag: '🇯🇵' },
+    { code: 'KR', name: 'South Korea', flag: '🇰🇷' },
+    { code: 'SA', name: 'Saudi Arabia', flag: '🇸🇦' },
+    { code: 'AE', name: 'UAE', flag: '🇦🇪' },
+    { code: 'BR', name: 'Brazil', flag: '🇧🇷' },
+    { code: 'OTHER', name: 'Other', flag: '🌍' },
 ];
 
 const getCountryInfo = (code) => COUNTRY_LIST.find(c => c.code === code) || null;
@@ -83,7 +83,7 @@ const Profile = () => {
     const [likesLoading, setLikesLoading] = useState(false);
 
     const token = safeGetToken();
-    const currentUser = JSON.parse(safeGetSessionStorage('user') || '{}');
+    const currentUser = JSON.parse(safeGetUser() || '{}');
     const isOwner = currentUser.id === parseInt(id);
     const isLoggedIn = !!token && !!currentUser.id;
 
@@ -504,7 +504,7 @@ const Profile = () => {
 
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-chefie-cream p-6">
-            <ChefLoader text={t('profile.loading') || 'Profil Hazırlanıyor...'} />
+            <ChefLoader text={t('profile.loading')} />
         </div>
     );
     
@@ -513,9 +513,9 @@ const Profile = () => {
             <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mb-6">
                 <X className="w-10 h-10" />
             </div>
-            <h2 className="text-xl font-black text-chefie-text mb-2">Eyvah!</h2>
-            <p className="text-chefie-secondary font-bold max-w-xs">{t('profile.not_found') || 'Kullanıcı bulunamadı veya bir hata oluştu.'}</p>
-            <Link to="/" className="mt-8 px-8 py-3 bg-chefie-yellow text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">Ana Sayfaya Dön</Link>
+            <h2 className="text-xl font-black text-chefie-text mb-2">{t('common.error_title', 'Eyvah!')}</h2>
+            <p className="text-chefie-secondary font-bold max-w-xs">{t('profile.not_found')}</p>
+            <Link to="/" className="mt-8 px-8 py-3 bg-chefie-yellow text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">{t('nav.home')}</Link>
         </div>
     );
 
@@ -544,14 +544,14 @@ const Profile = () => {
                             className="bg-chefie-cream w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
                         >
                             <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
-                                <h3 className="font-bold text-lg text-chefie-text">{t('profile.followers') || 'Takipçiler'}</h3>
+                                <h3 className="font-bold text-lg text-chefie-text">{t('profile.followers')}</h3>
                                 <button onClick={() => setShowFollowers(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
                             <div className="p-4 overflow-y-auto w-full flex-1">
                                 {followersList.length === 0 ? (
-                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz takipçi yok.</p>
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">{t('profile.no_followers')}</p>
                                 ) : (
                                     <div className="space-y-3">
                                         {followersList.map(user => (
@@ -597,14 +597,14 @@ const Profile = () => {
                             className="bg-chefie-cream w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
                         >
                             <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
-                                <h3 className="font-bold text-lg text-chefie-text">{t('profile.following_count') || 'Takip Edilenler'}</h3>
+                                <h3 className="font-bold text-lg text-chefie-text">{t('profile.following_count')}</h3>
                                 <button onClick={() => setShowFollowing(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
                             <div className="p-4 overflow-y-auto w-full flex-1">
                                 {followingList.length === 0 ? (
-                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz kimseyi takip etmiyor.</p>
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">{t('profile.no_following')}</p>
                                 ) : (
                                     <div className="space-y-3">
                                         {followingList.map(user => (
@@ -652,7 +652,7 @@ const Profile = () => {
                             <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
                                 <div className="flex items-center gap-2">
                                     <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
-                                    <h3 className="font-bold text-lg text-chefie-text">Aldığım Beğeniler ({formatStat(profile?.likes_count)})</h3>
+                                    <h3 className="font-bold text-lg text-chefie-text">{t('profile.received_likes')} ({formatStat(profile?.likes_count)})</h3>
                                 </div>
                                 <button onClick={() => setShowLikesModal(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
                                     <X className="w-5 h-5" />
@@ -664,7 +664,7 @@ const Profile = () => {
                                         <Loader2 className="w-8 h-8 animate-spin text-chefie-yellow" />
                                     </div>
                                 ) : recipeLikers.length === 0 ? (
-                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz beğeni yok.</p>
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">{t('profile.no_likes')}</p>
                                 ) : (
                                     <div className="space-y-5">
                                         {recipeLikers.map(recipe => (
@@ -687,7 +687,7 @@ const Profile = () => {
                                                         <div className="font-bold text-xs text-chefie-text truncate group-hover:text-chefie-green transition-colors">{recipe.recipe_title}</div>
                                                         <div className="text-[10px] text-chefie-secondary font-medium">
                                                             <Heart className="w-2.5 h-2.5 text-rose-500 fill-rose-500 inline mr-1" />
-                                                            {recipe.likers.length} beğeni
+                                                            {recipe.likers.length} {t('profile.likes_label')}
                                                         </div>
                                                     </div>
                                                     <ArrowRight className="w-3.5 h-3.5 text-chefie-secondary/40 group-hover:text-chefie-green transition-colors" />
@@ -745,7 +745,7 @@ const Profile = () => {
                             <div className="p-5 flex items-center justify-between border-b border-chefie-border bg-chefie-card">
                                 <div className="flex items-center gap-2">
                                     <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
-                                    <h3 className="font-bold text-lg text-chefie-text">Favorilerim ({formatStat(profile?.favorites_count || userFavorites.length)})</h3>
+                                    <h3 className="font-bold text-lg text-chefie-text">{t('profile.my_favorites')} ({formatStat(profile?.favorites_count || userFavorites.length)})</h3>
                                 </div>
                                 <button onClick={() => setShowFavoritesModal(false)} className="p-2 bg-chefie-cream rounded-xl text-chefie-secondary hover:text-chefie-text hover:bg-chefie-border transition-colors">
                                     <X className="w-5 h-5" />
@@ -753,7 +753,7 @@ const Profile = () => {
                             </div>
                             <div className="p-4 overflow-y-auto w-full flex-1">
                                 {userFavorites.length === 0 ? (
-                                    <p className="text-center text-chefie-secondary py-8 text-sm">Henüz favori tarifiniz yok.</p>
+                                    <p className="text-center text-chefie-secondary py-8 text-sm">{t('profile.no_favorites')}</p>
                                 ) : (
                                     <div className="space-y-4">
                                         {userFavorites.map(recipe => (
@@ -867,7 +867,7 @@ const Profile = () => {
                                 <div className="text-chefie-secondary text-sm md:text-base mb-6 max-w-sm mx-auto md:mx-0 font-medium">
                                     <span className="md:hidden">@{profile.username}</span>
                                     <div className="hidden md:block">
-                                        <div className="text-chefie-text font-bold mb-1">Usta Şef & Tarif Yaratıcısı</div>
+                                        <div className="text-chefie-text font-bold mb-1">{t('profile.chef_title')}</div>
                                     {(profile.city || profile.country) && (
                                         <div className="text-chefie-secondary opacity-70">
                                             {[profile.city, profile.country].filter(Boolean).join(', ')}
@@ -882,7 +882,7 @@ const Profile = () => {
                                     </button>
                                     <span className="w-1.5 h-1.5 bg-chefie-border rounded-full"></span>
                                     <button onClick={() => setShowFollowing(true)} className="hover:text-chefie-text transition-colors">
-                                        <span className="font-bold text-chefie-text">{formatStat(profile.following_count)}</span> {t('profile.following_count') || 'Takip'}
+                                        <span className="font-bold text-chefie-text">{formatStat(profile.following_count)}</span> {t('profile.following_count')}
                                     </button>
                                 </div>
 
@@ -891,7 +891,7 @@ const Profile = () => {
                                         <>
                                             {renderFriendButton()}
                                             <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-chefie-dark border border-chefie-border text-chefie-text font-bold rounded-xl hover:bg-chefie-cream transition-all shadow-sm">
-                                                İletişime Geç
+                                                {t('profile.contact')}
                                             </button>
                                         </>
                                     ) : (
@@ -899,7 +899,7 @@ const Profile = () => {
                                             onClick={() => navigate('/settings')}
                                             className="hidden md:flex items-center gap-2 px-8 py-3 bg-chefie-yellow text-white font-bold rounded-xl hover:scale-105 transition-all shadow-lg"
                                         >
-                                            Profili Düzenle
+                                            {t('profile.edit_profile_btn')}
                                         </button>
                                     )}
                                 </div>
@@ -913,7 +913,7 @@ const Profile = () => {
                                         <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{formatStat(profile.follower_count)}</div>
                                     </div>
                                     <div className="text-center group cursor-pointer" onClick={() => setShowFollowing(true)}>
-                                        <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.following_count') || 'Takip'}</div>
+                                        <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.following_count')}</div>
                                         <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{formatStat(profile.following_count)}</div>
                                     </div>
                                     <div className="text-center group cursor-pointer" onClick={async () => {
@@ -928,7 +928,7 @@ const Profile = () => {
                                             setLikesLoading(false);
                                         }
                                     }}>
-                                        <div className="text-[13px] text-chefie-text/60 font-medium mb-0">Beğeniler</div>
+                                        <div className="text-[13px] text-chefie-text/60 font-medium mb-0">{t('profile.likes')}</div>
                                         <div className="text-[2.2rem] font-black text-chefie-text tracking-tighter leading-none">{formatStat(profile.likes_count)}</div>
                                     </div>
                                 </div>
@@ -936,50 +936,6 @@ const Profile = () => {
                         </div>
                     </div>
 
-                {/* Pending Friend Requests (owner only) */}
-                {isOwner && pendingRequests.length > 0 && (
-                    <div className="bg-chefie-card rounded-[2rem] p-6 border border-chefie-yellow/20 shadow-md mb-8Text">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-chefie-yellow/10 rounded-xl">
-                                <UserPlus className="w-5 h-5 text-chefie-yellow" />
-                            </div>
-                            <h2 className="font-bold text-chefie-text">{t('profile.pending_requests')} ({pendingRequests.length})</h2>
-                        </div>
-                        <div className="space-y-4">
-                            {pendingRequests.map(request => (
-                                <div key={request.friendship_id} className="flex items-center justify-between gap-4 p-3 bg-chefie-cream rounded-2xl border border-chefie-border">
-                                    <Link to={`/profile/${request.id}`} className="flex items-center gap-3 min-w-0">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-chefie-card shadow-sm flex-shrink-0">
-                                            {request.profile_image ? (
-                                                <img
-                                                    src={getImageUrl(request.profile_image)}
-                                                    alt={request.username}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-chefie-green/10 text-chefie-green flex items-center justify-center font-bold text-sm">
-                                                    {(request.username || 'U').charAt(0).toUpperCase()}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="truncate">
-                                            <div className="font-bold text-sm truncate text-chefie-text">{request.full_name || request.username}</div>
-                                            <div className="text-[11px] text-chefie-secondary truncate">@{request.username}</div>
-                                        </div>
-                                    </Link>
-                                    <div className="flex gap-1.5">
-                                        <button onClick={() => acceptRequest(request.friendship_id)} className="p-2 bg-chefie-green text-white rounded-xl shadow-sm hover:scale-105 transition-transform">
-                                            <Check className="w-4 h-4" />
-                                        </button>
-                                        <button onClick={() => rejectRequest(request.friendship_id)} className="p-2 bg-chefie-card text-chefie-secondary rounded-xl border border-chefie-border shadow-sm hover:bg-chefie-cream">
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
                 {/* Tab System Mobile vs Desktop */}
                 <div className="md:border-b md:border-chefie-border mb-8 md:mb-12 w-full">
@@ -1115,7 +1071,7 @@ const Profile = () => {
                                         <div className="p-4 flex-1 flex flex-col">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="text-[10px] text-chefie-secondary font-bold uppercase tracking-wider">
-                                                    {new Date(recipe.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
+                                                    {new Date(recipe.created_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
                                                 </div>
                                                 <div className="flex items-center gap-1 text-[10px] font-bold text-chefie-text">
                                                     <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
@@ -1161,7 +1117,7 @@ const Profile = () => {
                                 <div className="w-24 h-24 bg-chefie-green/10 rounded-full flex items-center justify-center mb-6 border border-chefie-green/20 shadow-inner">
                                     <ChefHat className="w-12 h-12 text-chefie-green" />
                                 </div>
-                                <h3 className="text-chefie-text font-bold text-xl mb-2">Henüz Paylaşım Yok</h3>
+                                <h3 className="text-chefie-text font-bold text-xl mb-2">{t('profile.no_posts_title', 'Henüz Paylaşım Yok')}</h3>
                                 <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_posts')}</p>
                             </div>
                         )
@@ -1225,7 +1181,7 @@ const Profile = () => {
                                 <div className="w-24 h-24 bg-chefie-green/10 rounded-full flex items-center justify-center mb-6 border border-chefie-green/20 shadow-inner">
                                     <ChefHat className="w-12 h-12 text-chefie-green" />
                                 </div>
-                                <h3 className="text-chefie-text font-bold text-xl mb-2">Henüz Favoriler Yok</h3>
+                                <h3 className="text-chefie-text font-bold text-xl mb-2">{t('profile.no_favorites_title', 'Henüz Favoriler Yok')}</h3>
                                 <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_posts')}</p>
                             </div>
                         )
@@ -1254,12 +1210,12 @@ const Profile = () => {
                                                 <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-3">
                                                     <div>
                                                         <div className="text-white/80 text-[10px] font-black tracking-widest uppercase">
-                                                            {new Date(m.createdAt).toLocaleDateString('tr-TR')}
+                                                            {new Date(m.createdAt).toLocaleDateString(i18n.language)}
                                                         </div>
                                                         <h3 className="text-xl font-black text-white leading-tight">{m.title}</h3>
                                                     </div>
                                                     <div className="px-3 py-1.5 bg-chefie-card/90 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest text-chefie-text border border-chefie-border">
-                                                        {(m.recipes?.length || 0)} Tarif
+                                                        {(m.recipes?.length || 0)} {t('profile.menus_count')}
                                                     </div>
                                                 </div>
                                             </div>
@@ -1276,10 +1232,10 @@ const Profile = () => {
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
                                                         <span className="text-xs font-bold text-chefie-text truncate">
-                                                            {m.createdBy?.full_name || m.createdBy?.username || 'Kullanıcı'}
+                                                            {m.createdBy?.full_name || m.createdBy?.username || t('profile.menu_owner')}
                                                         </span>
                                                         {m.copiedFrom && (
-                                                            <span className="text-[10px] text-chefie-secondary/60 font-medium truncate">Kaynak: {m.copiedFrom}</span>
+                                                            <span className="text-[10px] text-chefie-secondary/60 font-medium truncate">{t('profile.menu_source')}{m.copiedFrom}</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -1296,10 +1252,10 @@ const Profile = () => {
                                 <div className="w-24 h-24 bg-chefie-yellow/10 rounded-full flex items-center justify-center mb-6 border border-chefie-yellow/20 shadow-inner">
                                     <LayoutGrid className="w-12 h-12 text-chefie-yellow" />
                                 </div>
-                                <h3 className="text-chefie-text font-bold text-xl mb-2">Henüz Menü Yok</h3>
-                                <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">Menüler sayfasından hazır menüleri kopyalayabilir veya kendi menünüzü oluşturabilirsiniz.</p>
+                                <h3 className="text-chefie-text font-bold text-xl mb-2">{t('profile.no_menus')}</h3>
+                                <p className="text-chefie-secondary font-medium max-w-xs mx-auto leading-relaxed">{t('profile.no_menus_desc')}</p>
                                 <Link to="/menus" className="mt-8 px-8 py-3 bg-chefie-yellow text-white font-bold text-sm rounded-2xl shadow-lg hover:scale-105 transition-all">
-                                    Menülere Git
+                                    {t('profile.go_to_menus')}
                                 </Link>
                             </div>
                         )
@@ -1336,12 +1292,18 @@ const Profile = () => {
                                                 className="text-xs font-bold text-chefie-yellow hover:underline flex items-center gap-1"
                                             >
                                                 <Check className="w-3 h-3" />
-                                                Tümünü Okundu İşaretle
+                                                {t('profile.mark_all_read')}
                                             </button>
                                         </div>
                                     )}
                                     
                                     {/* Follow Requests */}
+                                    {pendingRequests.length > 0 && (
+                                        <div className="flex items-center gap-2 mb-3 px-1">
+                                            <UserPlus className="w-4 h-4 text-chefie-yellow" />
+                                            <h3 className="text-sm font-bold text-chefie-text">{t('profile.pending_requests')} ({pendingRequests.length})</h3>
+                                        </div>
+                                    )}
                                     {pendingRequests.map((request) => (
                                         <div key={`req-${request.friendship_id}`} className="bg-chefie-card rounded-3xl border border-chefie-border p-5 flex items-center gap-4 animate-in fade-in duration-500 shadow-md">
                                             <div className="w-12 h-12 rounded-full overflow-hidden border border-chefie-border flex-shrink-0 shadow-sm">
@@ -1389,7 +1351,7 @@ const Profile = () => {
                                                     <p className="text-sm font-bold text-chefie-text">{notification.title}</p>
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-[10px] text-chefie-secondary">
-                                                            {new Date(notification.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                            {new Date(notification.created_at).toLocaleDateString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                         <button 
                                                             onClick={(e) => {
@@ -1440,7 +1402,7 @@ const Profile = () => {
                                         <div className="flex items-center gap-1.5 mt-1 text-chefie-secondary">
                                             <Clock className="w-3.5 h-3.5" />
                                             <span className="text-[10px] font-bold uppercase tracking-wider">
-                                                {new Date(selectedNotification.created_at).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                                                {new Date(selectedNotification.created_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
                                     </div>

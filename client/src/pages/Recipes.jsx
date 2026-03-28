@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import ChefLoader from '../components/ChefLoader';
 
 const Recipes = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [recipes, setRecipes] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,6 +25,13 @@ const Recipes = () => {
     useEffect(() => {
         const q = searchParams.get('q') || '';
         setSearchQuery(q);
+        
+        // SEO: Dynamic Page Title
+        if (q) {
+            document.title = t('recipes.seo_title_search', { query: q });
+        } else {
+            document.title = t('recipes.seo_title_default');
+        }
     }, [searchParams]);
 
     useEffect(() => {
@@ -222,7 +229,7 @@ const Recipes = () => {
 
                                     <div className="absolute top-5 left-5">
                                         <div className="px-4 py-2 bg-chefie-card/90 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-widest text-chefie-text shadow-md dark:shadow-none">
-                                            {recipe.category_name || 'Genel'}
+                                            {recipe.category_name || t('common.general')}
                                         </div>
                                     </div>
 

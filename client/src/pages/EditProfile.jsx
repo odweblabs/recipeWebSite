@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
+import { safeGetUser, safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage} from '../utils/storage';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -49,7 +49,7 @@ const EditProfile = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const token = safeGetToken();
-    const [user, setUser] = useState(JSON.parse(safeGetSessionStorage('user') || '{}'));
+    const [user, setUser] = useState(JSON.parse(safeGetUser() || '{}'));
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
@@ -127,13 +127,13 @@ const EditProfile = () => {
             // 2. Update Password if fields are filled
             if (newPassword) {
                 if (newPassword !== confirmPassword) {
-                    throw new Error(t('edit_profile.errors.match'));
+                    throw new Error(t('edit_profile.validation.password_mismatch'));
                 }
                 if (newPassword.length < 6) {
-                    throw new Error(t('edit_profile.errors.length'));
+                    throw new Error(t('edit_profile.validation.password_length'));
                 }
                 if (!currentPassword) {
-                    throw new Error(t('edit_profile.errors.current_required'));
+                    throw new Error(t('edit_profile.validation.current_password_required'));
                 }
 
                 await axios.put(`${API_BASE}/api/auth/password`, {
@@ -145,7 +145,7 @@ const EditProfile = () => {
             }
 
             // Success!
-            setMessage({ type: 'success', text: t('edit_profile.messages.success') });
+            setMessage({ type: 'success', text: t('edit_profile.status.success') });
 
             // Update session storage
             const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
@@ -160,7 +160,7 @@ const EditProfile = () => {
         } catch (err) {
             setMessage({
                 type: 'error',
-                text: err.response?.data?.error || err.message || t('edit_profile.messages.error')
+                text: err.response?.data?.error || err.message || t('edit_profile.status.error')
             });
         } finally {
             setUpdating(false);
@@ -168,7 +168,7 @@ const EditProfile = () => {
     };
 
     const handleDeleteAccount = async () => {
-        if (window.confirm(t('edit_profile.messages.confirm_delete'))) {
+        if (window.confirm(t('edit_profile.status.delete_confirm'))) {
             try {
                 await axios.delete(`${API_BASE}/api/auth/account`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -177,7 +177,7 @@ const EditProfile = () => {
                 safeClearAuth();
                 navigate('/admin/login');
             } catch (err) {
-                alert(t('edit_profile.messages.error_delete'));
+                alert(t('edit_profile.status.delete_error'));
             }
         }
     };

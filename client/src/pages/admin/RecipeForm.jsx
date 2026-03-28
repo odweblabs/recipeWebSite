@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../../utils/storage';
+import { safeGetUser, safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage} from '../../utils/storage';
 import API_BASE from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
@@ -34,7 +34,7 @@ const RecipeForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const token = safeGetToken();
-    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
+    const user = JSON.parse(safeGetUser() || '{}');
     const isLoggedIn = !!token && !!user?.id;
 
     const [categories, setCategories] = useState([]);

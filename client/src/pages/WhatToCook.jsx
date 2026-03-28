@@ -29,6 +29,10 @@ const WhatToCook = () => {
     const [isSpinning, setIsSpinning] = useState(false);
 
     useEffect(() => {
+        document.title = t('what_to_cook.seo_title');
+    }, [t]);
+
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const [metaRes, categoriesRes] = await Promise.all([
@@ -379,7 +383,7 @@ const WhatToCook = () => {
                                         <div className="absolute inset-0 bg-gradient-to-t from-chefie-dark/60 via-transparent to-transparent"></div>
                                         <div className="absolute top-5 left-5">
                                             <div className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-widest text-chefie-dark shadow-xl">
-                                                {suggestion.category_name || 'GENEL'}
+                                                {suggestion.category_name || t('common.general').toUpperCase()}
                                             </div>
                                         </div>
                                         <div className="absolute top-5 right-5 bg-chefie-dark/90 backdrop-blur-md px-3 py-2 rounded-2xl flex items-center gap-2 shadow-xl">
@@ -484,7 +488,7 @@ const WhatToCook = () => {
                                             </div>
                                             <div className="p-3 md:p-4">
                                                 <div className="text-[9px] font-black tracking-widest uppercase text-gray-300 mb-1">
-                                                    {recipe.category_name || 'GENEL'}
+                                                    {recipe.category_name || t('common.general').toUpperCase()}
                                                 </div>
                                                 <h4 className="text-xs md:text-sm font-black text-chefie-text line-clamp-2 leading-snug group-hover:text-chefie-yellow transition-colors min-h-[2rem] md:min-h-[2.5rem]">
                                                     {recipe.title}

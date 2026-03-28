@@ -17,6 +17,11 @@ const executeQuery = async (query, params = []) => {
     rows.changes = result.rowCount;
     rows.lastInsertRowid = (rows.length > 0 && rows[0].id) ? rows[0].id : null;
     
+    // DEBUG LOG
+    if (query.trim().toLowerCase().startsWith('delete')) {
+        console.log('[DEBUG DB] DELETE result:', { query: query.substring(0, 50), rowCount: result.rowCount });
+    }
+
     // Crucial: Use defineProperty to add __rawPgResult as non-enumerable
     // to prevent JSON serialization from recursing infinitely.
     Object.defineProperty(rows, '__rawPgResult', {

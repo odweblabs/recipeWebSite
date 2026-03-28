@@ -55,6 +55,40 @@ const Home = () => {
     };
 
     useEffect(() => {
+        // SEO: Dynamic Page Title
+        document.title = t('home.seo_title');
+
+        // SEO: JSON-LD Structured Data (Organization & WebSite)
+        const structuredData = [
+            {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "Tarifo",
+                "url": "https://tarifo.vercel.app/",
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://tarifo.vercel.app/recipes?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                }
+            },
+            {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "Tarifo",
+                "url": "https://tarifo.vercel.app/",
+                "logo": "https://tarifo.vercel.app/bitarif_logo_1.png",
+                "sameAs": [
+                    "https://github.com/odweblabs/recipeWebSite"
+                ]
+            }
+        ];
+
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.id = 'home-structured-data';
+        script.innerHTML = JSON.stringify(structuredData);
+        document.head.appendChild(script);
+
         const fetchData = async () => {
             try {
                 const [recipesRes, categoriesRes, statsRes, chefsRes, recommendationRes] = await Promise.all([
@@ -81,6 +115,14 @@ const Home = () => {
             }
         };
         fetchData();
+
+        // Cleanup structured data on unmount
+        return () => {
+            const existingScript = document.getElementById('home-structured-data');
+            if (existingScript) {
+                existingScript.remove();
+            }
+        };
     }, []);
 
     return (
@@ -247,7 +289,7 @@ const Home = () => {
                 >
                     {loading ? (
                         <div className="w-full flex items-center justify-center py-20">
-                            <ChefLoader text={t('common.loading') || 'Yükleniyor...'} />
+                            <ChefLoader text={t('common.loading')} />
                         </div>
                     ) : (
                         recipes.slice(0, 6).map((recipe, index) => (

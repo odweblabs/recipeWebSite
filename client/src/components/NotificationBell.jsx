@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE from '../utils/api';
-import { safeGetToken, safeGetSessionStorage } from '../utils/storage';
+import { safeGetUser, safeGetToken, safeGetSessionStorage} from '../utils/storage';
 
 const NotificationBell = ({ isMobile = false }) => {
     const { t, i18n } = useTranslation();
@@ -15,7 +15,7 @@ const NotificationBell = ({ isMobile = false }) => {
     const [notifications, setNotifications] = useState([]);
     const [selectedNotification, setSelectedNotification] = useState(null);
     const token = safeGetToken();
-    const user = JSON.parse(safeGetSessionStorage('user') || '{}');
+    const user = JSON.parse(safeGetUser() || '{}');
 
     const fetchNotifications = async () => {
         if (!token) return;

@@ -1,25 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ShieldCheck, Lock, Eye, Cloud } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Policy = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const policies = [
         {
             icon: Lock,
-            title: "Veri Güvenliği",
-            content: "Kullanıcı verileriniz şifrelenmiş sunucularımızda güvenle saklanır. Şifreleriniz bcrypt hashing algoritması ile korunmaktadır ve bizim tarafımızdan dahi görülemez."
+            title: t('policy.item1.title'),
+            content: t('policy.item1.content')
         },
         {
             icon: Eye,
-            title: "Gizlilik İlkesi",
-            content: "Kişisel verileriniz asla üçüncü şahıslarla paylaşılmaz. Sadece platform içindeki etkileşimleriniz (ad soyad, paylaşılan tarifler) diğer kullanıcılar tarafından görülebilir."
+            title: t('policy.item2.title'),
+            content: t('policy.item2.content')
         },
         {
             icon: Cloud,
-            title: "Depolama",
-            content: "Paylaştığınız tarif görselleri bulut tabanlı depolama servislerimizde barındırılır. Hesabınızı sildiğinizde, size ait tüm kişisel veriler ve görseller sistemden kalıcı olarak temizlenir."
+            title: t('policy.item3.title'),
+            content: t('policy.item3.content')
         }
     ];
 
@@ -33,7 +35,7 @@ const Policy = () => {
                 >
                     <ChevronLeft className="w-6 h-6" />
                 </button>
-                <h1 className="text-xl font-bold font-sans">Kullanıcı Politikası</h1>
+                <h1 className="text-xl font-bold font-sans">{t('policy.title')}</h1>
                 <div className="w-10" />
             </div>
 
@@ -42,8 +44,8 @@ const Policy = () => {
                     <div className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-600 mb-4">
                         <ShieldCheck className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif dark:text-white">Güvenliğiniz Önceliğimiz</h2>
-                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">Tarifo platformunda verilerinizin nasıl yönetildiğini öğrenin.</p>
+                    <h2 className="text-2xl font-bold font-serif dark:text-white">{t('policy.header')}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-center mt-2">{t('policy.desc')}</p>
                 </div>
 
                 <div className="grid gap-6">
@@ -66,12 +68,12 @@ const Policy = () => {
 
                 <div className="mt-12 bg-chefie-green rounded-[32px] p-8 text-white text-center relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                    <h3 className="text-xl font-bold relative z-10">Daha Fazla Bilgi?</h3>
+                    <h3 className="text-xl font-bold relative z-10">{t('policy.more_info')}</h3>
                     <p className="text-white/80 mt-2 relative z-10 text-sm">
-                        Güvenlik ve gizlilik hakkında daha fazla sorunuz varsa destek ekibimizle iletişime geçmekten çekinmeyin.
+                        {t('policy.more_info_desc')}
                     </p>
                     <button className="mt-6 bg-white text-chefie-green px-8 py-3 rounded-full font-bold hover:bg-chefie-yellow hover:text-white transition-colors">
-                        Bize Ulaşın
+                        {t('policy.contact_btn')}
                     </button>
                 </div>
             </div>

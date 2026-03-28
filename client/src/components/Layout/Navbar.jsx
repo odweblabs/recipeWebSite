@@ -4,7 +4,7 @@ import { Menu, X } from 'lucide-react';
 import NotificationBell from '../NotificationBell';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { safeGetToken, safeGetSessionStorage } from '../../utils/storage';
+import { safeGetUser, safeGetToken, safeGetSessionStorage} from '../../utils/storage';
 import { getImageUrl } from '../../utils/imageUtils';
 import axios from 'axios';
 import API_BASE from '../../utils/api';
@@ -16,11 +16,11 @@ const Navbar = () => {
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [token, setToken] = useState(safeGetToken());
-    const [user, setUser] = useState(JSON.parse(safeGetSessionStorage('user') || '{}'));
+    const [user, setUser] = useState(JSON.parse(safeGetUser() || '{}'));
 
     useEffect(() => {
         setToken(safeGetToken());
-        setUser(JSON.parse(safeGetSessionStorage('user') || '{}'));
+        setUser(JSON.parse(safeGetUser() || '{}'));
     }, [location]);
 
     return (
@@ -54,10 +54,10 @@ const Navbar = () => {
                     </div>
 
                     <div className="md:hidden flex items-center gap-3">
-                        {token && (
+                        {token && user?.id && (
                             <div className="flex items-center gap-3">
                                 <NotificationBell isMobile={true} />
-                                <Link to={`/profile/${user.id}`} className="hover:opacity-80 transition-opacity">
+                                <Link to={`/profile/${user.id}`} className="hover:opacity-80 transition-opacity flex-shrink-0">
                                     {user.profile_image ? (
                                         <img 
                                             src={getImageUrl(user.profile_image)} 

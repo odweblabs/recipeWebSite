@@ -1,4 +1,4 @@
-import { safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage } from '../utils/storage';
+import { safeGetUser, safeGetToken, safeClearAuth, safeGetStorage, safeSetStorage, safeRemoveStorage, safeGetSessionStorage, safeSetSessionStorage} from '../utils/storage';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,8 @@ import {
     AlertCircle,
     Shield,
     X,
-    LayoutDashboard
+    LayoutDashboard,
+    Github
 } from 'lucide-react';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
@@ -32,7 +33,7 @@ const Settings = () => {
     const { t, i18n } = useTranslation();
     const { theme, toggleTheme } = useTheme();
     const token = safeGetToken();
-    const [user, setUser] = useState(JSON.parse(safeGetSessionStorage('user') || '{}'));
+    const [user, setUser] = useState(JSON.parse(safeGetUser() || '{}'));
     const [loading, setLoading] = useState(true);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -200,7 +201,7 @@ const Settings = () => {
                     className="w-full bg-chefie-card p-4 rounded-3xl border border-chefie-border shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
                 >
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 aspect-square rounded-full overflow-hidden border-2 border-chefie-border relative group">
+                        <div className="w-16 h-16 aspect-square rounded-full overflow-hidden border-2 border-chefie-border relative group flex-shrink-0">
                             {user.profile_image ? (
                                 <img
                                     src={getImageUrl(user.profile_image)}
@@ -321,6 +322,12 @@ const Settings = () => {
                         <MenuItem icon={Info} title={t('settings.items.terms')} onClick={() => navigate('/terms')} />
                         <div className="h-px bg-chefie-border mx-4" />
                         <MenuItem icon={Shield} title={t('settings.items.policy')} onClick={() => navigate('/policy')} />
+                        <div className="h-px bg-chefie-border mx-4" />
+                        <MenuItem 
+                            icon={Github} 
+                            title={t('settings.items.github_repo')} 
+                            onClick={() => window.open('https://github.com/odweblabs/recipeWebSite', '_blank')} 
+                        />
                     </div>
                 </div>
 
@@ -331,7 +338,7 @@ const Settings = () => {
                         className="w-full bg-chefie-dark p-4 rounded-full border border-chefie-border shadow-sm flex items-center justify-center gap-2 hover:bg-chefie-green transition-colors group"
                     >
                         <LayoutDashboard className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-                        <span className="text-white font-bold uppercase tracking-wider">Yönetim Paneli</span>
+                        <span className="text-white font-bold uppercase tracking-wider">{t('nav.dashboard')}</span>
                     </button>
                 )}
 
@@ -383,7 +390,7 @@ const Settings = () => {
                                 onClick={() => setShowLanguageModal(false)}
                                 className="w-full py-3 bg-chefie-card border border-chefie-border rounded-2xl font-bold text-chefie-secondary hover:bg-chefie-cream transition-colors"
                             >
-                                Kapat / Close
+                                {t('common.close')}
                             </button>
                         </div>
                     </div>
