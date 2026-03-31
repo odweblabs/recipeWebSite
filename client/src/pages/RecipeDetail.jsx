@@ -3,6 +3,7 @@ import API_BASE from '../utils/api';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ChefLoader from '../components/ChefLoader';
+import SEO from '../components/SEO';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, ArrowLeft, Printer, Share2, Heart, ChefHat, Star, MessageSquare, Send, Smartphone, Flame } from 'lucide-react';
@@ -23,6 +24,7 @@ const RecipeDetail = () => {
     const [isFavorited, setIsFavorited] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [isScreenAwake, setIsScreenAwake] = useState(false);
+    const [activeImage, setActiveImage] = useState(null);
     const token = safeGetToken();
     const user = JSON.parse(safeGetUser() || '{}');
 
@@ -41,10 +43,14 @@ const RecipeDetail = () => {
                 const res = await axios.get(`${API_BASE}/api/recipes/${id}`);
                 const data = res.data;
                 setRecipe(data);
+                if (data.images && data.images.length > 0) {
+                    setActiveImage(data.images[0]);
+                } else {
+                    setActiveImage(data.image_url);
+                }
                 fetchComments();
 
-                // SEO: Dynamic Page Title
-                document.title = t('recipe_detail.seo_title', { title: data.title });
+                // SEO: Dynamic Page Title handled by SEO component
 
                 // SEO: JSON-LD Structured Data
                 const structuredData = {
@@ -292,29 +298,52 @@ const RecipeDetail = () => {
 
             <div className="bg-chefie-card rounded-3xl shadow-sm md:shadow-lg dark:shadow-none border border-chefie-border overflow-hidden print:shadow-none print:border-none print:rounded-none">
                 {/* Hero Image */}
-                <div className="w-full h-[300px] md:h-[450px] relative print:h-[250px] print:mb-4">
-                    <img
-                        src={recipe.image_url ? (recipe.image_url.startsWith('/images/') ? recipe.image_url : `${API_BASE}${recipe.image_url}`) : '/default-recipe.png'}
-                        alt={recipe.title}
-                        className="w-full h-full object-cover print:rounded-2xl"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent print:hidden"></div>
-                    <div className="absolute bottom-0 left-0 p-6 md:p-10 text-white print:relative print:text-black print:p-0 print:mt-4">
-                        <div className="flex flex-wrap items-center gap-3 mb-4">
-                            {categoryName && (
-                                <span className="px-3 py-1 bg-chefie-yellow text-gray-900 text-xs font-bold uppercase tracking-wider rounded-lg print:bg-gray-100">
-                                    {categoryName}
-                                </span>
-                            )}
-                            <div className="flex items-center bg-black/30 backdrop-blur-sm px-3 py-1 rounded-lg text-sm font-bold print:bg-transparent print:text-gray-600 print:px-0">
-                                <Star className="w-4 h-4 text-chefie-yellow fill-current mr-1" />
-                                {recipe.avg_rating ? Number(recipe.avg_rating).toFixed(1) : t('common.new_tag')}
-                                <span className="text-white/60 font-normal ml-1 print:text-gray-400">({recipe.rating_count || 0})</span>
+                <div className="w-full relative print:mb-4">
+                    <div className="w-full h-[300px] md:h-[450px] relative print:h-[250px]">
+                        <img
+                            src={activeImage ? (activeImage.startsWith('data:') || activeImage.startsWith('/') ? activeImage : `${API_BASE}${activeImage}`) : '/default-recipe.png'}
+                            alt={`${recipe.title} Yemek Tarifi - Tarifo`}
+                            className="w-full h-full object-cover print:rounded-2xl"
+                            loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent print:hidden"></div>
+                        <div className="absolute bottom-0 left-0 p-6 md:p-10 text-white print:relative print:text-black print:p-0 print:mt-4">
+                            <div className="flex flex-wrap items-center gap-3 mb-4">
+                                {categoryName && (
+                                    <span className="px-3 py-1 bg-chefie-yellow text-gray-900 text-xs font-bold uppercase tracking-wider rounded-lg print:bg-gray-100">
+                                        {categoryName}
+                                    </span>
+                                )}
+                                <div className="flex items-center bg-black/30 backdrop-blur-sm px-3 py-1 rounded-lg text-sm font-bold print:bg-transparent print:text-gray-600 print:px-0">
+                                    <Star className="w-4 h-4 text-chefie-yellow fill-current mr-1" />
+                                    {recipe.avg_rating ? Number(recipe.avg_rating).toFixed(1) : t('common.new_tag')}
+                                    <span className="text-white/60 font-normal ml-1 print:text-gray-400">({recipe.rating_count || 0})</span>
+                                </div>
                             </div>
+                            <h1 className="text-3xl md:text-5xl font-bold font-serif mb-2 leading-tight">{recipe.title}</h1>
+                            <p className="text-white/80 max-w-2xl text-base md:text-lg line-clamp-2 print:text-black print:line-clamp-none">{recipe.description}</p>
                         </div>
-                        <h1 className="text-3xl md:text-5xl font-bold font-serif mb-2 leading-tight">{recipe.title}</h1>
-                        <p className="text-white/80 max-w-2xl text-base md:text-lg line-clamp-2 print:text-black print:line-clamp-none">{recipe.description}</p>
                     </div>
+
+                    {/* Image Gallery Thumbnails */}
+                    {recipe.images && recipe.images.length > 1 && (
+                        <div className="absolute right-6 top-6 flex flex-col gap-3 z-30 print:hidden">
+                            {recipe.images.map((img, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setActiveImage(img)}
+                                    className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all shadow-lg ${activeImage === img ? 'border-chefie-yellow scale-110' : 'border-white/50 hover:border-white'}`}
+                                >
+                                    <img 
+                                        src={img.startsWith('data:') || img.startsWith('/') ? img : `${API_BASE}${img}`} 
+                                        alt={`${recipe.title} - Görsel ${idx + 1} Yemek Tarifi - Tarifo`} 
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 print:block">

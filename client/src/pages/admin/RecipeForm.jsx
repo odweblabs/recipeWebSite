@@ -48,8 +48,8 @@ const RecipeForm = () => {
         prep_time: '',
         cook_time: ''
     });
-    const [image, setImage] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null);
+    const [images, setImages] = useState([]);
+    const [previewImages, setPreviewImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -81,8 +81,10 @@ const RecipeForm = () => {
                         prep_time: recipe.prep_time || '',
                         cook_time: recipe.cook_time || ''
                     });
-                    if (recipe.image_url) {
-                        setPreviewImage(getImageUrl(recipe.image_url));
+                    if (recipe.images && recipe.images.length > 0) {
+                        setPreviewImages(recipe.images.map(img => getImageUrl(img)));
+                    } else if (recipe.image_url) {
+                        setPreviewImages([getImageUrl(recipe.image_url)]);
                     }
                 })
                 .catch(err => {
@@ -98,16 +100,36 @@ const RecipeForm = () => {
     };
 
     const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.size > 4 * 1024 * 1024) {
-            alert('Resim boyutu çok büyük (Maksimum 4MB olmalıdır).');
-            e.target.value = '';
+        const selectedFiles = Array.from(e.target.files);
+        
+        if (selectedFiles.length + images.length > 5) {
+            alert('En fazla 5 resim yükleyebilirsiniz.');
             return;
         }
-        setImage(file);
-        if (file) {
-            setPreviewImage(URL.createObjectURL(file));
-        }
+
+        const validFiles = selectedFiles.filter(file => {
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name} çok büyük (Maksimum 5MB).`);
+                return false;
+            }
+            return true;
+        });
+
+        const newImages = [...images, ...validFiles];
+        setImages(newImages);
+        
+        const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+        setPreviewImages([...previewImages, ...newPreviews]);
+    };
+
+    const removeImage = (index) => {
+        const newImages = [...images];
+        newImages.splice(index, 1);
+        setImages(newImages);
+
+        const newPreviews = [...previewImages];
+        newPreviews.splice(index, 1);
+        setPreviewImages(newPreviews);
     };
 
     const handleLogout = () => {
@@ -130,8 +152,10 @@ const RecipeForm = () => {
         data.append('prep_time', formData.prep_time || '');
         data.append('cook_time', formData.cook_time || '');
 
-        if (image) {
-            data.append('image', image);
+        if (images.length > 0) {
+            images.forEach(img => {
+                data.append('images', img);
+            });
         }
 
         try {
@@ -322,26 +346,30 @@ const RecipeForm = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-400 mb-2">Kapak Görseli</label>
-                                        <label className="flex flex-col items-center justify-center w-full h-[180px] border-2 border-chefie-border border-dashed rounded-xl cursor-pointer bg-chefie-cream hover:bg-chefie-card transition-colors overflow-hidden relative group">
-                                            {previewImage ? (
-                                                <>
-                                                    <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
-                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <span className="text-white font-medium flex items-center gap-2"><UploadCloud className="w-5 h-5" /> Değiştir</span>
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                    <div className="w-12 h-12 bg-chefie-card rounded-full flex items-center justify-center mb-3 shadow-sm text-gray-400">
-                                                        <ImageIcon className="w-6 h-6" />
-                                                    </div>
-                                                    <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Yüklemek için tıklayın</span></p>
-                                                    <p className="text-xs text-gray-400">PNG, JPG (MAX. 5MB)</p>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">Görseller (En Fazla 5)</label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {previewImages.map((src, index) => (
+                                                <div key={index} className="relative group h-[120px] rounded-xl overflow-hidden border border-chefie-border">
+                                                    <img src={src} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeImage(index)}
+                                                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
                                                 </div>
+                                            ))}
+                                            {previewImages.length < 5 && (
+                                                <label className="flex flex-col items-center justify-center w-full h-[120px] border-2 border-chefie-border border-dashed rounded-xl cursor-pointer bg-chefie-cream hover:bg-chefie-card transition-colors overflow-hidden relative">
+                                                    <div className="flex flex-col items-center justify-center pt-2 pb-2">
+                                                        <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
+                                                        <p className="text-xs text-gray-500 text-center px-2">Resim Ekle</p>
+                                                    </div>
+                                                    <input type="file" className="hidden" accept="image/*" multiple onChange={handleImageChange} />
+                                                </label>
                                             )}
-                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                                        </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

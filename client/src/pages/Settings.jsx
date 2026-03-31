@@ -21,7 +21,8 @@ import {
     Shield,
     X,
     LayoutDashboard,
-    Github
+    Github,
+    Instagram
 } from 'lucide-react';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
@@ -328,6 +329,12 @@ const Settings = () => {
                             title={t('settings.items.github_repo')} 
                             onClick={() => window.open('https://github.com/odweblabs/recipeWebSite', '_blank')} 
                         />
+                        <div className="h-px bg-chefie-border mx-4" />
+                        <MenuItem 
+                            icon={Instagram} 
+                            title="Instagram" 
+                            onClick={() => window.open('https://instagram.com/recipes.with.tarifo', '_blank')} 
+                        />
                     </div>
                 </div>
 
@@ -354,12 +361,12 @@ const Settings = () => {
 
             {/* Language Selection Modal/Sheet */}
             {showLanguageModal && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8 sm:items-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
                     <div
                         className="fixed inset-0 bg-black/20 backdrop-blur-sm"
                         onClick={() => setShowLanguageModal(false)}
                     />
-                    <div className="relative w-full max-w-sm bg-chefie-card rounded-[32px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-300 border border-chefie-border">
+                    <div className="relative w-full max-w-sm bg-chefie-card rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in duration-300 border border-chefie-border">
                         <div className="p-6 text-center border-b border-chefie-border">
                             <h3 className="text-xl font-bold text-chefie-text">{t('settings.items.language')}</h3>
                         </div>
@@ -398,12 +405,12 @@ const Settings = () => {
             )}
             {/* Feedback Modal */}
             {showFeedbackModal && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8 sm:items-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
                     <div
                         className="fixed inset-0 bg-black/20 backdrop-blur-sm"
                         onClick={() => setShowFeedbackModal(false)}
                     />
-                    <div className="relative w-full max-w-sm bg-chefie-card rounded-[32px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-300 border border-chefie-border">
+                    <div className="relative w-full max-w-sm bg-chefie-card rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in duration-300 border border-chefie-border">
                         <div className="p-6 flex items-center justify-between border-b border-chefie-border">
                             <h3 className="text-xl font-bold text-chefie-text">
                                 {feedbackType === 'suggestion' ? t('settings.feedback.suggestion_title') : t('settings.feedback.bug_title')}

@@ -108,8 +108,6 @@ const Dashboard = () => {
     const [userCount, setUserCount] = useState(0);
     const [categories, setCategories] = useState([]);
     const [stats, setStats] = useState(null);
-    const [profileData, setProfileData] = useState({ fullName: user.full_name || '', profileImage: null, country: user.country || '' });
-    const [isUpdating, setIsUpdating] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
 
@@ -131,15 +129,10 @@ const Dashboard = () => {
     // User Activity State
     const [userActivity, setUserActivity] = useState({ activities: [], onlineCount: 0 });
 
-    // Password Change State
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordLoading, setPasswordLoading] = useState(false);
-    const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
-    const [showCurrentPw, setShowCurrentPw] = useState(false);
-    const [showNewPw, setShowNewPw] = useState(false);
-    const [showConfirmPw, setShowConfirmPw] = useState(false);
+    // My Settings Data
+    const [mySettingsRecipes, setMySettingsRecipes] = useState([]);
+    const [mySettingsComments, setMySettingsComments] = useState([]);
+    const [isLoadingMySettings, setIsLoadingMySettings] = useState(false);
 
     const [chefRecommendation, setChefRecommendation] = useState(null);
     const [isSavingRecommendation, setIsSavingRecommendation] = useState(false);
@@ -158,7 +151,8 @@ const Dashboard = () => {
         message: ''
     });
     const [notifUserSearch, setNotifUserSearch] = useState('');
-    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null); // Used for notification history
+    const [recipeToDelete, setRecipeToDelete] = useState(null); // Used for custom recipe delete modal
     const [viewingNotif, setViewingNotif] = useState(null);
     const [confirmDeleteFeedbackId, setConfirmDeleteFeedbackId] = useState(null);
     const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState(null);
@@ -249,7 +243,28 @@ const Dashboard = () => {
         if (tab === 'menus' || activeTab === 'menus') {
             fetchAdminMenus();
         }
+
+        // Fetch user data for settings tab
+        if (tab === 'settings' || activeTab === 'settings') {
+            fetchMySettingsData();
+        }
     }, [location.search, activeTab, user.role]);
+
+    const fetchMySettingsData = async () => {
+        setIsLoadingMySettings(true);
+        try {
+            const [recipesProps, commentsProps] = await Promise.all([
+                axios.get(`${API_BASE}/api/recipes/my/recipes`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${API_BASE}/api/recipes/my/comments`, { headers: { Authorization: `Bearer ${token}` } })
+            ]);
+            setMySettingsRecipes(recipesProps.data || []);
+            setMySettingsComments(commentsProps.data || []);
+        } catch (err) {
+            console.error('Error fetching personal dashboard data:', err);
+        } finally {
+            setIsLoadingMySettings(false);
+        }
+    };
 
     const fetchWelcomeTemplate = async () => {
         try {
@@ -664,18 +679,25 @@ const Dashboard = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Bu tarifi silmek istediğinize emin misiniz?')) {
-            try {
-                await axios.delete(`${API_BASE}/api/recipes/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                fetchRecipes();
-                fetchFavorites();
-                fetchTotalCount();
-            } catch (err) {
-                alert('Silme işlemi başarısız.');
-            }
+    const handleDelete = (id) => {
+        setRecipeToDelete(id);
+    };
+
+    const confirmDeleteRecipe = async () => {
+        if (!recipeToDelete) return;
+        try {
+            await axios.delete(`${API_BASE}/api/recipes/${recipeToDelete}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchRecipes();
+            fetchFavorites();
+            fetchTotalCount();
+            fetchStats();
+            setRecipeToDelete(null);
+        } catch (err) {
+            const errMsg = err.response?.data?.error || 'Silme işlemi başarısız. Lütfen tekrar deneyin.';
+            alert(errMsg);
+            setRecipeToDelete(null);
         }
     };
 
@@ -743,68 +765,9 @@ const Dashboard = () => {
         }
     };
 
-    const handleUpdateProfile = async (e) => {
-        e.preventDefault();
-        setIsUpdating(true);
-        try {
-            const formData = new FormData();
-            formData.append('full_name', profileData.fullName);
-            formData.append('country', profileData.country || '');
-            if (profileData.profileImage) {
-                formData.append('profile_image', profileData.profileImage);
-            }
-
-            await axios.put(`${API_BASE}/api/auth/profile`, formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            safeSetSessionStorage('user', JSON.stringify(userRes.data));
-            window.location.reload();
-        } catch (err) {
-            alert('Profil güncelleme başarısız.');
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
     const handleLogout = () => {
         safeClearAuth();
         navigate('/admin/login');
-    };
-
-    const handlePasswordChange = async () => {
-        if (!currentPassword || !newPassword || newPassword !== confirmPassword) return;
-        if (newPassword.length < 6) return;
-
-        setPasswordLoading(true);
-        setPasswordMessage({ type: '', text: '' });
-
-        try {
-            await axios.put(`${API_BASE}/api/auth/password`, {
-                current_password: currentPassword,
-                new_password: newPassword
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            setPasswordMessage({ type: 'success', text: 'Şifreniz başarıyla değiştirildi!' });
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-        } catch (err) {
-            setPasswordMessage({
-                type: 'error',
-                text: err.response?.data?.error || 'Şifre değiştirirken bir hata oluştu.'
-            });
-        } finally {
-            setPasswordLoading(false);
-        }
     };
 
     const handleDeleteComment = async (id) => {
@@ -813,10 +776,11 @@ const Dashboard = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setComments(prev => prev.filter(c => c.id !== id));
+            setMySettingsComments(prev => prev.filter(c => c.id !== id));
             setConfirmDeleteCommentId(null);
         } catch (err) {
             console.error('Error deleting comment:', err);
-            alert('Yorum silinirken bir hata oluştu.');
+            alert('Yorum silinirken bir hata oluştu. Yorumu silme yetkiniz olmayabilir.');
         }
     };
 
@@ -873,7 +837,7 @@ const Dashboard = () => {
                                                 <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} alt={u.full_name} className="w-full h-full object-cover block" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-chefie-secondary uppercase font-bold text-lg">
-                                                    {(u.full_name || u.username).charAt(0)}
+                                                    {(u.full_name || u.username || '?').charAt(0)}
                                                 </div>
                                             )}
                                         </div>
@@ -1057,7 +1021,7 @@ const Dashboard = () => {
                                                         {a.profile_image ? (
                                                             <img src={(a.profile_image.startsWith('http') || a.profile_image.startsWith('data:')) ? a.profile_image : `${API_BASE}${a.profile_image}`} className="w-full h-full object-cover block" alt="" />
                                                         ) : (
-                                                            <div className="w-full h-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold text-sm uppercase">{(a.full_name || a.username).charAt(0)}</div>
+                                                            <div className="w-full h-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold text-sm uppercase">{(a.full_name || a.username || '?').charAt(0)}</div>
                                                         )}
                                                     </div>
                                                     <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-chefie-card ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} title={isOnline ? 'Çevrimiçi' : 'Çevrimdışı'} />
@@ -1263,7 +1227,7 @@ const Dashboard = () => {
                                                     <img src={(item.profile_image.startsWith('http') || item.profile_image.startsWith('data:')) ? item.profile_image : `${API_BASE}${item.profile_image}`} className="w-full h-full object-cover block" alt="" />
                                                 ) : (
                                                     <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center">
-                                                        {(item.full_name || item.username).charAt(0)}
+                                                        {(item.full_name || item.username || '?').charAt(0)}
                                                     </div>
                                                 )}
                                             </div>
@@ -1377,7 +1341,7 @@ const Dashboard = () => {
                                                                         <img src={(u.profile_image.startsWith('http') || u.profile_image.startsWith('data:')) ? u.profile_image : `${API_BASE}${u.profile_image}`} className="w-full h-full object-cover block" alt="" />
                                                                     ) : (
                                                                         <div className="w-full h-full bg-chefie-yellow/10 text-chefie-yellow flex items-center justify-center font-bold text-xs uppercase">
-                                                                            {(u.full_name || u.username).charAt(0)}
+                                                                            {(u.full_name || u.username || '?').charAt(0)}
                                                                         </div>
                                                                     )}
                                                                 </div>
@@ -1645,150 +1609,100 @@ const Dashboard = () => {
                 <div className="px-4 md:px-6 py-6 md:py-12 bg-chefie-cream/30">
                         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start relative">
                             <div className="space-y-8">
+                                {/* My Recipes Panel */}
                                 <div className="bg-chefie-card p-8 rounded-3xl border border-chefie-border shadow-2xl">
-                                    <h2 className="text-xl font-bold text-chefie-text mb-6">Profil Bilgilerini Güncelle</h2>
-                                    <form onSubmit={handleUpdateProfile} className="space-y-6">
-                                        <div>
-                                            <label className="block text-sm font-medium text-chefie-secondary mb-2">Ad Soyad</label>
-                                            <input
-                                                type="text"
-                                                value={profileData.fullName}
-                                                onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                                                className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none text-chefie-text"
-                                                required
-                                            />
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-2">
+                                            <Utensils className="w-5 h-5 text-[#10B981]" />
+                                            <h2 className="text-xl font-bold text-chefie-text">Tariflerim</h2>
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-chefie-secondary mb-2">Ülke</label>
-                                            <select
-                                                value={profileData.country}
-                                                onChange={(e) => setProfileData({ ...profileData, country: e.target.value })}
-                                                className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none appearance-none text-chefie-text"
-                                            >
-                                                <option value="">Ülke Seçiniz</option>
-                                                {COUNTRY_LIST.map(c => (
-                                                    <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Profil Fotoğrafı</label>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => setProfileData({ ...profileData, profileImage: e.target.files[0] })}
-                                                className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none"
-                                            />
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={isUpdating}
-                                            className="w-full bg-[#10B981] text-white py-3 rounded-xl font-bold hover:bg-[#059669] transition-all disabled:opacity-50"
-                                        >
-                                            {isUpdating ? 'Güncelleniyor...' : 'Bilgileri Kaydet'}
-                                        </button>
-                                    </form>
-                                </div>
-
-                                <div className="bg-chefie-card p-8 rounded-3xl border border-chefie-border shadow-2xl">
-                                    <div className="flex items-center gap-2 mb-6">
-                                        <Lock className="w-5 h-5 text-[#10B981]" />
-                                        <h2 className="text-xl font-bold text-chefie-text">Şifre Değiştir</h2>
+                                        <span className="text-xs font-bold text-chefie-secondary bg-chefie-cream px-3 py-1 rounded-full">{mySettingsRecipes.length} Tarif</span>
                                     </div>
 
-                                    {passwordMessage.text && (
-                                        <div className={`mb-5 px-4 py-3 rounded-xl text-sm font-bold ${passwordMessage.type === 'success'
-                                            ? 'bg-green-500/10 text-green-500 border border-green-500/20'
-                                            : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                                            }`}>
-                                            {passwordMessage.text}
+                                    {isLoadingMySettings ? (
+                                        <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-chefie-green" /></div>
+                                    ) : mySettingsRecipes.length === 0 ? (
+                                        <p className="text-sm text-chefie-secondary text-center py-4">Henüz bir tarif oluşturmadınız.</p>
+                                    ) : (
+                                        <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                            {mySettingsRecipes.map(recipe => (
+                                                <div key={recipe.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-chefie-cream transition-colors border border-transparent hover:border-chefie-border group cursor-pointer" onClick={() => window.open(`/recipe/${recipe.id}`, '_blank')}>
+                                                    <div className="w-14 h-14 rounded-xl bg-chefie-cream border border-chefie-border/50 overflow-hidden flex-shrink-0 relative">
+                                                        {recipe.image_url ? (
+                                                            <img src={recipe.image_url.startsWith('http') ? recipe.image_url : `${API_BASE}${recipe.image_url}`} alt={recipe.title} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <Utensils className="w-6 h-6 text-chefie-secondary/40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="text-sm font-black text-chefie-text truncate tracking-tight group-hover:text-chefie-green transition-colors">{recipe.title}</h3>
+                                                        <div className="flex items-center gap-4 mt-2">
+                                                            <span className="text-[11px] font-bold text-chefie-secondary flex items-center gap-1.5"><Heart className="w-3.5 h-3.5" /> {recipe.favorite_count || 0}</span>
+                                                            <span className="text-[11px] font-bold text-chefie-secondary flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> {recipe.comment_count || 0}</span>
+                                                            <span className="text-[10px] font-bold text-chefie-secondary/50 uppercase tracking-widest">{new Date(recipe.created_at).toLocaleDateString('tr-TR')}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
-
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-chefie-secondary mb-2">Mevcut Şifre</label>
-                                            <div className="relative">
-                                                <input
-                                                    type={showCurrentPw ? 'text' : 'password'}
-                                                    value={currentPassword}
-                                                    onChange={(e) => setCurrentPassword(e.target.value)}
-                                                    placeholder="Mevcut şifrenizi girin"
-                                                    className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none pr-12 text-chefie-text placeholder:text-chefie-secondary/30"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowCurrentPw(prev => !prev); }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                                >
-                                                    {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-chefie-secondary mb-2">Yeni Şifre</label>
-                                            <div className="relative">
-                                                <input
-                                                    type={showNewPw ? 'text' : 'password'}
-                                                    value={newPassword}
-                                                    onChange={(e) => setNewPassword(e.target.value)}
-                                                    placeholder="Yeni şifrenizi girin (en az 6 karakter)"
-                                                    className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none pr-12 text-chefie-text placeholder:text-chefie-secondary/30"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowNewPw(prev => !prev); }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                                >
-                                                    {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                                </button>
-                                            </div>
-                                            {newPassword && newPassword.length < 6 && (
-                                                <p className="mt-1.5 text-xs text-orange-500 font-medium">Şifre en az 6 karakter olmalıdır.</p>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-chefie-secondary mb-2">Yeni Şifre Tekrar</label>
-                                            <div className="relative">
-                                                <input
-                                                    type={showConfirmPw ? 'text' : 'password'}
-                                                    value={confirmPassword}
-                                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                                    placeholder="Yeni şifrenizi tekrar girin"
-                                                    className="w-full px-5 py-3 bg-chefie-cream border border-chefie-border rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none pr-12 text-chefie-text placeholder:text-chefie-secondary/30"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowConfirmPw(prev => !prev); }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                                >
-                                                    {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                                </button>
-                                            </div>
-                                            {confirmPassword && confirmPassword !== newPassword && (
-                                                <p className="mt-1.5 text-xs text-red-500 font-medium">Şifreler eşleşmiyor.</p>
-                                            )}
-                                        </div>
-
-                                        <button
-                                            onClick={handlePasswordChange}
-                                            disabled={passwordLoading || !currentPassword || !newPassword || newPassword.length < 6 || newPassword !== confirmPassword}
-                                            className="w-full bg-[#10B981] text-white py-3 rounded-xl font-bold hover:bg-[#059669] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                        >
-                                            {passwordLoading ? (
-                                                <><Loader2 className="w-4 h-4 animate-spin" /> Değiştiriliyor...</>
-                                            ) : (
-                                                <><Lock className="w-4 h-4" /> Şifreyi Değiştir</>
-                                            )}
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
 
-                            <div className="hidden lg:flex justify-center items-center h-full pointer-events-none sticky top-24">
-                                <img src="/images/chef-settings.jpg" alt="Chef Illustration" className="w-full max-w-md object-contain mix-blend-multiply dark:mix-blend-normal opacity-80 dark:opacity-60 dark:invert-[0.05]" />
+                            <div className="space-y-8">
+                                {/* Received Comments Panel */}
+                                <div className="bg-chefie-card p-8 rounded-3xl border border-chefie-border shadow-2xl flex flex-col h-full">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-2">
+                                            <MessageSquare className="w-5 h-5 text-purple-500" />
+                                            <h2 className="text-xl font-bold text-chefie-text">Gelen Yorumlar</h2>
+                                        </div>
+                                        <span className="text-xs font-bold text-chefie-secondary bg-chefie-cream px-3 py-1 rounded-full">{mySettingsComments.length} Yorum</span>
+                                    </div>
+
+                                    {isLoadingMySettings ? (
+                                        <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /></div>
+                                    ) : mySettingsComments.length === 0 ? (
+                                        <div className="flex-1 flex flex-col items-center justify-center py-12 text-center text-chefie-secondary opacity-70">
+                                            <MessageSquare className="w-16 h-16 mb-4 opacity-50" />
+                                            <p className="text-sm font-bold uppercase tracking-widest">Tariflerinize henüz yorum yapılmamış.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                            {mySettingsComments.map(comment => (
+                                                <div key={comment.id} className="bg-chefie-cream/50 p-5 rounded-3xl border border-chefie-border transition-all hover:bg-chefie-cream hover:border-chefie-yellow/30 group">
+                                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-full bg-white border border-chefie-border overflow-hidden flex-shrink-0">
+                                                                {comment.commenter_image ? (
+                                                                    <img src={comment.commenter_image.startsWith('http') ? comment.commenter_image : `${API_BASE}${comment.commenter_image}`} alt={comment.commenter_name} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <UserCheck className="w-5 h-5 text-chefie-secondary/40 mx-auto mt-2.5" />
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-black text-chefie-text">{comment.commenter_name}</p>
+                                                                <p className="text-[11px] font-bold text-chefie-secondary mt-0.5">
+                                                                    <span className="text-chefie-green truncate max-w-[150px] inline-block align-bottom">{comment.recipe_title}</span> 
+                                                                    <span className="mx-1.5 opacity-30">•</span> 
+                                                                    {new Date(comment.created_at).toLocaleDateString('tr-TR')}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setConfirmDeleteCommentId(comment.id); }}
+                                                            className="p-2 text-red-500/70 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all flex-shrink-0 group-hover:opacity-100 md:opacity-0"
+                                                            title="Yorumu Sil"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-[13px] text-chefie-text/80 leading-relaxed font-medium">{comment.content}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                 </div>
@@ -2874,6 +2788,44 @@ const Dashboard = () => {
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {recipeToDelete && (
+                    <div
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-chefie-dark/60 backdrop-blur-sm"
+                        onClick={() => setRecipeToDelete(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-chefie-card w-full max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden p-8 border border-chefie-border"
+                        >
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Trash2 className="w-8 h-8 text-red-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-chefie-text text-center mb-2">Tarifi Sil?</h3>
+                            <p className="text-chefie-secondary text-center text-sm font-medium mb-8">
+                                Bu işlem geri alınamaz. Bu tarifi ve tüm ilişkili verileri (yorumlar, puanlar) silmek istediğinize emin misiniz?
+                            </p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => setRecipeToDelete(null)}
+                                    className="px-6 py-3 bg-chefie-cream text-chefie-secondary font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-chefie-border transition-all"
+                                >
+                                    İPTAL
+                                </button>
+                                <button
+                                    onClick={confirmDeleteRecipe}
+                                    className="px-6 py-3 bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg shadow-red-200 hover:shadow-xl hover:bg-red-600 transition-all"
+                                >
+                                    EVET, SİL
+                                </button>
                             </div>
                         </motion.div>
                     </div>

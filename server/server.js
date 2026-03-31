@@ -86,6 +86,7 @@ const listsRoutes = require('./routes/lists');
 const feedbackRoutes = require('./routes/feedback');
 const notificationsRoutes = require('./routes/notifications');
 const menusRoutes = require('./routes/menus');
+const seoRoutes = require('./routes/seo');
 
 app.use('/api/recipes', recipesRoutes);
 app.use('/api/categories', categoriesRoutes);
@@ -96,6 +97,7 @@ app.use('/api/lists', listsRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/menus', menusRoutes);
+app.use('/', seoRoutes);
 
 // Health check endpoint with DB status
 app.get('/api/health', async (req, res) => {

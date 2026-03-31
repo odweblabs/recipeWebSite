@@ -10,6 +10,7 @@ import SearchBar from '../components/SearchBar';
 import NotificationBell from '../components/NotificationBell';
 import { useTranslation } from 'react-i18next';
 import ChefLoader from '../components/ChefLoader';
+import SEO from '../components/SEO';
 
 const Home = () => {
     const { t, i18n } = useTranslation();
@@ -55,8 +56,7 @@ const Home = () => {
     };
 
     useEffect(() => {
-        // SEO: Dynamic Page Title
-        document.title = t('home.seo_title');
+        // SEO: Dynamic Page Title handled by SEO component
 
         // SEO: JSON-LD Structured Data (Organization & WebSite)
         const structuredData = [
@@ -152,6 +152,8 @@ const Home = () => {
                 </div>
             </header>
 
+            <SEO title={t('home.seo_title')} description={t('home.seo_description')} />
+
             {/* Hero Section */}
             <section className="relative rounded-[3rem] p-10 md:p-16 overflow-hidden bg-chefie-dark min-h-[450px] flex items-center shadow-2xl shadow-gray-200/50 dark:shadow-none">
                 {/* Decorative floating elements */}
@@ -168,7 +170,7 @@ const Home = () => {
 
                 <div className="absolute top-0 right-0 w-full md:w-1/2 h-full opacity-40 md:opacity-30 pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-chefie-dark via-chefie-dark/80 md:via-transparent to-chefie-dark/90 md:to-transparent z-10"></div>
-                    <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=1000" alt="Kitchen" className="w-full h-full object-cover" />
+                    <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=1000" alt="Kitchen" className="w-full h-full object-cover" loading="lazy" />
                 </div>
 
                 <div className="relative z-20 max-w-2xl">
@@ -194,21 +196,10 @@ const Home = () => {
                             <motion.span
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                transition={{ delay: 0.3 }}
-                                className="text-3xl md:text-4xl font-black text-white"
-                            >
-                                120+
-                            </motion.span>
-                            <span className="text-gray-400 text-xs font-bold tracking-widest uppercase mt-1">{t('home.hero.stats.videos')}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <motion.span
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
                                 transition={{ delay: 0.4 }}
                                 className="text-3xl md:text-4xl font-black text-chefie-yellow"
                             >
-                                {publicStats?.counts?.recipes || '1k+'}
+                                {publicStats?.counts?.recipes || 0}
                             </motion.span>
                             <span className="text-gray-400 text-xs font-bold tracking-widest uppercase mt-1">{t('home.hero.stats.recipes')}</span>
                         </div>
@@ -219,7 +210,7 @@ const Home = () => {
                                 transition={{ delay: 0.5 }}
                                 className="text-3xl md:text-4xl font-black text-white"
                             >
-                                {publicStats?.counts?.users || '5k+'}
+                                {publicStats?.counts?.users || 0}
                             </motion.span>
                             <span className="text-gray-400 text-xs font-bold tracking-widest uppercase mt-1">{t('home.hero.stats.chefs')}</span>
                         </div>
@@ -264,9 +255,12 @@ const Home = () => {
             {/* Haftanın Yıldızları Section */}
             <section className="relative group">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
-                    <h2 className="text-3xl font-black text-chefie-text flex items-center gap-4">
-                        {t('home.sections.stars_of_week')} <Trophy className="text-chefie-yellow w-8 h-8" />
-                    </h2>
+                    <div className="flex items-center gap-4 mb-10">
+                        <h2 className="text-4xl md:text-5xl font-black text-chefie-text">
+                            {t('home.sections.stars_of_week')}
+                        </h2>
+                        <Trophy className="text-chefie-yellow w-8 h-8" />
+                    </div>
                     <div className="flex gap-3 justify-end sm:justify-start">
                         <button
                             onClick={() => scroll('left')}
@@ -306,8 +300,9 @@ const Home = () => {
                                     <div className="w-full h-full rounded-full overflow-hidden relative">
                                         <img
                                             src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
-                                            alt={recipe.title}
+                                            alt={`${recipe.title} Yemek Tarifi - Tarifo`}
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover/card:rotate-3"
+                                            loading="lazy"
                                         />
                                     </div>
                                 </div>
@@ -429,7 +424,7 @@ const Home = () => {
                             <div className="relative mb-6">
                                 <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden">
                                     {chef.profile_image ? (
-                                        <img src={getImageUrl(chef.profile_image)} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        <img src={getImageUrl(chef.profile_image)} alt={chef.full_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
                                     ) : (
                                         <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-3xl text-chefie-text">{(chef.full_name || chef.username).charAt(0)}</div>
                                     )}
@@ -457,31 +452,37 @@ const Home = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                    {blogPosts.slice(0, 3).map((post, idx) => (
-                        <motion.div
-                            key={idx}
-                            whileHover={{ y: -10 }}
-                            className="bg-chefie-card rounded-[2.5rem] overflow-hidden border border-chefie-border shadow-xl shadow-gray-100 dark:shadow-none group cursor-pointer"
-                            onClick={() => navigate(`/blog/${post.id}`)}
-                        >
-                            <div className="relative h-60 overflow-hidden">
-                                <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                <div className="absolute top-5 left-5 px-4 py-2 bg-white/95 dark:bg-chefie-card/90 text-chefie-dark dark:text-chefie-yellow backdrop-blur-md rounded-2xl text-[10px] font-black shadow-sm">
-                                    {post.category}
-                                </div>
-                            </div>
-                            <div className="p-8">
-                                <h3 className="text-xl font-black text-chefie-text mb-4 leading-tight group-hover:text-chefie-yellow transition-colors">{post.title}</h3>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{post.author}</span>
-                                    <div className="flex items-center gap-1 text-chefie-yellow">
-                                        <span className="text-[10px] font-black">{t('blog.read')}</span>
-                                        <ArrowUpRight className="w-3 h-3" />
+                    {blogPosts.slice(0, 3).map((post, idx) => {
+                        const langData = post[i18n.language] || post.tr;
+                        return (
+                            <motion.div
+                                key={idx}
+                                whileHover={{ y: -10 }}
+                                className="bg-chefie-card rounded-[2.5rem] overflow-hidden border border-chefie-border shadow-xl shadow-gray-100 dark:shadow-none group cursor-pointer"
+                                onClick={() => navigate(`/blog/${post.id}`)}
+                            >
+                                <div className="relative h-60 overflow-hidden">
+                                    <img src={post.image} alt={langData.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
+                                    <div className="absolute top-5 left-5 px-4 py-2 bg-white/95 dark:bg-chefie-card/90 text-chefie-dark dark:text-chefie-yellow backdrop-blur-md rounded-2xl text-[10px] font-black shadow-sm">
+                                        {langData.category}
                                     </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                                <div className="p-8">
+                                    <h3 className="text-xl font-black text-chefie-text mb-3 leading-tight group-hover:text-chefie-yellow transition-colors">{langData.title}</h3>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 line-clamp-3 leading-relaxed">
+                                        {langData.excerpt}
+                                    </p>
+                                    <div className="flex items-center justify-between pt-4 border-t border-chefie-border/30">
+                                        <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{post.author}</span>
+                                        <div className="flex items-center gap-1 text-chefie-yellow">
+                                            <span className="text-[10px] font-black uppercase tracking-tighter">{t('blog.read')}</span>
+                                            <ArrowUpRight className="w-3 h-3" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </section>
 
@@ -528,7 +529,7 @@ const Home = () => {
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
                                     {comment.profile_image ? (
-                                        <img src={getImageUrl(comment.profile_image)} className="w-full h-full object-cover" />
+                                        <img src={getImageUrl(comment.profile_image)} className="w-full h-full object-cover" loading="lazy" />
                                     ) : (
                                         <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-bold text-chefie-dark text-xs">{(comment.full_name || comment.username).charAt(0)}</div>
                                     )}
@@ -597,7 +598,7 @@ const Home = () => {
                                 <div className="flex items-center gap-3 pl-2">
                                     <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden shadow-lg bg-white">
                                         {recommendation.chef_image ? (
-                                            <img src={getImageUrl(recommendation.chef_image)} alt={recommendation.chef_name} className="w-full h-full object-cover" />
+                                            <img src={getImageUrl(recommendation.chef_image)} alt={recommendation.chef_name} className="w-full h-full object-cover" loading="lazy" />
                                         ) : (
                                             <div className="w-full h-full bg-chefie-cream flex items-center justify-center font-black text-chefie-dark text-sm">{(recommendation.chef_name || recommendation.chef_username).charAt(0)}</div>
                                         )}
@@ -626,6 +627,7 @@ const Home = () => {
                                 src={recommendation.image_url ? getImageUrl(recommendation.image_url) : '/default-recipe.png'}
                                 alt={recommendation.title}
                                 className="w-full h-full object-cover"
+                                loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
                         </motion.div>

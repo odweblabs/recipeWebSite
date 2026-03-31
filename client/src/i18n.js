@@ -25,11 +25,12 @@ i18n
                         dashboard: "Yönetici Paneli"
                     },
                     home: {
-                        seo_title: "Tarifo - En Lezzetli Yemek Tarifleri, Kolay ve Pratik Tarifler",
+                        seo_title: "En Lezzetli Yemek Tarifleri | Pratik ve Denenmiş Tarifler - Tarifo",
+                        seo_description: "Binlerce denenmiş yemek tarifi, videolu anlatımlar ve adım adım rehberlerle mutfağınızın şefi olun. En lezzetli ve pratik tarifler Tarifo'da.",
                         hero: {
                             badge: "YENİ NESİL MUTFAK REHBERİ",
-                            title_1: "Öğren, Pişir &",
-                            title_2: "Tadını Çıkar.",
+                            title_1: "En Güncel",
+                            title_2: "Yemek Tarifleri",
                             stats: {
                                 videos: "Video",
                                 recipes: "Özel Tarif",
@@ -43,7 +44,7 @@ i18n
                             examine: "İncele"
                         },
                         sections: {
-                            stars_of_week: "Haftanın Yıldızları",
+                            stars_of_week: "Son Eklenen Tarifler",
                             chefs_of_week: {
                                 subtitle: "USTALARIN MUTFAĞI",
                                 title: "Haftanın Şefleri",
@@ -76,8 +77,8 @@ i18n
                             recipes: "TARİFLER"
                         },
                         header: {
-                            title_1: "Lezzet Yolculuğuna",
-                            title_2: "Buradan Başla",
+                            title_1: "Adım Adım",
+                            title_2: "Pratik Tarifler",
                             description: "Binlerce özenle seçilmiş tarif arasından damak tadınıza en uygun olanı saniyeler içinde bulun."
                         },
                         filters: {
@@ -103,6 +104,7 @@ i18n
                             button: "FİLTRELERİ SIFIRLA"
                         },
                         seo_title_default: "Nefis Yemek Tarifleri - Binlerce Lezzet | Tarifo",
+                        seo_description_default: "Binlerce kategorize edilmiş yemek tarifi arasından size en uygun olanı seçin. Et yemeklerinden tatlılara kadar her gün yeni bir lezzet keşfedin.",
                         seo_title_search: "{{query}} - Arama Sonuçları | Tarifo"
                     },
                     trend: {
@@ -337,6 +339,7 @@ i18n
                         not_found: "Kullanıcı bulunamadı.",
                         followers: "takipçi",
                         following_count: "takip",
+                        likes: "beğeni",
                         pending_requests: "Bekleyen Takip İstekleri",
                         tabs: {
                             recipes: "Tarifler",
@@ -808,7 +811,7 @@ i18n
                             examine: "View"
                         },
                         sections: {
-                            stars_of_week: "Stars of the Week",
+                            stars_of_week: "Latest Recipes",
                             chefs_of_week: {
                                 subtitle: "MASTER KITCHEN",
                                 title: "Chefs of the Week",
@@ -1102,6 +1105,7 @@ i18n
                         not_found: "User not found.",
                         followers: "followers",
                         following_count: "following",
+                        likes: "likes",
                         pending_requests: "Pending Follow Requests",
                         tabs: {
                             recipes: "Recipes",

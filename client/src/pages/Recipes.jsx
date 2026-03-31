@@ -8,6 +8,7 @@ import { Star, Clock, Users, ArrowRight, Home, ChevronRight, Search, SlidersHori
 import SearchBar from '../components/SearchBar';
 import { useTranslation } from 'react-i18next';
 import ChefLoader from '../components/ChefLoader';
+import SEO from '../components/SEO';
 
 const Recipes = () => {
     const { t, i18n } = useTranslation();
@@ -25,13 +26,7 @@ const Recipes = () => {
     useEffect(() => {
         const q = searchParams.get('q') || '';
         setSearchQuery(q);
-        
-        // SEO: Dynamic Page Title
-        if (q) {
-            document.title = t('recipes.seo_title_search', { query: q });
-        } else {
-            document.title = t('recipes.seo_title_default');
-        }
+        // SEO: Title and Description now handled by SEO component
     }, [searchParams]);
 
     useEffect(() => {
@@ -88,6 +83,10 @@ const Recipes = () => {
         <div className="min-h-screen pb-20 px-4 md:px-6">
             {/* Minimal Header */}
             <header className="py-8 text-center max-w-4xl mx-auto">
+                <SEO 
+                    title={searchQuery ? t('recipes.seo_title_search', { query: searchQuery }) : t('recipes.seo_title_default')} 
+                    description={t('recipes.seo_description_default')} 
+                />
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -223,8 +222,9 @@ const Recipes = () => {
                                 <div className="relative aspect-[16/11] overflow-hidden">
                                     <img
                                         src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'}
-                                        alt={recipe.title}
+                                        alt={`${recipe.title} Yemek Tarifi - Tarifo`}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                        loading="lazy"
                                     />
 
                                     <div className="absolute top-5 left-5">
@@ -285,6 +285,7 @@ const Recipes = () => {
                                                 src={getImageUrl(recipe.chef_image)}
                                                 alt={recipe.chef_name}
                                                 className="w-8 h-8 rounded-full object-cover border-2 border-chefie-card shadow-sm"
+                                                loading="lazy"
                                             />
                                         ) : (
                                             <div className="w-8 h-8 rounded-full bg-chefie-cream text-chefie-text flex items-center justify-center font-bold text-xs border-2 border-chefie-card shadow-sm">

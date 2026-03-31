@@ -125,6 +125,28 @@ const NotificationBell = ({ isMobile = false }) => {
         });
     };
 
+    const renderMessageWithLinks = (text) => {
+        if (!text) return null;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.split(urlRegex).map((part, i) => {
+            if (part.match(urlRegex)) {
+                return (
+                    <a 
+                        key={i} 
+                        href={part} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-chefie-yellow hover:underline break-all"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {part}
+                    </a>
+                );
+            }
+            return part;
+        });
+    };
+
     return (
         <div className="relative">
             <button
@@ -198,7 +220,7 @@ const NotificationBell = ({ isMobile = false }) => {
                                                             <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     </div>
-                                                    <p className="text-[10px] text-chefie-secondary font-bold leading-relaxed line-clamp-2">{notification.message}</p>
+                                                    <p className="text-[10px] text-chefie-secondary font-bold leading-relaxed line-clamp-2">{renderMessageWithLinks(notification.message)}</p>
                                                 </div>
                                                 {!notification.is_read && (
                                                     <div className="w-1.5 h-1.5 bg-chefie-yellow rounded-full flex-shrink-0 mt-1"></div>
@@ -249,7 +271,7 @@ const NotificationBell = ({ isMobile = false }) => {
                             
                             <div className="p-6 md:p-8 overflow-y-auto flex-1 overscroll-contain">
                                 <p className="text-chefie-text text-base font-medium leading-relaxed whitespace-pre-wrap">
-                                    {selectedNotification.message}
+                                    {renderMessageWithLinks(selectedNotification.message)}
                                 </p>
 
                                 {selectedNotification.type === 'friend_request' && !selectedNotification.is_read && (

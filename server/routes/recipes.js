@@ -4,6 +4,7 @@ const { executeQuery } = require('../database');
 const multer = require('multer');
 const path = require('path');
 const { authenticateToken, adminOnly } = require('../middleware/auth');
+const { optimizeImage } = require('../utils/imageProcessor');
 
 // Configure Multer for image upload
 const storage = multer.memoryStorage();
@@ -45,9 +46,12 @@ router.get('/stats', adminOnly, async (req, res) => {
             executeQuery("SELECT COUNT(*) as count FROM comments WHERE DATE(created_at) = $1", [today]),
             executeQuery('SELECT id, username, full_name, profile_image, created_at FROM users ORDER BY created_at DESC LIMIT 5'),
             executeQuery(`
-                SELECT recipes.id, recipes.title, recipes.image_url, recipes.created_at,
+                SELECT recipes.id, recipes.title, 
+                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                       recipes.created_at,
                        categories.name as category_name,
-                       users.username as chef_username, users.full_name as chef_name, users.profile_image as chef_image
+                       users.username as chef_username, users.full_name as chef_name, 
+                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image
                 FROM recipes
                 LEFT JOIN categories ON recipes.category_id = categories.id
                 LEFT JOIN users ON recipes.user_id = users.id
@@ -55,7 +59,8 @@ router.get('/stats', adminOnly, async (req, res) => {
             `),
             executeQuery(`
                 SELECT comments.id, comments.content, comments.created_at,
-                       users.username, users.full_name, users.profile_image,
+                       users.username, users.full_name, 
+                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as profile_image,
                        recipes.id as recipe_id, recipes.title as recipe_title,
                        ratings.score as rating
                 FROM comments
@@ -65,7 +70,8 @@ router.get('/stats', adminOnly, async (req, res) => {
                 ORDER BY comments.created_at DESC LIMIT 5
             `),
             executeQuery(`
-                SELECT recipes.id, recipes.title, recipes.image_url,
+                SELECT recipes.id, recipes.title, 
+                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
                        ROUND(AVG(ratings.score), 1) as avg_rating,
                        COUNT(ratings.id) as rating_count
                 FROM recipes
@@ -114,9 +120,12 @@ router.get('/public-stats', async (req, res) => {
             executeQuery('SELECT COUNT(*) as count FROM recipes'),
             executeQuery('SELECT COUNT(*) as count FROM users'),
             executeQuery(`
-                SELECT recipes.id, recipes.title, recipes.image_url, recipes.created_at,
+                SELECT recipes.id, recipes.title, 
+                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                       recipes.created_at,
                        categories.name as category_name,
-                       users.username as chef_username, users.full_name as chef_name, users.profile_image as chef_image
+                       users.username as chef_username, users.full_name as chef_name, 
+                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image
                 FROM recipes
                 LEFT JOIN categories ON recipes.category_id = categories.id
                 LEFT JOIN users ON recipes.user_id = users.id
@@ -124,7 +133,8 @@ router.get('/public-stats', async (req, res) => {
             `),
             executeQuery(`
                 SELECT comments.id, comments.content, comments.created_at,
-                       users.username, users.full_name, users.profile_image,
+                       users.username, users.full_name, 
+                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as profile_image,
                        recipes.id as recipe_id, recipes.title as recipe_title,
                        ratings.score as rating
                 FROM comments
@@ -134,7 +144,8 @@ router.get('/public-stats', async (req, res) => {
                 ORDER BY comments.created_at DESC LIMIT 6
             `),
             executeQuery(`
-                SELECT recipes.id, recipes.title, recipes.image_url,
+                SELECT recipes.id, recipes.title, 
+                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
                        ROUND(AVG(ratings.score), 1) as avg_rating,
                        COUNT(ratings.id) as rating_count
                 FROM recipes
@@ -171,11 +182,14 @@ router.get('/recommendation', async (req, res) => {
 
         const results = await executeQuery(`
             SELECT 
-                recipes.*, 
+                recipes.id, recipes.title, recipes.description,
+                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                users.profile_image as chef_image,
+                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating
             FROM recipes 
             LEFT JOIN categories ON recipes.category_id = categories.id
@@ -209,13 +223,15 @@ router.get('/', async (req, res) => {
         const { limit = 50, offset = 0, category_id } = req.query;
         let sql = `
             SELECT 
-                recipes.id, recipes.title, recipes.image_url, recipes.prep_time, 
+                recipes.id, recipes.title, 
+                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                recipes.prep_time, 
                 recipes.cook_time, recipes.servings, recipes.category_id, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                users.profile_image as chef_image,
+                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
             FROM recipes 
@@ -263,13 +279,15 @@ router.get('/latest', async (req, res) => {
         const limit = parseInt(req.query.limit) || 12;
         const recipes = await executeQuery(`
             SELECT 
-                recipes.id, recipes.title, recipes.image_url, recipes.prep_time,
+                recipes.id, recipes.title, 
+                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                recipes.prep_time,
                 recipes.cook_time, recipes.servings, recipes.category_id,
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                users.profile_image as chef_image,
+                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
             FROM recipes 
@@ -352,11 +370,14 @@ router.get('/:id', async (req, res) => {
     try {
         const results = await executeQuery(`
             SELECT 
-                recipes.*, 
+                recipes.id, recipes.title, recipes.description, recipes.ingredients, recipes.instructions,
+                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                users.profile_image as chef_image,
+                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
                 (SELECT COUNT(*) FROM ratings WHERE recipe_id = recipes.id) as rating_count,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
@@ -365,9 +386,18 @@ router.get('/:id', async (req, res) => {
             LEFT JOIN users ON recipes.user_id = users.id
             WHERE recipes.id = $1
         `, [req.params.id]);
-
+        
         if (results.length === 0) return res.status(404).json({ error: 'Recipe not found' });
-        res.json(results[0]);
+        
+        // Fetch all images for this recipe
+        const images = await executeQuery('SELECT image_url FROM recipe_images WHERE recipe_id = $1 ORDER BY id ASC', [req.params.id]);
+        
+        const recipeData = {
+            ...results[0],
+            images: images.map(img => img.image_url)
+        };
+        
+        res.json(recipeData);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -438,27 +468,35 @@ router.get('/:id/comments', async (req, res) => {
 });
 
 // POST new recipe
-router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
+router.post('/', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
         const { title, description, ingredients, instructions, category_id, servings, prep_time, cook_time } = req.body;
-        let imageUrl = null;
-
-        if (req.file) {
-            const base64Image = req.file.buffer.toString('base64');
-            imageUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+        const files = req.files || [];
+        const optimizedImages = [];
+        
+        for (const file of files) {
+            const optimizedBase64 = await optimizeImage(file.buffer);
+            optimizedImages.push(optimizedBase64);
         }
+        
+        const recipeImageUrl = optimizedImages.length > 0 ? optimizedImages[0] : null;
         const finalCategoryId = category_id && category_id !== '' ? category_id : null;
         const finalServings = servings && servings !== '' ? parseInt(servings) : null;
         const finalPrepTime = prep_time && prep_time !== '' ? parseInt(prep_time) : null;
         const finalCookTime = cook_time && cook_time !== '' ? parseInt(cook_time) : null;
         const userId = req.user.id;
-
+        
         const info = await executeQuery(`
             INSERT INTO recipes (title, description, ingredients, instructions, category_id, user_id, image_url, servings, prep_time, cook_time)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
-        `, [title, description, ingredients, instructions, finalCategoryId, userId, imageUrl, finalServings, finalPrepTime, finalCookTime]);
-
+        `, [title, description, ingredients, instructions, finalCategoryId, userId, recipeImageUrl, finalServings, finalPrepTime, finalCookTime]);
+        
         const recipeId = info[0]?.id || info.lastInsertRowid;
+        
+        // Save all images to recipe_images table
+        for (const imageUrl of optimizedImages) {
+            await executeQuery('INSERT INTO recipe_images (recipe_id, image_url) VALUES ($1, $2)', [recipeId, imageUrl]);
+        }
 
         // Trigger notification to all users about the new recipe (Non-blocking background task)
         (async () => {
@@ -468,7 +506,8 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
 
                 if (recipientIds.length > 0) {
                     const notifTitle = 'Yeni Tarif Eklendi!';
-                    const notifMessage = `"${title}" adlı yeni bir tarif paylaşıldı. Hemen göz atın!`;
+                    const baseUrl = process.env.APP_URL || 'https://tarifo.vercel.app';
+                    const notifMessage = `"${title}" adlı yeni bir tarif paylaşıldı. Hemen göz atın!\n\n${baseUrl}/recipes/${recipeId}`;
 
                     // Batch inserts to stay well within Postgres parameter limits (max 65535, but let's be conservative)
                     const BATCH_SIZE = 500;
@@ -492,30 +531,36 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
             }
         })();
 
+        // Ping Google after success (runs in background)
+        const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+        fetch(`http://www.google.com/ping?sitemap=${encodeURIComponent(baseUrl + '/sitemap.xml')}`).catch(() => {});
+
         res.json({ id: recipeId });
+        // NOTE: Standard fetch is native in Node 18+, so no extra imports needed.
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 // PUT update recipe
-router.put('/:id', authenticateToken, upload.single('image'), async (req, res) => {
+router.put('/:id', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
         const { title, description, ingredients, instructions, category_id, servings, prep_time, cook_time } = req.body;
         const recipeId = req.params.id;
         const userId = req.user.id;
         const userRole = req.user.role;
-
+        const files = req.files || [];
+        
         // Check ownership or admin status
         const recipes = await executeQuery('SELECT user_id FROM recipes WHERE id = $1', [recipeId]);
         const recipe = recipes[0];
-
+        
         if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
-
+        
         if (userRole !== 'admin' && recipe.user_id !== userId) {
             return res.status(403).json({ error: 'Bu işlemi yapmaya yetkiniz yok.' });
         }
-
+        
         const finalServings = servings && servings !== '' ? parseInt(servings) : null;
         const finalPrepTime = prep_time && prep_time !== '' ? parseInt(prep_time) : null;
         const finalCookTime = cook_time && cook_time !== '' ? parseInt(cook_time) : null;
@@ -523,16 +568,27 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
         let sql = `UPDATE recipes SET title = $1, description = $2, ingredients = $3, instructions = $4, category_id = $5, servings = $6, prep_time = $7, cook_time = $8`;
         let params = [title, description, ingredients, instructions, category_id || null, finalServings, finalPrepTime, finalCookTime];
         let paramIndex = 9;
-
-        if (req.file) {
-            const base64Image = req.file.buffer.toString('base64');
+        
+        if (files.length > 0) {
+            const optimizedImages = [];
+            for (const file of files) {
+                const optimizedBase64 = await optimizeImage(file.buffer);
+                optimizedImages.push(optimizedBase64);
+            }
+            
             sql += `, image_url = $${paramIndex++}`;
-            params.push(`data:${req.file.mimetype};base64,${base64Image}`);
+            params.push(optimizedImages[0]); // Primary image
+            
+            // For updates, we clear old images and set new ones for simplicity and consistency
+            await executeQuery('DELETE FROM recipe_images WHERE recipe_id = $1', [recipeId]);
+            for (const imageUrl of optimizedImages) {
+                await executeQuery('INSERT INTO recipe_images (recipe_id, image_url) VALUES ($1, $2)', [recipeId, imageUrl]);
+            }
         }
-
+        
         sql += ` WHERE id = $${paramIndex++}`;
         params.push(recipeId);
-
+        
         await executeQuery(sql, params);
 
         res.json({ message: 'Recipe updated successfully' });
@@ -559,17 +615,26 @@ router.delete('/:id', authenticateToken, async (req, res) => {
         }
 
         // Cleanup: remove related records that might have FK constraints
+        // Most of these should be covered by ON DELETE CASCADE but we do it explicitly for safety
+        await executeQuery('DELETE FROM recipe_images WHERE recipe_id = $1', [recipeId]);
         await executeQuery('DELETE FROM comments WHERE recipe_id = $1', [recipeId]);
         await executeQuery('DELETE FROM ratings WHERE recipe_id = $1', [recipeId]);
         await executeQuery('DELETE FROM favorites WHERE recipe_id = $1', [recipeId]);
+        await executeQuery('DELETE FROM menu_recipes WHERE recipe_id = $1', [recipeId]);
         
         // Remove from site_settings if it was the chef recommendation
         await executeQuery("UPDATE site_settings SET value = NULL WHERE key = 'chef_recommendation_id' AND value = $1", [recipeId.toString()]);
 
-        await executeQuery('DELETE FROM recipes WHERE id = $1', [recipeId]);
-        res.json({ message: 'Recipe deleted' });
+        const deleteResult = await executeQuery('DELETE FROM recipes WHERE id = $1', [recipeId]);
+        
+        if (deleteResult.changes === 0) {
+            return res.status(404).json({ error: 'Tarif silinirken bir sorun oluştu veya tarif zaten silinmiş.' });
+        }
+
+        res.json({ message: 'Tarif başarıyla silindi' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[ADMIN DELETE ERROR]', err);
+        res.status(500).json({ error: 'Tarif silinirken veritabanı hatası oluştu: ' + err.message });
     }
 });
 
@@ -615,6 +680,47 @@ router.get('/users/:id/comments', async (req, res) => {
             WHERE comments.user_id = $1
             ORDER BY comments.created_at DESC
         `, [req.params.id]);
+        res.json(comments);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET current user's recipes (Optimized for dashboard)
+router.get('/my/recipes', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const recipes = await executeQuery(`
+            SELECT 
+                recipes.id, recipes.title, recipes.image_url, recipes.created_at,
+                (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count,
+                (SELECT COUNT(*) FROM favorites WHERE recipe_id = recipes.id) as favorite_count
+            FROM recipes 
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+        `, [userId]);
+        res.json(recipes);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET comments left on current user's recipes
+router.get('/my/comments', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const comments = await executeQuery(`
+            SELECT 
+                comments.*, 
+                recipes.title as recipe_title,
+                users.username as commenter_name,
+                users.profile_image as commenter_image
+            FROM comments 
+            JOIN recipes ON comments.recipe_id = recipes.id
+            JOIN users ON comments.user_id = users.id
+            WHERE recipes.user_id = $1
+            ORDER BY comments.created_at DESC
+        `, [userId]);
         res.json(comments);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -668,20 +774,26 @@ router.put('/comments/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// DELETE comment (Owner or Admin)
+// DELETE comment (Owner or Admin or Recipe Owner)
 router.delete('/comments/:id', authenticateToken, async (req, res) => {
     const commentId = req.params.id;
     const userId = req.user.id;
     const userRole = req.user.role;
 
     try {
-        // Check ownership
-        const comments = await executeQuery('SELECT user_id FROM comments WHERE id = $1', [commentId]);
+        // Check ownership of comment OR ownership of the recipe the comment is on
+        const comments = await executeQuery(`
+            SELECT comments.user_id as comment_author_id, recipes.user_id as recipe_author_id 
+            FROM comments 
+            JOIN recipes ON comments.recipe_id = recipes.id
+            WHERE comments.id = $1
+        `, [commentId]);
+        
         const comment = comments[0];
 
         if (!comment) return res.status(404).json({ error: 'Yorum bulunamadı.' });
 
-        if (userRole !== 'admin' && comment.user_id !== userId) {
+        if (userRole !== 'admin' && comment.comment_author_id !== userId && comment.recipe_author_id !== userId) {
             return res.status(403).json({ error: 'Bu yorumu silemezsiniz.' });
         }
 

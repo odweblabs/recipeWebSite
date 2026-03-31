@@ -24,7 +24,7 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const users = await executeQuery('SELECT * FROM users WHERE username = $1', [username]);
+        const users = await executeQuery('SELECT id, password, username, role, full_name, profile_image, country, city, notifications_paused FROM users WHERE username = $1', [username]);
         const user = users[0];
 
         if (!user) {
@@ -194,6 +194,7 @@ router.get('/users/:id/profile', async (req, res) => {
         `, [req.params.id, req.params.id, req.params.id]);
         const user = users[0];
         if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+        if (user.profile_image) user.profile_image = user.profile_image.substring(0, 100) + '...';
         res.json(user);
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -60,7 +60,12 @@ router.get('/', authenticateToken, async (req, res) => {
 
     try {
         const favorites = await executeQuery(`
-            SELECT recipes.*, categories.name as category_name, 1 as is_favorited
+            SELECT 
+                recipes.id, recipes.title, 
+                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.user_id, recipes.created_at,
+                categories.name as category_name, 1 as is_favorited
             FROM recipes
             JOIN favorites ON recipes.id = favorites.recipe_id
             LEFT JOIN categories ON recipes.category_id = categories.id

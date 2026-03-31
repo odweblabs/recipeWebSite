@@ -92,9 +92,9 @@ const FAQ = () => {
 
                 <div className="mt-12 p-6 bg-white dark:bg-chefie-card rounded-3xl border border-dashed border-gray-200 dark:border-chefie-border text-center">
                     <p className="text-sm text-gray-500 dark:text-gray-400">{t('faq.no_answer')}</p>
-                    <button className="mt-2 text-chefie-green font-bold hover:underline">
+                    <a href="mailto:tarifo@outlook.com.tr" className="mt-2 inline-block text-chefie-green font-bold hover:underline">
                         {t('faq.contact_us')}
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
