@@ -117,7 +117,12 @@ router.post('/register', upload.single('profile_image'), async (req, res) => {
 // Get current user info
 router.get('/me', authenticateToken, async (req, res) => {
     try {
-        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, country, city, notifications_paused, created_at FROM users WHERE id = $1', [req.user.id]);
+        const users = await executeQuery(`
+            SELECT id, username, full_name, 
+                   CASE WHEN profile_image LIKE 'data:%' THEN '/api/images/user/' || id ELSE profile_image END as profile_image,
+                   role, country, city, notifications_paused, created_at 
+            FROM users WHERE id = $1
+        `, [req.user.id]);
         const user = users[0];
         res.json(user);
     } catch (err) {
@@ -184,7 +189,9 @@ router.get('/users/:id/profile', async (req, res) => {
     try {
         const users = await executeQuery(`
             SELECT 
-                id, username, full_name, profile_image, country, city, notifications_paused, created_at,
+                id, username, full_name, 
+                CASE WHEN profile_image LIKE 'data:%' THEN '/api/images/user/' || id ELSE profile_image END as profile_image,
+                country, city, notifications_paused, created_at,
                 (SELECT COUNT(*) FROM friendships WHERE addressee_id = $1 AND status = 'accepted') as follower_count,
                 (SELECT COUNT(*) FROM friendships WHERE requester_id = $2 AND status = 'accepted') as following_count,
                 (SELECT COUNT(*) FROM recipes WHERE user_id = $3) as recipe_count,
@@ -194,7 +201,6 @@ router.get('/users/:id/profile', async (req, res) => {
         `, [req.params.id, req.params.id, req.params.id]);
         const user = users[0];
         if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
-        if (user.profile_image) user.profile_image = user.profile_image.substring(0, 100) + '...';
         res.json(user);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -204,7 +210,12 @@ router.get('/users/:id/profile', async (req, res) => {
 // Get all users (Admin only)
 router.get('/users', adminOnly, async (req, res) => {
     try {
-        const users = await executeQuery('SELECT id, username, full_name, profile_image, role, can_comment, country, city, created_at FROM users ORDER BY created_at DESC');
+        const users = await executeQuery(`
+            SELECT id, username, full_name, 
+                   CASE WHEN profile_image LIKE 'data:%' THEN '/api/images/user/' || id ELSE profile_image END as profile_image,
+                   role, can_comment, country, city, created_at 
+            FROM users ORDER BY created_at DESC
+        `);
         res.json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });

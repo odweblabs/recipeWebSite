@@ -164,7 +164,8 @@ router.get('/admin-history/:id/recipients', authenticateToken, adminOnly, async 
     try {
         const { id } = req.params;
         const recipients = await executeQuery(`
-            SELECT u.id, u.username, u.full_name, u.profile_image
+            SELECT u.id, u.username, u.full_name, 
+                   CASE WHEN u.profile_image LIKE 'data:%' THEN '/api/images/user/' || u.id ELSE u.profile_image END as profile_image
             FROM notifications n
             JOIN users u ON n.user_id = u.id
             WHERE n.history_id = $1

@@ -260,7 +260,8 @@ i18n
                         groups: {
                             notifications: "Bildirimler & Genel",
                             design: "Tasarım & Dil",
-                            support: "Destek & Yasal"
+                            support: "Destek & Yasal",
+                            social: "Sosyal & İletişim"
                         },
                         items: {
                             pause_notifications: "Bildirimleri duraklat",
@@ -275,6 +276,7 @@ i18n
                             terms: "Kullanım Koşulları",
                             policy: "Gizlilik Politikası",
                             github_repo: "GitHub Deposu",
+                            email_us: "Bize Ulaşın",
                             logout: "Oturumu Kapat"
                         },
                         feedback: {
@@ -1026,7 +1028,8 @@ i18n
                         groups: {
                             notifications: "Notifications & General",
                             design: "Design & Language",
-                            support: "Support & Legal"
+                            support: "Support & Legal",
+                            social: "Social & Contact"
                         },
                         items: {
                             pause_notifications: "Pause notifications",
@@ -1041,6 +1044,7 @@ i18n
                             terms: "Terms of Use",
                             policy: "User Policy",
                             github_repo: "GitHub Repository",
+                            email_us: "Contact Us",
                             logout: "Log Out"
                         },
                         feedback: {

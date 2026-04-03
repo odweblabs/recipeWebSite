@@ -196,7 +196,7 @@ const RecipeForm = () => {
                 {/* Header */}
                 <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-10 gap-4">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/admin/dashboard')} className="p-2 bg-chefie-card border border-chefie-border rounded-xl hover:bg-chefie-cream transition-colors">
+                        <button onClick={() => navigate(-1)} className="p-2 bg-chefie-card border border-chefie-border rounded-xl hover:bg-chefie-cream transition-colors">
                             <ArrowLeft className="w-5 h-5 text-chefie-text" />
                         </button>
                         <div>
@@ -229,7 +229,7 @@ const RecipeForm = () => {
                 </header>
 
                 {/* Content */}
-                <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+                <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mb-28 md:mb-0">
                     <div className="bg-chefie-card rounded-3xl shadow-sm md:shadow-lg dark:shadow-none border border-chefie-border overflow-hidden">
                         <div className="p-8 space-y-8">
 
@@ -418,7 +418,7 @@ const RecipeForm = () => {
                         <div className="bg-chefie-cream px-8 py-6 flex items-center justify-between border-t border-chefie-border">
                             <button
                                 type="button"
-                                onClick={() => navigate('/admin/dashboard')}
+                                onClick={() => navigate(-1)}
                                 className="px-6 py-2.5 bg-chefie-card border border-chefie-border text-gray-400 font-medium rounded-xl hover:bg-chefie-cream hover:text-chefie-text transition-colors shadow-sm dark:shadow-none"
                             >
                                 Vazgeç

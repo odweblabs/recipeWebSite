@@ -66,13 +66,16 @@ const Policy = () => {
                     ))}
                 </div>
 
-                <div className="mt-12 bg-chefie-green rounded-[32px] p-8 text-white text-center relative overflow-hidden">
+                <div className="mt-12 mb-32 bg-chefie-green rounded-[32px] p-8 text-white text-center relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                     <h3 className="text-xl font-bold relative z-10">{t('policy.more_info')}</h3>
                     <p className="text-white/80 mt-2 relative z-10 text-sm">
                         {t('policy.more_info_desc')}
                     </p>
-                    <button className="mt-6 bg-white text-chefie-green px-8 py-3 rounded-full font-bold hover:bg-chefie-yellow hover:text-white transition-colors">
+                    <button 
+                        onClick={() => window.location.href = 'mailto:tarifo@outlook.com.tr'} 
+                        className="mt-6 bg-white text-chefie-green px-8 py-3 rounded-full font-bold hover:bg-chefie-yellow hover:text-white transition-colors"
+                    >
                         {t('policy.contact_btn')}
                     </button>
                 </div>

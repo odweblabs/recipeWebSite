@@ -16,7 +16,8 @@ app.set('trust proxy', 1);
 // Security & Middleware
 app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP if it interferes with inline scripts/styles in dev
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -87,6 +88,7 @@ const feedbackRoutes = require('./routes/feedback');
 const notificationsRoutes = require('./routes/notifications');
 const menusRoutes = require('./routes/menus');
 const seoRoutes = require('./routes/seo');
+const imagesRoutes = require('./routes/images');
 
 app.use('/api/recipes', recipesRoutes);
 app.use('/api/categories', categoriesRoutes);
@@ -97,6 +99,7 @@ app.use('/api/lists', listsRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/menus', menusRoutes);
+app.use('/api/images', imagesRoutes);
 app.use('/', seoRoutes);
 
 // Health check endpoint with DB status
@@ -135,6 +138,43 @@ app.get('/api/health', async (req, res) => {
 // Routes Placeholder
 app.get('/', (req, res) => {
     res.send('Recipe API is running...');
+});
+
+// Dynamic Sitemap Generation
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const { executeQuery } = require('./database');
+        const baseUrl = process.env.APP_URL || 'https://tarifo.vercel.app';
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+        
+        // Static Routes
+        const staticRoutes = ['', '/recipes', '/what-to-cook', '/blog', '/trend'];
+        staticRoutes.forEach(route => {
+            xml += `  <url>\n    <loc>${baseUrl}${route}</loc>\n    <changefreq>daily</changefreq>\n    <priority>${route === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
+        });
+
+        // Dynamic Recipe Routes
+        const recipes = await executeQuery('SELECT id, created_at FROM recipes');
+        recipes.forEach(recipe => {
+            let date = new Date().toISOString().split('T')[0];
+            try {
+                if (recipe.created_at) {
+                    const parsedDate = new Date(recipe.created_at);
+                    if (!isNaN(parsedDate.getTime())) {
+                        date = parsedDate.toISOString().split('T')[0];
+                    }
+                }
+            } catch (e) {}
+            xml += `  <url>\n    <loc>${baseUrl}/recipes/${recipe.id}</loc>\n    <lastmod>${date}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+        });
+
+        xml += `</urlset>`;
+        res.header('Content-Type', 'application/xml');
+        res.send(xml);
+    } catch (err) {
+        console.error('Sitemap generation error stack:', err.stack);
+        res.status(500).send(err.message + '\\n' + err.stack);
+    }
 });
 // Error handling middleware should be added after all routes
 app.use(errorHandler);

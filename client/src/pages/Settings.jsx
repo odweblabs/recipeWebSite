@@ -22,7 +22,8 @@ import {
     X,
     LayoutDashboard,
     Github,
-    Instagram
+    Instagram,
+    Mail
 } from 'lucide-react';
 import API_BASE from '../utils/api';
 import { getImageUrl } from '../utils/imageUtils';
@@ -323,7 +324,13 @@ const Settings = () => {
                         <MenuItem icon={Info} title={t('settings.items.terms')} onClick={() => navigate('/terms')} />
                         <div className="h-px bg-chefie-border mx-4" />
                         <MenuItem icon={Shield} title={t('settings.items.policy')} onClick={() => navigate('/policy')} />
-                        <div className="h-px bg-chefie-border mx-4" />
+                    </div>
+                </div>
+
+                {/* Group 5: Social & Contact */}
+                <div className="space-y-2">
+                    <h3 className="text-[11px] font-black text-chefie-secondary uppercase tracking-[0.2em] ml-4">{t('settings.groups.social')}</h3>
+                    <div className="bg-chefie-card rounded-3xl border border-chefie-border shadow-sm overflow-hidden">
                         <MenuItem 
                             icon={Github} 
                             title={t('settings.items.github_repo')} 
@@ -334,6 +341,12 @@ const Settings = () => {
                             icon={Instagram} 
                             title="Instagram" 
                             onClick={() => window.open('https://instagram.com/recipes.with.tarifo', '_blank')} 
+                        />
+                        <div className="h-px bg-chefie-border mx-4" />
+                        <MenuItem 
+                            icon={Mail} 
+                            title={t('settings.items.email_us') || "Email Us"} 
+                            onClick={() => window.location.href = 'mailto:tarifo@outlook.com.tr'} 
                         />
                     </div>
                 </div>

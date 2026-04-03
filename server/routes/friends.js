@@ -124,7 +124,9 @@ router.get('/:userId', async (req, res) => {
     try {
         const friends = await executeQuery(`
             SELECT 
-                u.id, u.username, u.full_name, u.profile_image, u.created_at,
+                u.id, u.username, u.full_name, 
+                CASE WHEN u.profile_image LIKE 'data:%' THEN '/api/images/user/' || u.id ELSE u.profile_image END as profile_image,
+                u.created_at,
                 f.id as friendship_id, f.created_at as friends_since,
                 f.requester_id, f.addressee_id
             FROM friendships f
@@ -152,7 +154,8 @@ router.get('/requests/pending', authenticateToken, async (req, res) => {
         const requests = await executeQuery(`
             SELECT 
                 f.id as friendship_id, f.created_at as requested_at,
-                u.id, u.username, u.full_name, u.profile_image
+                u.id, u.username, u.full_name, 
+                CASE WHEN u.profile_image LIKE 'data:%' THEN '/api/images/user/' || u.id ELSE u.profile_image END as profile_image
             FROM friendships f
             JOIN users u ON u.id = f.requester_id
             WHERE f.addressee_id = $1 AND f.status = 'pending'

@@ -44,14 +44,19 @@ router.get('/stats', adminOnly, async (req, res) => {
             executeQuery("SELECT COUNT(*) as count FROM recipes WHERE DATE(created_at) = $1", [today]),
             executeQuery("SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = $1", [today]),
             executeQuery("SELECT COUNT(*) as count FROM comments WHERE DATE(created_at) = $1", [today]),
-            executeQuery('SELECT id, username, full_name, profile_image, created_at FROM users ORDER BY created_at DESC LIMIT 5'),
+            executeQuery(`
+                SELECT id, username, full_name, 
+                       CASE WHEN profile_image LIKE 'data:%' THEN '/api/images/user/' || id ELSE profile_image END as profile_image,
+                       created_at 
+                FROM users ORDER BY created_at DESC LIMIT 5
+            `),
             executeQuery(`
                 SELECT recipes.id, recipes.title, 
-                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                       CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                        recipes.created_at,
                        categories.name as category_name,
                        users.username as chef_username, users.full_name as chef_name, 
-                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image
+                       CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image
                 FROM recipes
                 LEFT JOIN categories ON recipes.category_id = categories.id
                 LEFT JOIN users ON recipes.user_id = users.id
@@ -60,7 +65,7 @@ router.get('/stats', adminOnly, async (req, res) => {
             executeQuery(`
                 SELECT comments.id, comments.content, comments.created_at,
                        users.username, users.full_name, 
-                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as profile_image,
+                       CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as profile_image,
                        recipes.id as recipe_id, recipes.title as recipe_title,
                        ratings.score as rating
                 FROM comments
@@ -71,7 +76,7 @@ router.get('/stats', adminOnly, async (req, res) => {
             `),
             executeQuery(`
                 SELECT recipes.id, recipes.title, 
-                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                       CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                        ROUND(AVG(ratings.score), 1) as avg_rating,
                        COUNT(ratings.id) as rating_count
                 FROM recipes
@@ -121,11 +126,11 @@ router.get('/public-stats', async (req, res) => {
             executeQuery('SELECT COUNT(*) as count FROM users'),
             executeQuery(`
                 SELECT recipes.id, recipes.title, 
-                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                       CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                        recipes.created_at,
                        categories.name as category_name,
                        users.username as chef_username, users.full_name as chef_name, 
-                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image
+                       CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image
                 FROM recipes
                 LEFT JOIN categories ON recipes.category_id = categories.id
                 LEFT JOIN users ON recipes.user_id = users.id
@@ -134,7 +139,7 @@ router.get('/public-stats', async (req, res) => {
             executeQuery(`
                 SELECT comments.id, comments.content, comments.created_at,
                        users.username, users.full_name, 
-                       CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as profile_image,
+                       CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as profile_image,
                        recipes.id as recipe_id, recipes.title as recipe_title,
                        ratings.score as rating
                 FROM comments
@@ -145,7 +150,7 @@ router.get('/public-stats', async (req, res) => {
             `),
             executeQuery(`
                 SELECT recipes.id, recipes.title, 
-                       CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                       CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                        ROUND(AVG(ratings.score), 1) as avg_rating,
                        COUNT(ratings.id) as rating_count
                 FROM recipes
@@ -183,13 +188,13 @@ router.get('/recommendation', async (req, res) => {
         const results = await executeQuery(`
             SELECT 
                 recipes.id, recipes.title, recipes.description,
-                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating
             FROM recipes 
             LEFT JOIN categories ON recipes.category_id = categories.id
@@ -224,14 +229,14 @@ router.get('/', async (req, res) => {
         let sql = `
             SELECT 
                 recipes.id, recipes.title, 
-                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time, 
                 recipes.cook_time, recipes.servings, recipes.category_id, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
             FROM recipes 
@@ -280,14 +285,14 @@ router.get('/latest', async (req, res) => {
         const recipes = await executeQuery(`
             SELECT 
                 recipes.id, recipes.title, 
-                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time,
                 recipes.cook_time, recipes.servings, recipes.category_id,
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
             FROM recipes 
@@ -334,13 +339,15 @@ router.post('/bulk', async (req, res) => {
 
         const sql = `
             SELECT 
-                recipes.id, recipes.title, recipes.image_url, recipes.prep_time,
+                recipes.id, recipes.title, 
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
+                recipes.prep_time,
                 recipes.cook_time, recipes.servings, recipes.category_id,
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                users.profile_image as chef_image,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
             FROM recipes 
@@ -371,13 +378,13 @@ router.get('/:id', async (req, res) => {
         const results = await executeQuery(`
             SELECT 
                 recipes.id, recipes.title, recipes.description, recipes.ingredients, recipes.instructions,
-                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                CASE WHEN LENGTH(users.profile_image) > 1000 AND users.profile_image LIKE 'data:%' THEN NULL ELSE users.profile_image END as chef_image,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image,
                 (SELECT AVG(score) FROM ratings WHERE recipe_id = recipes.id) as avg_rating,
                 (SELECT COUNT(*) FROM ratings WHERE recipe_id = recipes.id) as rating_count,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count
@@ -455,7 +462,8 @@ router.post('/:id/comment', authenticateToken, async (req, res) => {
 router.get('/:id/comments', async (req, res) => {
     try {
         const comments = await executeQuery(`
-            SELECT comments.*, users.username, users.full_name, users.profile_image 
+            SELECT comments.*, users.username, users.full_name, 
+                   CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as profile_image
             FROM comments 
             JOIN users ON comments.user_id = users.id 
             WHERE comments.recipe_id = $1 
@@ -647,11 +655,14 @@ router.get('/users/:id/recipes', async (req, res) => {
 
         const recipes = await executeQuery(`
             SELECT 
-                recipes.*, 
+                recipes.id, recipes.title, 
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
+                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
                 users.full_name as chef_name,
-                users.profile_image as chef_image,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as chef_image,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count,
                 (SELECT COUNT(*) FROM favorites WHERE recipe_id = recipes.id) as favorite_count
             FROM recipes 
@@ -714,7 +725,7 @@ router.get('/my/comments', authenticateToken, async (req, res) => {
                 comments.*, 
                 recipes.title as recipe_title,
                 users.username as commenter_name,
-                users.profile_image as commenter_image
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as commenter_image
             FROM comments 
             JOIN recipes ON comments.recipe_id = recipes.id
             JOIN users ON comments.user_id = users.id
@@ -734,7 +745,8 @@ router.get('/admin/comments/all', adminOnly, async (req, res) => {
         const comments = await executeQuery(`
             SELECT 
                 comments.*, 
-                users.username, users.full_name, users.profile_image,
+                users.username, users.full_name, 
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as profile_image,
                 recipes.title as recipe_title,
                 recipes.id as recipe_id
             FROM comments 

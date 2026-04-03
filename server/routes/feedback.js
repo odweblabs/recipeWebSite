@@ -29,7 +29,7 @@ router.get('/', adminOnly, async (req, res) => {
             SELECT f.*, 
                    COALESCE(u.username, 'deleted_user') as username, 
                    COALESCE(u.full_name, 'Silinmiş Kullanıcı') as full_name,
-                   CASE WHEN LENGTH(u.profile_image) > 1000 AND u.profile_image LIKE 'data:%' THEN NULL ELSE u.profile_image END as profile_image
+                   CASE WHEN u.profile_image LIKE 'data:%' THEN '/api/images/user/' || u.id ELSE u.profile_image END as profile_image
             FROM feedback f
             LEFT JOIN users u ON f.user_id = u.id
             ORDER BY f.created_at DESC

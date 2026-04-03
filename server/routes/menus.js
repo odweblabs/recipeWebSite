@@ -31,7 +31,8 @@ router.get('/', async (req, res) => {
         // Fetch recipes for each menu
         const menusWithRecipes = await Promise.all(menus.map(async (menu) => {
             const recipes = await executeQuery(`
-                SELECT r.id, r.title, r.image_url, 
+                SELECT r.id, r.title, 
+                       CASE WHEN r.image_url LIKE 'data:%' THEN '/api/images/recipe/' || r.id ELSE r.image_url END as image_url,
                        (SELECT AVG(score) FROM ratings WHERE recipe_id = r.id) as avg_rating,
                        c.name as category_name
                 FROM recipes r

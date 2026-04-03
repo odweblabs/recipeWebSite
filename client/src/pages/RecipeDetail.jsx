@@ -281,6 +281,10 @@ const RecipeDetail = () => {
 
     return (
         <div className="max-w-5xl mx-auto pb-12 print:p-0 print:m-0 px-4 bg-chefie-cream">
+            <SEO 
+                title={t('recipe_detail.seo_title', { title: recipe.title, defaultValue: `${recipe.title} Tarifi - Nasıl Yapılır? | Tarifo` })}
+                description={recipe.description} 
+            />
             {/* Breadcrumb & Back */}
             <div className="mb-8 flex items-center justify-between print:hidden">
                 <button onClick={() => navigate(-1)} className="flex items-center text-chefie-text hover:text-chefie-yellow transition-colors">

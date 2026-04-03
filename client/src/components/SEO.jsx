@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 
 /**
@@ -9,55 +10,25 @@ import { useLocation } from 'react-router-dom';
  */
 const SEO = ({ title, description, canonical }) => {
     const location = useLocation();
-    
-    useEffect(() => {
-        // 1. Update Title
-        if (title) {
-            document.title = title;
-        }
+    const baseUrl = window.location.origin;
+    const currentCanonical = canonical || `${baseUrl}${location.pathname}`;
 
-        // 2. Update Description
-        let metaDescription = document.querySelector('meta[name="description"]');
-        if (!metaDescription) {
-            metaDescription = document.createElement('meta');
-            metaDescription.name = 'description';
-            document.head.appendChild(metaDescription);
-        }
-        
-        if (description) {
-            metaDescription.setAttribute('content', description);
-        }
-
-        // 3. Update Canonical Tag
-        let linkCanonical = document.querySelector('link[rel="canonical"]');
-        if (!linkCanonical) {
-            linkCanonical = document.createElement('link');
-            linkCanonical.rel = 'canonical';
-            document.head.appendChild(linkCanonical);
-        }
-
-        const baseUrl = window.location.origin;
-        const currentCanonical = canonical || `${baseUrl}${location.pathname}`;
-        linkCanonical.setAttribute('href', currentCanonical);
-
-        // Optional: Update OG Tags
-        const updateOG = (property, content) => {
-            let meta = document.querySelector(`meta[property="${property}"]`);
-            if (!meta) {
-                meta = document.createElement('meta');
-                meta.setAttribute('property', property);
-                document.head.appendChild(meta);
-            }
-            meta.setAttribute('content', content);
-        };
-
-        if (title) updateOG('og:title', title);
-        if (description) updateOG('og:description', description);
-        updateOG('og:url', currentCanonical);
-
-    }, [title, description, canonical, location]);
-
-    return null; // This component doesn't render anything
+    return (
+        <Helmet>
+            {title && <title>{title}</title>}
+            {description && <meta name="description" content={description} />}
+            <link rel="canonical" href={currentCanonical} />
+            
+            {/* Open Graph Tags */}
+            {title && <meta property="og:title" content={title} />}
+            {description && <meta property="og:description" content={description} />}
+            <meta property="og:url" content={currentCanonical} />
+            
+            {/* Twitter Tags */}
+            {title && <meta name="twitter:title" content={title} />}
+            {description && <meta name="twitter:description" content={description} />}
+        </Helmet>
+    );
 };
 
 export default SEO;

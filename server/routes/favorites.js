@@ -62,7 +62,7 @@ router.get('/', authenticateToken, async (req, res) => {
         const favorites = await executeQuery(`
             SELECT 
                 recipes.id, recipes.title, 
-                CASE WHEN LENGTH(recipes.image_url) > 1000 AND recipes.image_url LIKE 'data:%' THEN NULL ELSE recipes.image_url END as image_url,
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name, 1 as is_favorited
@@ -84,13 +84,15 @@ router.get('/user/:userId', async (req, res) => {
     try {
         const favorites = await executeQuery(`
             SELECT 
-                recipes.id, recipes.title, recipes.image_url, recipes.prep_time,
+                recipes.id, recipes.title, 
+                CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
+                recipes.prep_time,
                 recipes.cook_time, recipes.servings, recipes.category_id,
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as author_username,
                 users.full_name as author_name,
-                users.profile_image as author_image,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as author_image,
                 (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count,
                 (SELECT COUNT(*) FROM favorites WHERE recipe_id = recipes.id) as favorite_count
             FROM recipes
@@ -115,11 +117,11 @@ router.get('/recipe-likers/:userId', async (req, res) => {
             SELECT 
                 r.id as recipe_id,
                 r.title as recipe_title,
-                r.image_url as recipe_image,
+                CASE WHEN r.image_url LIKE 'data:%' THEN '/api/images/recipe/' || r.id ELSE r.image_url END as recipe_image,
                 u.id as liker_id,
                 u.username as liker_username,
                 u.full_name as liker_name,
-                u.profile_image as liker_image,
+                CASE WHEN u.profile_image LIKE 'data:%' THEN '/api/images/user/' || u.id ELSE u.profile_image END as liker_image,
                 f.created_at as liked_at
             FROM favorites f
             JOIN recipes r ON f.recipe_id = r.id
