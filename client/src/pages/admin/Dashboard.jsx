@@ -2224,7 +2224,7 @@ const Dashboard = () => {
                     <button onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'settings' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Settings className="w-5 h-5 mr-3" /> Ayarlar</button>
                 </nav>
 
-                <div className="p-4 border-t border-chefie-border">
+                <div className="p-4 pb-32 md:pb-4 border-t border-chefie-border mt-auto">
                     <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-medium transition-colors"><LogOut className="w-5 h-5 mr-3" /> Çıkış Yap</button>
                 </div>
             </aside>

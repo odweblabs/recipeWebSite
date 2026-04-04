@@ -174,7 +174,7 @@ const RecipeForm = () => {
                     }
                 });
             }
-            navigate('/admin/dashboard');
+            navigate('/recipes');
         } catch (err) {
             console.error('Error saving recipe:', err);
             alert('Hata oluştu.');

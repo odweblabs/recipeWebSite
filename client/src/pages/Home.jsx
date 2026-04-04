@@ -254,25 +254,29 @@ const Home = () => {
 
             {/* Haftanın Yıldızları Section */}
             <section className="relative group">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
-                    <div className="flex items-center gap-4 mb-10">
-                        <h2 className="text-4xl md:text-5xl font-black text-chefie-text">
+                <div className="flex items-center justify-between gap-4 mb-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-chefie-yellow/15 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <Trophy className="text-chefie-yellow w-5 h-5 md:w-6 md:h-6" />
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-chefie-text leading-tight">
                             {t('home.sections.stars_of_week')}
                         </h2>
-                        <Trophy className="text-chefie-yellow w-8 h-8" />
                     </div>
-                    <div className="flex gap-3 justify-end sm:justify-start">
+                    <div className="flex gap-2 flex-shrink-0">
                         <button
                             onClick={() => scroll('left')}
-                            className="p-3 bg-chefie-card border border-chefie-border rounded-2xl text-gray-400 hover:text-chefie-text hover:bg-chefie-cream transition-all shadow-xl shadow-gray-100 dark:shadow-none"
+                            className="p-2.5 md:p-3 bg-chefie-card border border-chefie-border rounded-xl md:rounded-2xl text-gray-400 hover:text-chefie-text hover:bg-chefie-cream transition-all shadow-xl shadow-gray-100 dark:shadow-none"
                         >
-                            <ChevronLeft size={24} />
+                            <ChevronLeft size={18} className="md:hidden" />
+                            <ChevronLeft size={24} className="hidden md:block" />
                         </button>
                         <button
                             onClick={() => scroll('right')}
-                            className="p-3 bg-chefie-card border border-chefie-border rounded-2xl text-gray-400 hover:text-chefie-text hover:bg-chefie-cream transition-all shadow-xl shadow-gray-100 dark:shadow-none"
+                            className="p-2.5 md:p-3 bg-chefie-card border border-chefie-border rounded-xl md:rounded-2xl text-gray-400 hover:text-chefie-text hover:bg-chefie-cream transition-all shadow-xl shadow-gray-100 dark:shadow-none"
                         >
-                            <ChevronRight size={24} />
+                            <ChevronRight size={18} className="md:hidden" />
+                            <ChevronRight size={24} className="hidden md:block" />
                         </button>
                     </div>
                 </div>
@@ -410,7 +414,8 @@ const Home = () => {
 
                 <div
                     ref={chefsScrollRef}
-                    className="flex justify-center md:justify-start gap-10 overflow-x-auto scrollbar-hide pb-4 snap-x relative z-10 -mx-4 px-4"
+                    className="flex gap-10 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory relative z-10"
+                    style={{ paddingLeft: 'calc(50% - 100px)', paddingRight: 'calc(50% - 100px)' }}
                 >
                     {topChefs.length > 0 ? topChefs.map((chef, idx) => (
                         <motion.div
@@ -418,7 +423,7 @@ const Home = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="min-w-[200px] flex flex-col items-center snap-start group cursor-pointer"
+                            className="min-w-[200px] flex flex-col items-center snap-center group cursor-pointer"
                             onClick={() => navigate(`/profile/${chef.id}`)}
                         >
                             <div className="relative mb-6">

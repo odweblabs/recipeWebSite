@@ -108,7 +108,7 @@ router.get('/stats', adminOnly, async (req, res) => {
             topRated
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -171,7 +171,7 @@ router.get('/public-stats', async (req, res) => {
             topRated
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -204,7 +204,7 @@ router.get('/recommendation', async (req, res) => {
 
         res.json(results[0] || null);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -218,7 +218,7 @@ router.post('/recommendation', adminOnly, async (req, res) => {
         );
         res.json({ message: 'Şefin tavsiyesi güncellendi' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -274,7 +274,7 @@ router.get('/', async (req, res) => {
         const recipes = await executeQuery(sql, params);
         res.json(recipes);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -303,7 +303,7 @@ router.get('/latest', async (req, res) => {
         `, [limit]);
         res.json(recipes);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -320,7 +320,7 @@ router.get('/what-to-cook-metadata', async (req, res) => {
         const recipes = await executeQuery(sql);
         res.json(recipes);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -358,7 +358,7 @@ router.post('/bulk', async (req, res) => {
         const recipes = await executeQuery(sql, safeIds);
         res.json(recipes);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -367,6 +367,47 @@ router.get('/count', async (req, res) => {
     try {
         const result = await executeQuery('SELECT COUNT(*) as count FROM recipes');
         res.json({ count: result[0].count });
+    } catch (err) {
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
+    }
+});
+
+// GET current user's recipes (Optimized for dashboard)
+router.get('/my/recipes', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const recipes = await executeQuery(`
+            SELECT 
+                recipes.id, recipes.title, recipes.image_url, recipes.created_at,
+                (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count,
+                (SELECT COUNT(*) FROM favorites WHERE recipe_id = recipes.id) as favorite_count
+            FROM recipes 
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+        `, [userId]);
+        res.json(recipes);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET comments left on current user's recipes
+router.get('/my/comments', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const comments = await executeQuery(`
+            SELECT 
+                comments.*, 
+                recipes.title as recipe_title,
+                users.username as commenter_name,
+                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as commenter_image
+            FROM comments 
+            JOIN recipes ON comments.recipe_id = recipes.id
+            JOIN users ON comments.user_id = users.id
+            WHERE recipes.user_id = $1
+            ORDER BY comments.created_at DESC
+        `, [userId]);
+        res.json(comments);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -406,7 +447,7 @@ router.get('/:id', async (req, res) => {
         
         res.json(recipeData);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -428,7 +469,7 @@ router.post('/:id/rate', authenticateToken, async (req, res) => {
         `, [userId, recipeId, score]);
         res.json({ message: 'Puanınız kaydedildi' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -454,7 +495,7 @@ router.post('/:id/comment', authenticateToken, async (req, res) => {
         await executeQuery('INSERT INTO comments (user_id, recipe_id, content) VALUES ($1, $2, $3)', [userId, recipeId, content]);
         res.json({ message: 'Yorumunuz eklendi' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -471,7 +512,7 @@ router.get('/:id/comments', async (req, res) => {
         `, [req.params.id]);
         res.json(comments);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -514,8 +555,7 @@ router.post('/', authenticateToken, upload.array('images', 5), async (req, res) 
 
                 if (recipientIds.length > 0) {
                     const notifTitle = 'Yeni Tarif Eklendi!';
-                    const baseUrl = process.env.APP_URL || 'https://tarifo.vercel.app';
-                    const notifMessage = `"${title}" adlı yeni bir tarif paylaşıldı. Hemen göz atın!\n\n${baseUrl}/recipes/${recipeId}`;
+                    const notifMessage = `"${title}" adlı yeni bir tarif paylaşıldı. Hemen göz atın!`;
 
                     // Batch inserts to stay well within Postgres parameter limits (max 65535, but let's be conservative)
                     const BATCH_SIZE = 500;
@@ -546,7 +586,7 @@ router.post('/', authenticateToken, upload.array('images', 5), async (req, res) 
         res.json({ id: recipeId });
         // NOTE: Standard fetch is native in Node 18+, so no extra imports needed.
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -601,7 +641,7 @@ router.put('/:id', authenticateToken, upload.array('images', 5), async (req, res
 
         res.json({ message: 'Recipe updated successfully' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -674,7 +714,7 @@ router.get('/users/:id/recipes', async (req, res) => {
         `, [userId, limit, offset]);
         res.json(recipes);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -693,50 +733,10 @@ router.get('/users/:id/comments', async (req, res) => {
         `, [req.params.id]);
         res.json(comments);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
-// GET current user's recipes (Optimized for dashboard)
-router.get('/my/recipes', authenticateToken, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const recipes = await executeQuery(`
-            SELECT 
-                recipes.id, recipes.title, recipes.image_url, recipes.created_at,
-                (SELECT COUNT(*) FROM comments WHERE recipe_id = recipes.id) as comment_count,
-                (SELECT COUNT(*) FROM favorites WHERE recipe_id = recipes.id) as favorite_count
-            FROM recipes 
-            WHERE user_id = $1
-            ORDER BY created_at DESC
-        `, [userId]);
-        res.json(recipes);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// GET comments left on current user's recipes
-router.get('/my/comments', authenticateToken, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const comments = await executeQuery(`
-            SELECT 
-                comments.*, 
-                recipes.title as recipe_title,
-                users.username as commenter_name,
-                CASE WHEN users.profile_image LIKE 'data:%' THEN '/api/images/user/' || users.id ELSE users.profile_image END as commenter_image
-            FROM comments 
-            JOIN recipes ON comments.recipe_id = recipes.id
-            JOIN users ON comments.user_id = users.id
-            WHERE recipes.user_id = $1
-            ORDER BY comments.created_at DESC
-        `, [userId]);
-        res.json(comments);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 // GET all comments (Admin only)
 router.get('/admin/comments/all', adminOnly, async (req, res) => {
@@ -757,7 +757,7 @@ router.get('/admin/comments/all', adminOnly, async (req, res) => {
         `, [parseInt(limit), parseInt(offset)]);
         res.json(comments);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -782,7 +782,7 @@ router.put('/comments/:id', authenticateToken, async (req, res) => {
         await executeQuery('UPDATE comments SET content = $1 WHERE id = $2', [content, commentId]);
         res.json({ message: 'Yorum güncellendi.' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 
@@ -812,7 +812,7 @@ router.delete('/comments/:id', authenticateToken, async (req, res) => {
         await executeQuery('DELETE FROM comments WHERE id = $1', [commentId]);
         res.json({ message: 'Yorum silindi.' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("MY_COMMENTS_CRASH:", err); res.status(500).json({ error: err.message });
     }
 });
 

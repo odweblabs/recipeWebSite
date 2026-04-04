@@ -151,33 +151,43 @@ const Lists = () => {
 
     const handleShare = async (list) => {
         try {
-            // Eğer liste henüz paylaşıma açık değilse önce otomatik olarak açalım
-            if (!list.is_public) {
-                await axios.put(`${API_URL}/lists/${list.id}`, {
-                    ...list,
-                    is_public: true
-                }, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                // State'i güncelle ki bir sonraki render'da doğru kalsın
-                setLists(prev => prev.map(l => l.id === list.id ? { ...l, is_public: true } : l));
+            // Düz metin olarak numaralı liste oluştur
+            let shareText = '';
+
+            // Başlık: Liste adı
+            shareText += `🛒 ${list.name}`;
+
+            // Market adı varsa ekle
+            if (list.market_name) {
+                shareText += `\n🛍️ ${list.market_name}`;
             }
 
-            const shareData = {
-                title: t('lists.actions.share_title', { name: list.name }),
-                text: t('lists.actions.share_text', { market: list.market_name ? list.market_name + (i18n.language === 'tr' ? ' için ' : ' for ') : '' }),
-                url: `${window.location.origin}/liste/${list.id}`,
-            };
+            shareText += '\n\n';
+
+            // Numaralı ürün listesi
+            if (list.items && list.items.length > 0) {
+                list.items.forEach((item, index) => {
+                    const checkMark = item.checked ? '✅' : '🔹';
+                    shareText += `${checkMark} ${index + 1}. ${item.text}\n`;
+                });
+            } else {
+                shareText += i18n.language === 'tr' ? '(Liste boş)' : '(List is empty)';
+            }
+
+            shareText += `\n— Tarifo`;
 
             if (navigator.share) {
-                await navigator.share(shareData);
+                await navigator.share({ text: shareText });
             } else {
-                await navigator.clipboard.writeText(shareData.url);
-                alert(t('lists.actions.copied') || 'Bağlantı kopyalandı!');
+                await navigator.clipboard.writeText(shareText);
+                alert(t('lists.actions.copied') || 'Liste kopyalandı!');
             }
         } catch (err) {
-            console.error('Share failed', err);
-            alert(t('lists.actions.share_error'));
+            // Kullanıcı paylaşım penceresini kapatırsa hata fırlatır, bunu sessizce geç
+            if (err.name !== 'AbortError') {
+                console.error('Share failed', err);
+                alert(t('lists.actions.share_error'));
+            }
         }
     };
 
@@ -223,7 +233,7 @@ const Lists = () => {
     if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-chefie-dark">{t('lists.loading')}</div>;
 
     return (
-        <div className="min-h-screen pb-20 px-4 md:px-6">
+        <div className="min-h-screen pb-20 px-4 md:px-6 overflow-x-hidden">
             {/* Header */}
             <header className="py-10 max-w-5xl mx-auto">
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
@@ -334,7 +344,7 @@ const Lists = () => {
                                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
-                                className="w-full max-w-lg max-h-[85vh] bg-chefie-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-chefie-border flex flex-col"
+                                className="w-full max-w-lg max-h-[85vh] bg-chefie-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-chefie-border flex flex-col overflow-x-hidden"
                             >
                                 {/* Modal Header */}
                                 <div className="p-6 md:p-8 border-b border-chefie-border flex items-center justify-between gap-4 flex-shrink-0">
@@ -382,7 +392,7 @@ const Lists = () => {
                                 </div>
 
                                 {/* Items list (Scrollable area) */}
-                                <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4">
+                                <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 md:px-8 py-4">
                                     {/* Add item input */}
                                     <div className="flex items-center gap-3 mb-4">
                                         <input

@@ -703,7 +703,9 @@ i18n
                     },
                     actions: {
                         share: "PAYLAŞ",
-                        save: "KAYDET"
+                        save: "KAYDET",
+                        share_error: "Paylaşım sırasında bir hata oluştu.",
+                        copied: "Liste panoya kopyalandı!"
                     },
                     empty: {
                         title: "Henüz bir listen yok",
@@ -1595,7 +1597,7 @@ i18n
                         share_title: "{{name}} - My Shopping List",
                         share_text: "Check out the shopping list I created{{market}}!",
                         share_error: "An error occurred while sharing.",
-                        copied: "Link copied!",
+                        copied: "List copied to clipboard!",
                         error_fetch: "Failed to load lists:",
                         error_create: "An error occurred while creating the list:",
                         error_delete: "Failed to delete list:",
