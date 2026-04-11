@@ -30,7 +30,7 @@ const FormInput = ({ label, placeholder, value, onChange, type = "text", icon: I
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className="w-full bg-chefie-card border border-chefie-border rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-chefie-green/20 focus:border-chefie-green transition-all shadow-sm text-chefie-text placeholder-chefie-secondary/50"
+                className="w-full bg-chefie-card border border-chefie-border rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-chefie-green/20 focus:border-chefie-green transition-all shadow-sm text-chefie-text placeholder-chefie-secondary/50 font-bold"
             />
             {showToggle && (
                 <button
@@ -44,6 +44,53 @@ const FormInput = ({ label, placeholder, value, onChange, type = "text", icon: I
         </div>
     </div>
 );
+
+const FormSelect = ({ label, value, onChange, icon: Icon, options, placeholder }) => (
+    <div className="space-y-2">
+        <label className="text-sm font-bold text-chefie-secondary ml-1 uppercase tracking-wider">{label}</label>
+        <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-chefie-secondary group-focus-within:text-chefie-green transition-colors pointer-events-none z-10">
+                {Icon && <Icon className="w-5 h-5" />}
+            </div>
+            <select
+                value={value}
+                onChange={onChange}
+                className="w-full bg-chefie-card border border-chefie-border rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-chefie-green/20 focus:border-chefie-green transition-all shadow-sm text-chefie-text appearance-none font-bold"
+            >
+                <option value="" disabled hidden>{placeholder}</option>
+                {options.map((opt, i) => {
+                    const viewValue = typeof opt === 'string' ? opt : opt.code;
+                    const viewLabel = typeof opt === 'string' ? opt : `${opt.flag} ${opt.name}`;
+                    return (
+                        <option key={i} value={viewValue}>{viewLabel}</option>
+                    )
+                })}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-chefie-secondary group-focus-within:text-chefie-green transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+        </div>
+    </div>
+);
+
+const COUNTRY_LIST = [
+    { code: 'TR', name: 'Türkiye', flag: '🇹🇷' }, { code: 'US', name: 'ABD', flag: '🇺🇸' },
+    { code: 'DE', name: 'Almanya', flag: '🇩🇪' }, { code: 'FR', name: 'Fransa', flag: '🇫🇷' },
+    { code: 'GB', name: 'İngiltere', flag: '🇬🇧' }, { code: 'NL', name: 'Hollanda', flag: '🇳🇱' },
+    { code: 'BE', name: 'Belçika', flag: '🇧🇪' }, { code: 'AT', name: 'Avusturya', flag: '🇦🇹' },
+    { code: 'CH', name: 'İsviçre', flag: '🇨🇭' }, { code: 'SE', name: 'İsveç', flag: '🇸🇪' },
+    { code: 'NO', name: 'Norveç', flag: '🇳🇴' }, { code: 'DK', name: 'Danimarka', flag: '🇩🇰' },
+    { code: 'IT', name: 'İtalya', flag: '🇮🇹' }, { code: 'ES', name: 'İspanya', flag: '🇪🇸' },
+    { code: 'AZ', name: 'Azerbaycan', flag: '🇦🇿' }, { code: 'RU', name: 'Rusya', flag: '🇷🇺' },
+    { code: 'AU', name: 'Avustralya', flag: '🇦🇺' }, { code: 'CA', name: 'Kanada', flag: '🇨🇦' },
+    { code: 'JP', name: 'Japonya', flag: '🇯🇵' }, { code: 'KR', name: 'Güney Kore', flag: '🇰🇷' },
+    { code: 'SA', name: 'Suudi Arabistan', flag: '🇸🇦' }, { code: 'AE', name: 'BAE', flag: '🇦🇪' },
+    { code: 'BR', name: 'Brezilya', flag: '🇧🇷' }, { code: 'OTHER', name: 'Diğer', flag: '🌍' }
+];
+
+const TURKEY_CITIES = [
+    "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Kahramanmaraş", "Mardin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"
+].sort((a,b) => a.localeCompare(b, 'tr'));
 
 const EditProfile = () => {
     const navigate = useNavigate();
@@ -246,20 +293,32 @@ const EditProfile = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <FormInput
+                        <FormSelect
                             label={t('edit_profile.fields.country')}
                             placeholder={t('edit_profile.fields.country')}
                             value={country}
                             onChange={(e) => setCountry(e.target.value)}
                             icon={Globe}
+                            options={COUNTRY_LIST}
                         />
-                        <FormInput
-                            label={t('edit_profile.fields.city')}
-                            placeholder={t('edit_profile.fields.city')}
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            icon={MapPin}
-                        />
+                        {country === 'TR' || country === 'Türkiye' ? (
+                            <FormSelect
+                                label={t('edit_profile.fields.city')}
+                                placeholder={t('edit_profile.fields.city')}
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                icon={MapPin}
+                                options={TURKEY_CITIES}
+                            />
+                        ) : (
+                            <FormInput
+                                label={t('edit_profile.fields.city')}
+                                placeholder={t('edit_profile.fields.city')}
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                icon={MapPin}
+                            />
+                        )}
                     </div>
 
                     {/* Password Section */}

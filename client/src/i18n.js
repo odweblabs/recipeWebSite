@@ -25,8 +25,8 @@ i18n
                         dashboard: "Yönetici Paneli"
                     },
                     home: {
-                        seo_title: "En Lezzetli Yemek Tarifleri | Pratik ve Denenmiş Tarifler - Tarifo",
-                        seo_description: "Binlerce denenmiş yemek tarifi, videolu anlatımlar ve adım adım rehberlerle mutfağınızın şefi olun. En lezzetli ve pratik tarifler Tarifo'da.",
+                        seo_title: "Tarif, Yemek Tarifi | En Lezzetli ve Pratik Yemek Tarifleri - Tarifo",
+                        seo_description: "Bugün ne pişireceğim derdine son! Yüzlerce lezzetli yemek tarifi, pratik ev yemekleri ve tatlı tarifleri Tarifo'da.",
                         hero: {
                             badge: "YENİ NESİL MUTFAK REHBERİ",
                             title_1: "En Güncel",
@@ -68,6 +68,19 @@ i18n
                                 servings: "PORSİYON",
                                 author: "HAZIRLAYAN",
                                 button: "TARİFİ İNCELE"
+                            },
+                            trending_recipes: {
+                                title: "Popüler & Trend Olanlar",
+                                subtitle: "EN ÇOK SEVİLENLER",
+                                rating: "Puan"
+                            },
+                            newsletter: {
+                                title: "Lezzet Bültenine Katılın",
+                                description: "Haftalık en iyi tarifler, pratik ipuçları ve sürpriz içerikler için e-posta listemize abone olun.",
+                                placeholder: "E-posta adresiniz",
+                                button: "ABONE OL",
+                                success: "Bültenimize başarıyla abone oldunuz! Sizi aramızda görmek harika.",
+                                error: "Bir hata oluştu, lütfen e-posta adresinizi kontrol edin."
                             }
                         }
                     },
@@ -839,6 +852,19 @@ i18n
                                 servings: "PORTION",
                                 author: "PREPARED BY",
                                 button: "VIEW RECIPE"
+                            },
+                            trending_recipes: {
+                                title: "Popular & Trending",
+                                subtitle: "MOST LOVED",
+                                rating: "Rating"
+                            },
+                            newsletter: {
+                                title: "Join Our Tasty Newsletter",
+                                description: "Subscribe to our email list for the best weekly recipes, practical tips, and surprise content.",
+                                placeholder: "Your email address",
+                                button: "SUBSCRIBE",
+                                success: "You have successfully subscribed to our newsletter! Great to have you with us.",
+                                error: "An error occurred, please check your email address."
                             }
                         }
                     },

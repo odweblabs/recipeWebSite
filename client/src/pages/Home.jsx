@@ -414,8 +414,7 @@ const Home = () => {
 
                 <div
                     ref={chefsScrollRef}
-                    className="flex gap-10 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory relative z-10"
-                    style={{ paddingLeft: 'calc(50% - 100px)', paddingRight: 'calc(50% - 100px)' }}
+                    className="flex gap-10 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory relative z-10 px-[calc(50%-100px)] md:px-0"
                 >
                     {topChefs.length > 0 ? topChefs.map((chef, idx) => (
                         <motion.div
@@ -444,6 +443,60 @@ const Home = () => {
                             <ChefLoader className="scale-75" />
                         </div>
                     )}
+                </div>
+            </section>
+
+            {/* Popüler & Trend Olanlar Section */}
+            <section>
+                <div className="flex flex-col items-center text-center mb-12">
+                    <motion.span
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="text-chefie-yellow text-xs font-black tracking-widest uppercase mb-4"
+                    >
+                        {t('home.sections.trending_recipes.subtitle')}
+                    </motion.span>
+                    <h2 className="text-4xl md:text-5xl font-black text-chefie-text mb-6">
+                        {t('home.sections.trending_recipes.title')}
+                    </h2>
+                    <div className="w-20 h-1.5 bg-chefie-yellow rounded-full"></div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {recipes
+                        .filter(r => r.avg_rating && Number(r.avg_rating) >= 4)
+                        .sort((a, b) => Number(b.rating_count || 0) - Number(a.rating_count || 0))
+                        .slice(0, 3)
+                        .map((recipe, idx) => (
+                            <motion.div
+                                key={recipe.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="bg-white/50 dark:bg-chefie-card/50 backdrop-blur-xl rounded-[2.5rem] p-4 border border-chefie-border shadow-2xl shadow-yellow-100/30 dark:shadow-none hover:-translate-y-2 transition-all cursor-pointer group flex flex-col"
+                                onClick={() => navigate(`/recipes/${recipe.id}`)}
+                            >
+                                <div className="h-48 rounded-3xl overflow-hidden relative mb-4">
+                                    <img src={recipe.image_url ? getImageUrl(recipe.image_url) : '/default-recipe.png'} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">
+                                        <Star className="w-4 h-4 text-chefie-yellow fill-current" />
+                                        <span className="text-xs font-black text-chefie-dark">{Number(recipe.avg_rating).toFixed(1)}</span>
+                                    </div>
+                                    <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-2 text-white shadow-sm">
+                                        <Trophy className="w-4 h-4 text-chefie-yellow" />
+                                        <span className="text-[10px] font-black uppercase tracking-wider">{t('home.sections.trending_recipes.subtitle')}</span>
+                                    </div>
+                                </div>
+                                <div className="px-2 pb-2">
+                                    <h3 className="text-xl font-black text-chefie-text mb-2 line-clamp-1 group-hover:text-chefie-yellow transition-colors">{recipe.title}</h3>
+                                    <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-tight">
+                                        <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {recipe.servings || 4} Kişilik</div>
+                                        <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {recipe.cook_time || '30 dk'}</div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))
+                    }
                 </div>
             </section>
 
@@ -639,6 +692,36 @@ const Home = () => {
                     </div>
                 </section>
             )}
+
+            {/* Newsletter Section */}
+            <section className="bg-gradient-to-r from-orange-100 to-yellow-50 dark:from-chefie-card/80 dark:to-chefie-card rounded-[3rem] p-10 md:p-16 border border-yellow-200/50 dark:border-chefie-border shadow-2xl shadow-yellow-100 dark:shadow-none relative overflow-hidden mt-20">
+                <div className="absolute top-0 right-0 p-8 text-yellow-300/30 dark:text-chefie-yellow/10 transform rotate-12 scale-150 pointer-events-none">
+                    <Utensils size={200} />
+                </div>
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+                    <div className="flex-1 text-center md:text-left space-y-4">
+                        <h2 className="text-3xl md:text-5xl font-black text-chefie-dark dark:text-white leading-tight">
+                            {t('home.sections.newsletter.title')}
+                        </h2>
+                        <p className="text-lg font-medium text-gray-600 dark:text-gray-400 max-w-lg">
+                            {t('home.sections.newsletter.description')}
+                        </p>
+                    </div>
+                    <div className="flex-1 w-full max-w-md bg-white dark:bg-chefie-dark p-2 rounded-3xl shadow-xl dark:shadow-none border border-gray-100 dark:border-white/5 flex">
+                        <input 
+                            type="email" 
+                            placeholder={t('home.sections.newsletter.placeholder')} 
+                            className="bg-transparent border-none w-full px-6 py-4 text-chefie-text focus:outline-none focus:ring-0 font-medium"
+                        />
+                        <button 
+                            onClick={(e) => { e.preventDefault(); alert(t('home.sections.newsletter.success')); }}
+                            className="bg-chefie-yellow text-chefie-dark px-6 md:px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-lg shadow-yellow-400/30"
+                        >
+                            {t('home.sections.newsletter.button')}
+                        </button>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 };

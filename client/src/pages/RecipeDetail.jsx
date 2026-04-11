@@ -303,11 +303,11 @@ const RecipeDetail = () => {
             <div className="bg-chefie-card rounded-3xl shadow-sm md:shadow-lg dark:shadow-none border border-chefie-border overflow-hidden print:shadow-none print:border-none print:rounded-none">
                 {/* Hero Image */}
                 <div className="w-full relative print:mb-4">
-                    <div className="w-full h-[300px] md:h-[450px] relative print:h-[250px]">
+                    <div className="w-full h-[300px] md:h-[450px] relative print:h-auto">
                         <img
                             src={activeImage ? (activeImage.startsWith('data:') || activeImage.startsWith('/') ? activeImage : `${API_BASE}${activeImage}`) : '/default-recipe.png'}
                             alt={`${recipe.title} Yemek Tarifi - Tarifo`}
-                            className="w-full h-full object-cover print:rounded-2xl"
+                            className="w-full h-full object-cover print:h-[250px] print:rounded-2xl"
                             loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent print:hidden"></div>

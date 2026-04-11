@@ -226,7 +226,7 @@ const Dashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'feedback', 'send_notification', 'comments'].includes(tab)) {
+        if (tab && ['all', 'favorites', 'stats', 'users', 'settings', 'recommendation', 'categories', 'menus', 'feedback', 'send_notification', 'comments'].includes(tab)) {
             setActiveTab(tab);
         }
         // Always fetch template if target tab is send_notification or activeTab is changed to it
@@ -2201,27 +2201,35 @@ const Dashboard = () => {
                     </button>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
-                    <div className="text-xs font-semibold text-gray-400 px-4 mb-2 uppercase tracking-wide">Menu</div>
-                    <button onClick={() => { setActiveTab('all'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'all' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Folder className="w-5 h-5 mr-3" /> Tüm Tarifler</button>
-                    <button onClick={() => { setActiveTab('favorites'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'favorites' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Heart className="w-5 h-5 mr-3" /> Favorilerim</button>
+                <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto scrollbar-hide pb-20">
+                    {/* Kişisel & Temel Yönlendirmeler */}
+                    <div className="text-[10px] font-black text-gray-400/80 px-4 mb-2 mt-2 uppercase tracking-widest">Temel Mutfak</div>
+                    <button onClick={() => { navigate('?tab=all'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'all' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Folder className="w-5 h-5 mr-3" /> Tüm Tarifler</button>
+                    <button onClick={() => { navigate('?tab=favorites'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'favorites' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Heart className="w-5 h-5 mr-3" /> Favorilerim</button>
+                    {user.role !== 'admin' && (
+                        <button onClick={() => { navigate('?tab=comments'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'comments' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><MessageSquare className="w-5 h-5 mr-3" /> Yorumlarım</button>
+                    )}
+
                     {user.role === 'admin' && (
                         <>
-                            <button onClick={() => { setActiveTab('stats'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'stats' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> İstatistikler</button>
-                            <button onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'users' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
-                            <button onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'categories' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Tag className="w-5 h-5 mr-3" /> Kategoriler</button>
-                            <button onClick={() => { setActiveTab('recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'recommendation' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
-                            <button onClick={() => { setActiveTab('feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors whitespace-nowrap overflow-hidden ${activeTab === 'feedback' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" /> Öneriler & Hatalar</button>
-                            <button onClick={() => { setActiveTab('comments'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'comments' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><MessageSquare className="w-5 h-5 mr-3" /> Yorum Yönetimi</button>
-                            <button onClick={() => { setActiveTab('menus'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'menus' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Utensils className="w-5 h-5 mr-3" /> Menü Yönetimi</button>
-                            <button onClick={() => { setActiveTab('send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'send_notification' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Send className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
+                            {/* Genel Durum & İçerik */}
+                            <div className="text-[10px] font-black text-gray-400/80 px-4 mb-2 mt-6 uppercase tracking-widest">İçerik Yönetimi</div>
+                            <button onClick={() => { navigate('?tab=stats'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'stats' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> İstatistikler</button>
+                            <button onClick={() => { navigate('?tab=categories'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'categories' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Tag className="w-5 h-5 mr-3" /> Kategoriler</button>
+                            <button onClick={() => { navigate('?tab=menus'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'menus' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Utensils className="w-5 h-5 mr-3" /> Hazır Menüler</button>
+                            <button onClick={() => { navigate('?tab=recommendation'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'recommendation' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Star className="w-5 h-5 mr-3" /> Şefin Tavsiyesi</button>
+
+                            {/* Topluluk & Etkileşim */}
+                            <div className="text-[10px] font-black text-gray-400/80 px-4 mb-2 mt-6 uppercase tracking-widest">Topluluk & İletişim</div>
+                            <button onClick={() => { navigate('?tab=users'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'users' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Users className="w-5 h-5 mr-3" /> Kullanıcılar</button>
+                            <button onClick={() => { navigate('?tab=comments'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'comments' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><MessageSquare className="w-5 h-5 mr-3" /> Yorum Onayları</button>
+                            <button onClick={() => { navigate('?tab=send_notification'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'send_notification' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Send className="w-5 h-5 mr-3" /> Bildirim Gönder</button>
+                            <button onClick={() => { navigate('?tab=feedback'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all whitespace-nowrap overflow-hidden ${activeTab === 'feedback' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" /> Gelen Talepler</button>
                         </>
                     )}
-                    {user.role !== 'admin' && (
-                        <button onClick={() => { setActiveTab('comments'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'comments' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><MessageSquare className="w-5 h-5 mr-3" /> Yorumlarım</button>
-                    )}
-                    <div className="text-xs font-semibold text-gray-400 px-4 mb-2 mt-6 uppercase tracking-wide">Diğer</div>
-                    <button onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'settings' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-400 hover:text-chefie-yellow'}`}><Settings className="w-5 h-5 mr-3" /> Ayarlar</button>
+
+                    <div className="text-[10px] font-black text-gray-400/80 px-4 mb-2 mt-6 uppercase tracking-widest">Sistem</div>
+                    <button onClick={() => { navigate('?tab=settings'); setIsMobileMenuOpen(false); }} className={`flex items-center w-full px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'settings' ? 'bg-chefie-cream text-[#10B981] shadow-sm' : 'text-gray-500 hover:text-chefie-yellow hover:bg-gray-50'}`}><Settings className="w-5 h-5 mr-3" /> Genel Ayarlar</button>
                 </nav>
 
                 <div className="p-4 pb-32 md:pb-4 border-t border-chefie-border mt-auto">

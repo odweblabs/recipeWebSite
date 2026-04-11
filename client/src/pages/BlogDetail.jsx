@@ -60,7 +60,7 @@ const BlogDetail = () => {
                     className="absolute inset-0 w-full h-full object-cover"
                 />
 
-                <div className="absolute top-8 left-4 md:left-8 z-20">
+                <div className="absolute top-8 left-4 md:left-8 z-20 print:hidden">
                     <button
                         onClick={() => navigate('/blog')}
                         className="p-3 bg-chefie-card/20 backdrop-blur-md hover:bg-chefie-card/40 text-white rounded-full transition-all flex items-center gap-2 font-bold border border-white/10"
@@ -105,7 +105,7 @@ const BlogDetail = () => {
                             <Tag className="w-4 h-4" />
                             {post[lang].category}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 print:hidden">
                             <button
                                 onClick={handleShare}
                                 className="p-2.5 rounded-xl hover:bg-chefie-cream text-gray-400 transition-colors"
@@ -114,6 +114,7 @@ const BlogDetail = () => {
                                 <Share2 className="w-5 h-5" />
                             </button>
                             <button
+                                onClick={() => window.print()}
                                 className="p-2.5 rounded-xl hover:bg-chefie-cream text-gray-400 transition-colors"
                                 title={t('blog.print')}
                             >

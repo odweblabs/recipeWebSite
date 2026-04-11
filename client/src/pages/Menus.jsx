@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, X, Utensils, ArrowRight, Trash2, LayoutGrid, Star, Sparkles } from 'lucide-react';
+import { Search, Plus, X, Utensils, ArrowRight, Trash2, LayoutGrid, Star, Sparkles, Clock, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { safeGetUser, safeGetStorage, safeSetStorage, safeGetSessionStorage, safeSetSessionStorage} from '../utils/storage';
 import { getImageUrl } from '../utils/imageUtils';
@@ -260,6 +260,15 @@ const Menus = () => {
 
   const selectedIds = useMemo(() => new Set(selectedRecipes.map((r) => r.id)), [selectedRecipes]);
 
+  const userMenus = useMemo(() => {
+    return menus.filter(m => {
+      if (currentUser && currentUser.id) {
+        return m.createdBy && String(m.createdBy.id) === String(currentUser.id);
+      }
+      return !m.createdBy;
+    });
+  }, [menus, currentUser]);
+
   const openCreate = () => {
     setIsCreateOpen(true);
     setTitle('');
@@ -375,7 +384,7 @@ const Menus = () => {
             </button>
             <div className="inline-flex items-center gap-2 px-5 py-3 bg-chefie-card rounded-2xl border border-chefie-border text-[10px] font-black tracking-widest text-chefie-secondary shadow-sm w-full sm:w-auto justify-center">
               <LayoutGrid className="w-4 h-4 text-chefie-yellow" />
-              {t('menus.saved_count', { count: menus.length })}
+              {t('menus.saved_count', { count: userMenus.length })}
             </div>
           </div>
         </motion.div>
@@ -494,7 +503,7 @@ const Menus = () => {
           )}
         </section>
 
-        {menus.length === 0 ? (
+        {userMenus.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
             <div className="bg-chefie-card w-28 h-28 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-xl border border-chefie-border">
               <Utensils className="w-12 h-12 text-chefie-secondary/20" />
@@ -512,7 +521,7 @@ const Menus = () => {
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {menus.map((m, idx) => {
+            {userMenus.map((m, idx) => {
               const cover = m.recipes?.find((r) => r.image_url)?.image_url;
               return (
                 <motion.div
@@ -735,30 +744,39 @@ const Menus = () => {
                   </div>
                 ) : null}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   {(openMenu.recipes || []).map((r) => (
                     <button
                       key={r.id}
                       onClick={() => navigate(`/recipes/${r.id}`)}
-                      className="group flex items-center gap-4 p-4 bg-chefie-card rounded-[2rem] border border-chefie-border hover:border-chefie-yellow hover:shadow-xl transition-all text-left"
+                      className="group flex flex-col sm:flex-row sm:items-center gap-4 md:gap-6 p-4 md:p-5 bg-chefie-card rounded-[2rem] md:rounded-full border border-chefie-border hover:border-chefie-yellow hover:shadow-xl hover:-translate-y-1 transition-all text-left"
                     >
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden bg-chefie-cream flex-shrink-0 border border-chefie-border">
+                      <div className="w-full sm:w-24 h-40 sm:h-24 rounded-[1.5rem] md:rounded-full overflow-hidden bg-chefie-cream flex-shrink-0 border border-chefie-border shadow-sm">
                         <img
                           src={r.image_url ? getImageUrl(r.image_url) : '/default-recipe.png'}
                           alt={r.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[10px] font-black tracking-widest uppercase text-gray-400 dark:text-gray-500 line-clamp-1">
-                          {r.category_name || t('common.general')}
+                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-[10px] font-black tracking-widest uppercase text-chefie-yellow bg-chefie-yellow/10 px-2.5 py-1 rounded-full border border-chefie-yellow/20">
+                            {r.category_name || t('common.general')}
+                          </span>
                         </div>
-                        <div className="text-sm font-black text-chefie-text line-clamp-1 group-hover:text-chefie-yellow transition-colors">
+                        <h4 className="text-lg md:text-xl font-black text-chefie-text line-clamp-1 group-hover:text-chefie-yellow transition-colors mb-2">
                           {r.title}
+                        </h4>
+                        <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-tight">
+                            <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-gray-400" /> {r.cook_time || '30'} {t('common.minutes')}</div>
+                            <div className="flex items-center gap-1.5"><Users className="w-4 h-4 text-gray-400" /> {r.servings || 4} {t('common.servings')}</div>
+                            {r.avg_rating && (
+                                <div className="flex items-center gap-1.5"><Star className="w-4 h-4 text-chefie-yellow fill-current" /> {Number(r.avg_rating).toFixed(1)}</div>
+                            )}
                         </div>
                       </div>
-                      <div className="w-9 h-9 rounded-2xl bg-chefie-cream border border-chefie-border flex items-center justify-center text-chefie-secondary group-hover:bg-chefie-yellow group-hover:text-white transition-all shadow-sm">
-                        <ArrowRight className="w-4 h-4" />
+                      <div className="w-12 h-12 rounded-full sm:mr-2 bg-chefie-cream border border-chefie-border flex items-center justify-center text-chefie-secondary group-hover:bg-chefie-yellow group-hover:text-white transition-all shadow-sm flex-shrink-0 absolute top-4 right-4 sm:relative sm:top-auto sm:right-auto bg-white/80 backdrop-blur-md sm:bg-chefie-cream">
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </button>
                   ))}

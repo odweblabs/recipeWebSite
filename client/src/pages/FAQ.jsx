@@ -58,7 +58,7 @@ const FAQ = () => {
                     <div className="w-16 h-16 bg-chefie-green/10 rounded-3xl flex items-center justify-center text-chefie-green mb-4">
                         <HelpCircle className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif dark:text-white">{t('faq.subtitle')}</h2>
+                    <h2 className="text-2xl font-bold font-serif dark:text-white text-center">{t('faq.subtitle')}</h2>
                     <p className="text-gray-500 dark:text-gray-400 text-center mt-2">{t('faq.desc')}</p>
                 </div>
 

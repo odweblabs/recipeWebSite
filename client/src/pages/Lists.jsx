@@ -392,27 +392,27 @@ const Lists = () => {
                                 </div>
 
                                 {/* Items list (Scrollable area) */}
-                                <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 md:px-8 py-4">
+                                <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-8 py-4">
                                     {/* Add item input */}
-                                    <div className="flex items-center gap-3 mb-4">
+                                    <div className="flex items-center gap-2 md:gap-3 mb-4 w-full">
                                         <input
                                             value={newItem}
                                             onChange={(e) => setNewItem(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && addItem(openList.id)}
                                             placeholder={t('lists.items.add_placeholder')}
-                                            className="flex-1 px-4 py-3 bg-chefie-cream dark:bg-chefie-card rounded-xl border border-chefie-border dark:border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-chefie-text dark:text-chefie-text placeholder-chefie-secondary/50 transition-all outline-none text-sm"
+                                            className="min-w-0 flex-1 px-4 py-3 bg-chefie-cream dark:bg-chefie-card rounded-xl border border-chefie-border dark:border-chefie-border focus:ring-2 focus:ring-chefie-yellow/20 font-bold text-chefie-text dark:text-chefie-text placeholder-chefie-secondary/50 transition-all outline-none text-sm"
                                         />
                                         <button
                                             onClick={() => addItem(openList.id)}
                                             disabled={!newItem.trim()}
-                                            className="p-3 bg-chefie-dark text-white rounded-xl hover:bg-chefie-yellow transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
+                                            className="flex-shrink-0 p-3 bg-chefie-dark text-white rounded-xl hover:bg-chefie-yellow transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
                                         >
                                             <Plus className="w-5 h-5" />
                                         </button>
                                     </div>
 
                                     {/* Preset Ingredients (Quick Add) */}
-                                    <div className="mb-6 bg-chefie-cream/20 dark:bg-chefie-card/30 p-5 rounded-[2.5rem] border border-chefie-border/50 dark:border-chefie-border/20">
+                                    <div className="mb-6 bg-chefie-cream/20 dark:bg-chefie-card/30 p-4 md:p-5 rounded-[2rem] md:rounded-[2.5rem] border border-chefie-border/50 dark:border-chefie-border/20">
                                         <div className="mb-5 px-1">
                                             <div className="flex items-center gap-2 mb-4">
                                                 <Package className="w-3 h-3 text-chefie-yellow" />
@@ -494,7 +494,7 @@ const Lists = () => {
                                     )}
                                 </div>
 
-                                <div className="p-4 bg-chefie-cream dark:bg-chefie-card border-t border-chefie-border dark:border-chefie-border flex flex-col gap-3 pb-12 sm:pb-8 sm:p-8">
+                                <div className="p-4 bg-chefie-cream dark:bg-chefie-card border-t border-chefie-border dark:border-chefie-border flex flex-col gap-3 pb-24 sm:pb-8 sm:p-8">
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => handleShare(openList)}
@@ -511,12 +511,6 @@ const Lists = () => {
                                             {t('lists.actions.save')}
                                         </button>
                                     </div>
-                                    <button
-                                        onClick={() => setOpenListId(null)}
-                                        className="w-full py-2.5 bg-transparent text-gray-400 hover:text-chefie-dark font-bold text-[10px] tracking-widest transition-all uppercase"
-                                    >
-                                        {t('common.cancel')}
-                                    </button>
                                 </div>
                             </motion.div>
                         </motion.div>
