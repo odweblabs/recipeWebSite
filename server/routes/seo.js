@@ -50,7 +50,7 @@ const generateSitemapXml = (recipes, baseUrl) => {
 // GET /sitemap.xml
 router.get('/sitemap.xml', async (req, res) => {
     try {
-        const recipes = await executeQuery('SELECT id, created_at, updated_at FROM recipes ORDER BY created_at DESC');
+        const recipes = await executeQuery('SELECT id, created_at FROM recipes ORDER BY created_at DESC');
         const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
         
         const sitemap = generateSitemapXml(recipes, baseUrl);
