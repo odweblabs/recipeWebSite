@@ -121,6 +121,7 @@ i18n
                         seo_title_search: "{{query}} - Arama Sonuçları | Tarifo"
                     },
                     trend: {
+                        seo_title: "Şu An Trend Olan Tarifler - Popüler Lezzetler | Tarifo",
                         breadcrumb: {
                             home: "ANASAYFA",
                             trend: "TREND"
@@ -393,6 +394,7 @@ i18n
                         all_rights_reserved: "Tüm hakları saklıdır."
                     },
                     what_to_cook: {
+                        seo_title: "Bugün Ne Pişirsem? - Tarif Çarkı | Tarifo",
                         breadcrumb: "NE PİŞİRSEM",
                         header: {
                             title_1: "Bugün Ne",
@@ -481,6 +483,7 @@ i18n
                     share_success: "Bağlantı kopyalandı!",
                     not_found: "Tarif bulunamadı.",
                 menus: {
+                    seo_title: "Özel Menüler - Kendi Menünü Oluştur | Tarifo",
                     breadcrumb: "MENÜLER",
                     hero: {
                         title_1: "Kendi Menünü",
@@ -904,6 +907,7 @@ i18n
                         seo_title_search: "{{query}} - Search Results | Tarifo"
                     },
                     trend: {
+                        seo_title: "Trending Recipes Right Now - Popular Flavors | Tarifo",
                         breadcrumb: {
                             home: "HOME",
                             trend: "TREND"
@@ -1266,6 +1270,7 @@ i18n
                     share_success: "Link copied to clipboard!",
                     not_found: "Recipe not found.",
                 menus: {
+                    seo_title: "Special Menus - Create Your Own Menu | Tarifo",
                     breadcrumb: "MENUS",
                     hero: {
                         title: "Create Your Own Menu Here",
