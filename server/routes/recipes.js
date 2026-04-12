@@ -231,7 +231,7 @@ router.get('/', async (req, res) => {
                 recipes.id, recipes.title, 
                 CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time, 
-                recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.cook_time, recipes.servings, recipes.category_id, recipes.youtube_url, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
@@ -287,7 +287,7 @@ router.get('/latest', async (req, res) => {
                 recipes.id, recipes.title, 
                 CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time,
-                recipes.cook_time, recipes.servings, recipes.category_id,
+                recipes.cook_time, recipes.servings, recipes.category_id, recipes.youtube_url,
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
@@ -342,7 +342,7 @@ router.post('/bulk', async (req, res) => {
                 recipes.id, recipes.title, 
                 CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
                 recipes.prep_time,
-                recipes.cook_time, recipes.servings, recipes.category_id,
+                recipes.cook_time, recipes.servings, recipes.category_id, recipes.youtube_url,
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
@@ -420,7 +420,7 @@ router.get('/:id', async (req, res) => {
             SELECT 
                 recipes.id, recipes.title, recipes.description, recipes.ingredients, recipes.instructions,
                 CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
-                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, recipes.youtube_url, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,
@@ -519,7 +519,7 @@ router.get('/:id/comments', async (req, res) => {
 // POST new recipe
 router.post('/', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
-        const { title, description, ingredients, instructions, category_id, servings, prep_time, cook_time } = req.body;
+        const { title, description, ingredients, instructions, category_id, servings, prep_time, cook_time, youtube_url } = req.body;
         const files = req.files || [];
         const optimizedImages = [];
         
@@ -536,9 +536,9 @@ router.post('/', authenticateToken, upload.array('images', 5), async (req, res) 
         const userId = req.user.id;
         
         const info = await executeQuery(`
-            INSERT INTO recipes (title, description, ingredients, instructions, category_id, user_id, image_url, servings, prep_time, cook_time)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
-        `, [title, description, ingredients, instructions, finalCategoryId, userId, recipeImageUrl, finalServings, finalPrepTime, finalCookTime]);
+            INSERT INTO recipes (title, description, ingredients, instructions, category_id, user_id, image_url, servings, prep_time, cook_time, youtube_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
+        `, [title, description, ingredients, instructions, finalCategoryId, userId, recipeImageUrl, finalServings, finalPrepTime, finalCookTime, youtube_url || null]);
         
         const recipeId = info[0]?.id || info.lastInsertRowid;
         
@@ -593,7 +593,7 @@ router.post('/', authenticateToken, upload.array('images', 5), async (req, res) 
 // PUT update recipe
 router.put('/:id', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
-        const { title, description, ingredients, instructions, category_id, servings, prep_time, cook_time } = req.body;
+        const { title, description, ingredients, instructions, category_id, servings, prep_time, cook_time, youtube_url } = req.body;
         const recipeId = req.params.id;
         const userId = req.user.id;
         const userRole = req.user.role;
@@ -613,9 +613,9 @@ router.put('/:id', authenticateToken, upload.array('images', 5), async (req, res
         const finalPrepTime = prep_time && prep_time !== '' ? parseInt(prep_time) : null;
         const finalCookTime = cook_time && cook_time !== '' ? parseInt(cook_time) : null;
         
-        let sql = `UPDATE recipes SET title = $1, description = $2, ingredients = $3, instructions = $4, category_id = $5, servings = $6, prep_time = $7, cook_time = $8`;
-        let params = [title, description, ingredients, instructions, category_id || null, finalServings, finalPrepTime, finalCookTime];
-        let paramIndex = 9;
+        let sql = `UPDATE recipes SET title = $1, description = $2, ingredients = $3, instructions = $4, category_id = $5, servings = $6, prep_time = $7, cook_time = $8, youtube_url = $9`;
+        let params = [title, description, ingredients, instructions, category_id || null, finalServings, finalPrepTime, finalCookTime, youtube_url || null];
+        let paramIndex = 10;
         
         if (files.length > 0) {
             const optimizedImages = [];
@@ -697,7 +697,7 @@ router.get('/users/:id/recipes', async (req, res) => {
             SELECT 
                 recipes.id, recipes.title, 
                 CASE WHEN recipes.image_url LIKE 'data:%' THEN '/api/images/recipe/' || recipes.id ELSE recipes.image_url END as image_url,
-                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, 
+                recipes.prep_time, recipes.cook_time, recipes.servings, recipes.category_id, recipes.youtube_url, 
                 recipes.user_id, recipes.created_at,
                 categories.name as category_name,
                 users.username as chef_username,

@@ -46,7 +46,8 @@ const RecipeForm = () => {
         category_id: '',
         servings: '',
         prep_time: '',
-        cook_time: ''
+        cook_time: '',
+        youtube_url: ''
     });
     const [images, setImages] = useState([]);
     const [previewImages, setPreviewImages] = useState([]);
@@ -79,7 +80,8 @@ const RecipeForm = () => {
                         category_id: recipe.category_id || '',
                         servings: recipe.servings || '',
                         prep_time: recipe.prep_time || '',
-                        cook_time: recipe.cook_time || ''
+                        cook_time: recipe.cook_time || '',
+                        youtube_url: recipe.youtube_url || ''
                     });
                     if (recipe.images && recipe.images.length > 0) {
                         setPreviewImages(recipe.images.map(img => getImageUrl(img)));
@@ -151,6 +153,7 @@ const RecipeForm = () => {
         data.append('servings', formData.servings || '');
         data.append('prep_time', formData.prep_time || '');
         data.append('cook_time', formData.cook_time || '');
+        data.append('youtube_url', formData.youtube_url || '');
 
         if (images.length > 0) {
             images.forEach(img => {
@@ -341,6 +344,20 @@ const RecipeForm = () => {
                                                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400 pointer-events-none">dk</span>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-400 mb-2">YouTube Video Linki (İsteğe Bağlı)</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="url"
+                                                    name="youtube_url"
+                                                    value={formData.youtube_url}
+                                                    onChange={handleChange}
+                                                    placeholder="https://www.youtube.com/watch?v=..."
+                                                    className="w-full px-4 py-3 bg-chefie-cream/50 border border-chefie-border text-chefie-text rounded-xl focus:ring-2 focus:ring-chefie-yellow focus:border-transparent outline-none"
+                                                />
                                             </div>
                                         </div>
                                     </div>

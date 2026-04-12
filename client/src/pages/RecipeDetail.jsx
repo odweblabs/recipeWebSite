@@ -8,6 +8,13 @@ import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, ArrowLeft, Printer, Share2, Heart, ChefHat, Star, MessageSquare, Send, Smartphone, Flame } from 'lucide-react';
 
+const getYouTubeEmbedUrl = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+};
+
 const RecipeDetail = () => {
     const { t, i18n } = useTranslation();
     const { id } = useParams();
@@ -494,6 +501,24 @@ const RecipeDetail = () => {
                                 );
                             })}
                         </div>
+
+                        {recipe.youtube_url && getYouTubeEmbedUrl(recipe.youtube_url) && (
+                            <div className="mb-16 print:hidden">
+                                <h3 className="text-xl font-bold text-chefie-text mb-6 flex items-center gap-3">
+                                    <span className="w-1.5 h-6 bg-red-500 rounded-full"></span>
+                                    Tarif Videosu
+                                </h3>
+                                <div className="aspect-w-16 aspect-h-9 w-full rounded-2xl overflow-hidden shadow-lg border border-chefie-border bg-black">
+                                    <iframe 
+                                        src={getYouTubeEmbedUrl(recipe.youtube_url)} 
+                                        title={`${recipe.title} YouTube Video`}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        className="w-full h-full min-h-[300px] md:min-h-[450px] border-none"
+                                    ></iframe>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Comments Section */}
                         <div className="border-t border-chefie-border pt-12 print:hidden">
