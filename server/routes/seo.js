@@ -12,9 +12,20 @@ const generateSitemapXml = (recipes, baseUrl) => {
     ];
 
     recipes.forEach(recipe => {
+        let date = new Date().toISOString().split('T')[0];
+        try {
+            const rawDate = recipe.updated_at || recipe.created_at;
+            if (rawDate) {
+                const parsedDate = new Date(rawDate);
+                if (!isNaN(parsedDate.getTime())) {
+                    date = parsedDate.toISOString().split('T')[0];
+                }
+            }
+        } catch (e) {}
+
         urls.push({
             loc: `${baseUrl}/recipes/${recipe.id}`,
-            lastmod: new Date(recipe.updated_at || recipe.created_at).toISOString().split('T')[0],
+            lastmod: date,
             changefreq: 'weekly',
             priority: '0.6'
         });
