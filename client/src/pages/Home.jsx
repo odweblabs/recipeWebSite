@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare, Soup, Beef, Cake, Croissant, Coffee, Flame, Trophy } from 'lucide-react';
+import { Search, ArrowUpRight, Star, ChevronLeft, ChevronRight, Utensils, Play, Users, Clock, ChefHat, MessageSquare, Soup, Beef, Cake, Croissant, Coffee, Flame, Trophy, X, Plus } from 'lucide-react';
 import { blogPosts } from '../data/blogData';
 import SearchBar from '../components/SearchBar';
 import NotificationBell from '../components/NotificationBell';
@@ -27,6 +27,31 @@ const Home = () => {
     const scrollContainerRef = useRef(null);
     const chefsScrollRef = useRef(null);
     const categoriesScrollRef = useRef(null);
+
+    const [ingredientInput, setIngredientInput] = useState('');
+    const [selectedIngredients, setSelectedIngredients] = useState([]);
+    const quickSuggestions = ['Tavuk', 'Patates', 'Peynir', 'Soğan', 'Kıyma', 'Domates'];
+
+    const handleAddIngredient = (e) => {
+        if (e.key === 'Enter' || e.type === 'click') {
+            e.preventDefault();
+            const val = ingredientInput.trim();
+            if (val && !selectedIngredients.includes(val)) {
+                setSelectedIngredients([...selectedIngredients, val]);
+            }
+            setIngredientInput('');
+        }
+    };
+
+    const handleRemoveIngredient = (ingredient) => {
+        setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
+    };
+
+    const handleIngredientSearch = () => {
+        if (selectedIngredients.length > 0) {
+            navigate(`/recipes?q=${encodeURIComponent(selectedIngredients.join(' '))}`);
+        }
+    };
 
     const scrollChefs = (direction) => {
         if (chefsScrollRef.current) {
@@ -393,6 +418,95 @@ const Home = () => {
                             </Link>
                         );
                     })}
+                </div>
+            </section>
+
+            {/* Dolabındakilerle Ne Pişirsem? Section */}
+            <section className="bg-chefie-card rounded-[4rem] p-10 md:p-20 shadow-2xl shadow-gray-100 dark:shadow-none border border-chefie-border overflow-hidden relative">
+                <div className="absolute inset-0 opacity-20 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cream-pixels.png')] mix-blend-multiply dark:mix-blend-overlay"></div>
+                
+                <div className="flex flex-col items-center text-center mb-10 relative z-10">
+                    <motion.span
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="px-4 py-2 bg-green-50 text-green-600 rounded-full text-[10px] sm:text-xs font-black tracking-widest uppercase mb-4 shadow-sm inline-flex items-center gap-2"
+                    >
+                        <ChefHat className="w-4 h-4" /> {t('home.sections.smart_match.badge', 'YAPAY ZEKA DESTEKLİ')}
+                    </motion.span>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-chefie-text mb-4">
+                        {t('home.sections.smart_match.title', 'Evdekilerle Ne Pişirsem?')}
+                    </h2>
+                    <p className="text-gray-500 font-medium text-base sm:text-lg max-w-xl mx-auto">
+                        {t('home.sections.smart_match.description', 'Dolabınızdaki malzemeleri yazın, elinizdekilerle hazırlayabileceğiniz en iyi tarifleri vakit kaybetmeden bulalım.')}
+                    </p>
+                </div>
+
+                <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+                    {/* Input Field */}
+                    <div className="w-full relative flex items-center bg-white dark:bg-chefie-dark rounded-[2rem] p-2 border border-gray-100 dark:border-white/5 shadow-xl shadow-gray-100/50 dark:shadow-none mb-6">
+                        <input
+                            type="text"
+                            value={ingredientInput}
+                            onChange={(e) => setIngredientInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddIngredient(e)}
+                            placeholder={t('home.sections.smart_match.placeholder', 'Örn: Tavuk, Patates, Peynir...')}
+                            className="w-full bg-transparent border-none px-6 py-4 text-chefie-text placeholder-gray-400 focus:outline-none focus:ring-0 font-medium md:text-lg"
+                        />
+                        <button
+                            onClick={handleAddIngredient}
+                            className="bg-chefie-yellow text-chefie-dark p-4 rounded-xl font-black hover:scale-105 active:scale-95 transition-all shadow-lg shadow-yellow-400/30 flex-shrink-0"
+                        >
+                            <Plus className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    {/* Quick Suggestions */}
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 w-full px-2">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center pr-2">{t('home.sections.smart_match.suggestions', 'HIZLI EKLE:')}</span>
+                        {quickSuggestions.map((item, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => {
+                                    if (!selectedIngredients.includes(item)) {
+                                        setSelectedIngredients([...selectedIngredients, item]);
+                                    }
+                                }}
+                                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 dark:text-gray-400 rounded-full text-[10px] sm:text-xs font-bold hover:bg-chefie-yellow hover:text-chefie-dark hover:border-transparent dark:hover:border-transparent transition-all"
+                            >
+                                + {item}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Selected Ingredients Tags */}
+                    {selectedIngredients.length > 0 && (
+                        <div className="w-full flex flex-col sm:flex-row justify-between items-center sm:items-end border-t border-gray-100 dark:border-chefie-border/50 pt-8 mt-2 gap-6">
+                            <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3 flex-1 w-full min-h-[48px]">
+                                {selectedIngredients.map((ing, idx) => (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        key={idx}
+                                        className="px-4 py-2 bg-chefie-dark dark:bg-white text-white dark:text-chefie-dark rounded-xl text-sm font-black flex items-center gap-2 shadow-lg shadow-gray-200/50 dark:shadow-none"
+                                    >
+                                        {ing}
+                                        <button onClick={() => handleRemoveIngredient(ing)} className="text-gray-400 dark:text-gray-500 hover:text-chefie-yellow dark:hover:text-amber-500 transition-colors bg-white/10 dark:bg-black/5 rounded-full p-0.5">
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    </motion.div>
+                                ))}
+                            </div>
+                            
+                            <motion.button
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                onClick={handleIngredientSearch}
+                                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-chefie-yellow to-amber-500 text-white font-black rounded-2xl text-sm uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-xl shadow-amber-300/40 dark:shadow-none flex items-center justify-center gap-2 flex-shrink-0"
+                            >
+                                <Search className="w-4 h-4" /> {t('home.sections.smart_match.button', 'TARİFLERİ BUL')}
+                            </motion.button>
+                        </div>
+                    )}
                 </div>
             </section>
 
