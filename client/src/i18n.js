@@ -813,7 +813,7 @@ i18n
                         dashboard: "Admin Panel"
                     },
                     home: {
-                        seo_title: "Tarifo - Most Delicious Recipes, Easy and Practical Recipes",
+                        seo_title: "Tarifo | Nefis Yemek Tarifleri, Yemek Tarifi, Pratik Yemekler",
                         hero: {
                             badge: "NEXT GEN KITCHEN GUIDE",
                             title_1: "Learn, Cook &",

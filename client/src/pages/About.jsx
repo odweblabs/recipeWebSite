@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { ChefHat, Heart, Users, Coffee, ArrowRight } from 'lucide-react';
+import { ChefHat, Heart, Users, Coffee, ArrowRight, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 
@@ -49,49 +49,49 @@ const About = () => {
 
             {/* Stats / Features */}
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="bg-chefie-card p-10 rounded-[2.5rem] border border-chefie-border shadow-xl shadow-gray-100 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300">
-                    <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-6">
+                <div className="bg-chefie-card dark:bg-slate-900 p-10 rounded-[2.5rem] border border-chefie-border dark:border-slate-800 shadow-xl shadow-gray-100 dark:shadow-none flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300">
+                    <div className="w-16 h-16 bg-orange-50 dark:bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center mb-6">
                         <Heart className="w-8 h-8 fill-current" />
                     </div>
-                    <h3 className="text-2xl font-black text-chefie-text mb-3">Tutkuyla Hazırlandı</h3>
-                    <p className="text-gray-500 font-medium leading-relaxed">
+                    <h3 className="text-2xl font-black text-chefie-text dark:text-white mb-3">Tutkuyla Hazırlandı</h3>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
                         Her tarif, mutfağa gönül vermiş şefler ve ev hanımları tarafından büyük bir sevgi ve özenle hazırlanıp paylaşılıyor.
                     </p>
                 </div>
 
-                <div className="bg-chefie-card p-10 rounded-[2.5rem] border border-chefie-border shadow-xl shadow-gray-100 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300">
-                    <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                <div className="bg-chefie-card dark:bg-slate-900 p-10 rounded-[2.5rem] border border-chefie-border dark:border-slate-800 shadow-xl shadow-gray-100 dark:shadow-none flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300">
+                    <div className="w-16 h-16 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-6">
                         <Users className="w-8 h-8 fill-current" />
                     </div>
-                    <h3 className="text-2xl font-black text-chefie-text mb-3">Geniş Aile</h3>
-                    <p className="text-gray-500 font-medium leading-relaxed">
+                    <h3 className="text-2xl font-black text-chefie-text dark:text-white mb-3">Geniş Aile</h3>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
                         Binlerce aktif üyesiyle Tarifo, mutfak sırlarını ve püf noktalarını birbirinden öğrenen kocaman bir ailedir.
                     </p>
                 </div>
 
-                <div className="bg-chefie-card p-10 rounded-[2.5rem] border border-chefie-border shadow-xl shadow-gray-100 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300">
-                    <div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mb-6">
+                <div className="bg-chefie-card dark:bg-slate-900 p-10 rounded-[2.5rem] border border-chefie-border dark:border-slate-800 shadow-xl shadow-gray-100 dark:shadow-none flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300">
+                    <div className="w-16 h-16 bg-green-50 dark:bg-green-500/10 text-green-500 rounded-2xl flex items-center justify-center mb-6">
                         <Coffee className="w-8 h-8 fill-current" />
                     </div>
-                    <h3 className="text-2xl font-black text-chefie-text mb-3">Pratik & Lezzetli</h3>
-                    <p className="text-gray-500 font-medium leading-relaxed">
+                    <h3 className="text-2xl font-black text-chefie-text dark:text-white mb-3">Pratik & Lezzetli</h3>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
                         Zamanı kısıtlı olanlar için 15 dakikalık pratik lezzetlerden, özel misafirleriniz için gösterişli davet sofralarına kadar her şey burada.
                     </p>
                 </div>
             </section>
 
             {/* Story Section */}
-            <section className="bg-white rounded-[3rem] p-10 md:p-20 shadow-2xl shadow-gray-100 border border-gray-100 flex flex-col md:flex-row items-center gap-16 relative overflow-hidden">
+            <section className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 md:p-20 shadow-2xl shadow-gray-100 dark:shadow-none border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row items-center gap-16 relative overflow-hidden transition-colors duration-200">
                 <div className="flex-1 space-y-6 relative z-10">
                     <span className="text-chefie-yellow text-xs font-black tracking-widest uppercase">Hikayemiz</span>
-                    <h2 className="text-4xl md:text-5xl font-black text-chefie-text leading-tight">
+                    <h2 className="text-4xl md:text-5xl font-black text-chefie-text dark:text-white leading-tight">
                         Nasıl Başladık?
                     </h2>
                     <div className="w-16 h-1.5 bg-chefie-yellow rounded-full"></div>
-                    <p className="text-gray-500 text-lg leading-relaxed pt-4">
+                    <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed pt-4">
                         Tarifo'nun temelleri, mutfakta vakit geçirmeyi seven küçük bir grubun tariflerini ve sırlarını dijital bir ortamda paylaşma arzusuyla atıldı. Amacımız, karmaşık ve zorlayıcı yemek kitapları yerine; herkesin kolayca anlayabileceği, adım adım anlatımlı ve evdeki malzemelerle harikalar yaratılabilecek bir platform sunmaktı.
                     </p>
-                    <p className="text-gray-500 text-lg leading-relaxed">
+                    <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
                         Bugün binlerce tarifin yer aldığı bu büyük arşiv, sizlerin katkılarıyla her geçen gün büyümeye ve mutfakları daha da renklendirmeye devam ediyor.
                     </p>
                     <div className="pt-6">
@@ -102,7 +102,7 @@ const About = () => {
                 </div>
                 
                 <div className="flex-1 w-full relative z-10">
-                    <div className="relative rounded-[2.5rem] overflow-hidden border-8 border-gray-50 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <div className="relative rounded-[2.5rem] overflow-hidden border-8 border-gray-50 dark:border-slate-800 shadow-2xl dark:shadow-none transform rotate-3 hover:rotate-0 transition-transform duration-500">
                         <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1000" alt="Mutfakta yemek yapanlar" className="w-full h-full object-cover" />
                     </div>
                 </div>
@@ -110,10 +110,11 @@ const About = () => {
 
             {/* Footer Connect */}
             <section className="text-center py-12">
-                <h2 className="text-3xl font-black text-chefie-text mb-4">Bizimle İletişime Geçin</h2>
-                <p className="text-gray-500 mb-8 max-w-lg mx-auto">Soru, öneri ve işbirlikleri için bize e-posta yoluyla ulaşabilirsiniz.</p>
-                <a href="mailto:tarifo@outlook.com.tr" className="px-10 py-5 bg-gradient-to-r from-chefie-yellow to-amber-500 text-white font-black rounded-2xl text-lg hover:shadow-xl hover:-translate-y-1 transition-all inline-block">
-                    tarifo@outlook.com.tr
+                <h2 className="text-3xl font-black text-chefie-text dark:text-white mb-4">Bizimle İletişime Geçin</h2>
+                <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-lg mx-auto">Soru, öneri ve işbirlikleri için bize e-posta yoluyla ulaşabilirsiniz.</p>
+                <a href="mailto:tarifo@outlook.com.tr" className="px-10 py-5 bg-gradient-to-r from-chefie-yellow to-amber-500 text-white font-black rounded-2xl text-lg hover:shadow-xl hover:-translate-y-1 transition-all inline-flex items-center gap-3">
+                    <Mail className="w-6 h-6" />
+                    Bize E-Posta Gönderin
                 </a>
             </section>
         </div>
