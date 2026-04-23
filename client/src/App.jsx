@@ -21,6 +21,7 @@ import FAQ from './pages/FAQ';
 import Terms from './pages/Terms';
 import Policy from './pages/Policy';
 import PlaceholderPage from './pages/placeholders/PlaceholderPage';
+import About from './pages/About';
 
 // Layouts
 import MainLayout from './components/Layout/MainLayout';
@@ -47,6 +48,7 @@ function App() {
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipes/:id" element={<RecipeDetail />} />
           <Route path="/profile/:id" element={<Profile />} />
+          <Route path="/about" element={<About />} />
           <Route path="/categories" element={<PlaceholderPage />} />
 
           {/* New Menu Routes */}

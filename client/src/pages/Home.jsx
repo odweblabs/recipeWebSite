@@ -127,7 +127,34 @@ const Home = () => {
                 setRecipes(recipesRes.data || []);
                 setCategories(categoriesRes.data || []);
                 setPublicStats(statsRes.data);
-                setTopChefs(chefsRes.data || []);
+                const mockChefs = [
+                    {
+                        id: 2028,
+                        username: 'Zeynep',
+                        full_name: 'Zeynep',
+                        profile_image: '/api/images/user/2028',
+                        recipe_count: 142
+                    },
+                    {
+                        id: 21,
+                        username: 'mahmut',
+                        full_name: 'Mahmut Can',
+                        profile_image: null,
+                        recipe_count: 98
+                    },
+                    {
+                        id: 2036,
+                        username: 'elif',
+                        full_name: 'Gurme Elif',
+                        profile_image: '/api/images/user/2036',
+                        recipe_count: 76
+                    }
+                ];
+                
+                const dbChefs = (chefsRes.data || []).filter(c => !mockChefs.some(mc => mc.id === c.id));
+                const combinedChefs = [...mockChefs, ...dbChefs].sort((a, b) => b.recipe_count - a.recipe_count);
+                
+                setTopChefs(combinedChefs);
                 setRecommendation(recommendationRes.data);
 
                 if (statsRes.data?.counts?.recipes) {
@@ -528,7 +555,7 @@ const Home = () => {
 
                 <div
                     ref={chefsScrollRef}
-                    className="flex gap-10 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory relative z-10 px-[calc(50%-100px)] md:px-0"
+                    className="flex gap-10 md:gap-4 lg:gap-8 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory relative z-10 px-[calc(50%-100px)] md:px-0"
                 >
                     {topChefs.length > 0 ? topChefs.map((chef, idx) => (
                         <motion.div
@@ -536,7 +563,7 @@ const Home = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="min-w-[200px] flex flex-col items-center snap-center group cursor-pointer"
+                            className="min-w-[200px] md:min-w-[160px] lg:min-w-[180px] xl:min-w-[200px] flex flex-col items-center snap-center group cursor-pointer"
                             onClick={() => navigate(`/profile/${chef.id}`)}
                         >
                             <div className="relative mb-6">

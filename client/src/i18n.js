@@ -25,8 +25,8 @@ i18n
                         dashboard: "Yönetici Paneli"
                     },
                     home: {
-                        seo_title: "Tarif, Yemek Tarifi | En Lezzetli ve Pratik Yemek Tarifleri - Tarifo",
-                        seo_description: "Bugün ne pişireceğim derdine son! Yüzlerce lezzetli yemek tarifi, pratik ev yemekleri ve tatlı tarifleri Tarifo'da.",
+                        seo_title: "Tarifo | Nefis Yemek Tarifleri, Yemek Tarifi, Pratik Yemekler",
+                        seo_description: "Tarifo'da en lezzetli yemekler, nefis yemek tarifleri ve pratik tatlı tarifleri sizi bekliyor. Bugün ne pişirsem derdine son verecek en iyi yemek tarifi burada.",
                         hero: {
                             badge: "YENİ NESİL MUTFAK REHBERİ",
                             title_1: "En Güncel",
@@ -385,7 +385,7 @@ i18n
                         go_to_menus: "Menülere Git"
                     },
                     footer: {
-                        description: "En lezzetli yemek tarifleri, mutfak sırları ve daha fazlası. Sofralarınızı şenlendirmek için buradayız.",
+                        description: "En lezzetli yemek tarifleri, mutfak sırları ve daha fazlası. Sofralarınızı şenlendirmek için buradayız. İster pratik atıştırmalıklar, ister özel davetlerinizi taçlandıracak ana yemekler arıyor olun, aradığınız her şey burada. Geleneksel Türk mutfağından dünya lezzetlerine kadar uzanan geniş arşivimizle her damak zevkine hitap ediyoruz.",
                         quick_links: "Hızlı Erişim",
                         about_us: "Hakkımızda",
                         contact: "İletişim",
@@ -1171,7 +1171,7 @@ i18n
                         go_to_menus: "Go to Menus"
                     },
                     footer: {
-                        description: "The most delicious recipes, kitchen secrets and more. We are here to brighten up your tables.",
+                        description: "The most delicious recipes, kitchen secrets and more. We are here to brighten up your tables. Whether you are looking for practical snacks or main courses to crown your special events, everything you are looking for is here. We appeal to every taste with our wide archive ranging from traditional Turkish cuisine to world flavors.",
                         quick_links: "Quick Access",
                         about_us: "About Us",
                         contact: "Contact",
