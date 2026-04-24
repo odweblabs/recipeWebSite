@@ -11,7 +11,8 @@ import { useLocation } from 'react-router-dom';
 const SEO = ({ title, description, canonical }) => {
     const location = useLocation();
     const baseUrl = window.location.origin;
-    const currentCanonical = canonical || `${baseUrl}${location.pathname}`;
+    const cleanPath = location.pathname === '/' ? '/' : location.pathname.replace(/\/$/, '');
+    const currentCanonical = canonical || `${baseUrl}${cleanPath}`;
 
     return (
         <Helmet>

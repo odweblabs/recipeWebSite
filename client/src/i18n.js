@@ -25,8 +25,8 @@ i18n
                         dashboard: "Yönetici Paneli"
                     },
                     home: {
-                        seo_title: "Tarifo | Nefis Yemek Tarifleri, Yemek Tarifi, Pratik Yemekler",
-                        seo_description: "Tarifo'da en lezzetli yemekler, nefis yemek tarifleri ve pratik tatlı tarifleri sizi bekliyor. Bugün ne pişirsem derdine son verecek en iyi yemek tarifi burada.",
+                        seo_title: "Tarifo | Yemek Tarifi, Nefis Yemek Tarifleri, Pratik Tarifler",
+                        seo_description: "Tarifo'da en lezzetli yemekler, nefis yemek tarifleri ve pratik tatlı tarifleri sizi bekliyor. Nefis tarifler arayanların buluşma noktası.",
                         hero: {
                             badge: "YENİ NESİL MUTFAK REHBERİ",
                             title_1: "En Güncel",
@@ -813,7 +813,8 @@ i18n
                         dashboard: "Admin Panel"
                     },
                     home: {
-                        seo_title: "Tarifo | Nefis Yemek Tarifleri, Yemek Tarifi, Pratik Yemekler",
+                        seo_title: "Tarifo | Yemek Tarifi, Nefis Yemek Tarifleri, Pratik Tarifler",
+                        seo_description: "Tarifo'da en lezzetli yemekler, nefis yemek tarifleri ve pratik tatlı tarifleri sizi bekliyor. Nefis tarifler arayanların buluşma noktası.",
                         hero: {
                             badge: "NEXT GEN KITCHEN GUIDE",
                             title_1: "Learn, Cook &",
