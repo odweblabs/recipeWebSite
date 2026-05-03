@@ -1715,6 +1715,7 @@ i18n
             order: ['navigator'], 
             caches: [],
         },
+        lng: 'tr',
         fallbackLng: 'tr',
         interpolation: {
             escapeValue: false
