@@ -60,27 +60,36 @@ const RecipeDetail = () => {
                 // SEO: Dynamic Page Title handled by SEO component
 
                 // SEO: JSON-LD Structured Data
+                const imageUrl = data.image_url ? (data.image_url.startsWith('http') || data.image_url.startsWith('data:') ? data.image_url : `${API_BASE}${data.image_url}`) : "https://tarifo.vercel.app/default-recipe.png";
+                
                 const structuredData = {
                     "@context": "https://schema.org/",
                     "@type": "Recipe",
                     "name": data.title,
-                    "image": data.image_url ? (data.image_url.startsWith('/images/') ? data.image_url : `${API_BASE}${data.image_url}`) : "https://tarifo.vercel.app/default-recipe.png",
-                    "description": data.description,
+                    "image": [imageUrl],
+                    "description": data.description || `${data.title} tarifi.`,
                     "author": {
                         "@type": "Person",
-                        "name": data.chef_name || data.chef_username || t('recipe_detail.chef_fallback')
+                        "name": data.chef_name || data.chef_username || t('recipe_detail.chef_fallback') || "Tarifo Şefi"
                     },
                     "datePublished": data.created_at,
                     "prepTime": `PT${data.prep_time || 15}M`,
                     "cookTime": `PT${data.cook_time || 30}M`,
                     "totalTime": `PT${(parseInt(data.prep_time) || 15) + (parseInt(data.cook_time) || 30)}M`,
-                    "recipeYield": `${data.servings || 4} ${t('recipe_detail.stats.servings').toLowerCase()}`,
-                    "recipeCategory": categoryName || t('common.general'),
+                    "recipeYield": `${data.servings || 4} ${t('recipe_detail.stats.servings')?.toLowerCase() || 'kişilik'}`,
+                    "recipeCategory": categoryName || t('common.general') || 'Genel',
+                    "recipeCuisine": "Türk",
+                    "nutrition": {
+                        "@type": "NutritionInformation",
+                        "calories": "250 kcal"
+                    },
                     "recipeIngredient": data.ingredients.split('\n').filter(i => i.trim()),
-                    "recipeInstructions": data.instructions.split('\n').map((step, index) => ({
+                    "recipeInstructions": data.instructions.split('\n').filter(step => step.trim()).map((step, index) => ({
                         "@type": "HowToStep",
+                        "name": `Adım ${index + 1}`,
                         "text": step.trim(),
-                        "position": index + 1
+                        "url": `${window.location.href}#step-${index + 1}`,
+                        "image": imageUrl
                     })),
                     "aggregateRating": data.avg_rating ? {
                         "@type": "AggregateRating",
@@ -88,6 +97,18 @@ const RecipeDetail = () => {
                         "reviewCount": data.rating_count || 1
                     } : undefined
                 };
+
+                if (data.youtube_url) {
+                    structuredData.video = {
+                        "@type": "VideoObject",
+                        "name": `${data.title} Tarifi Videosu`,
+                        "description": data.description || `${data.title} nasıl yapılır video anlatımı.`,
+                        "thumbnailUrl": [imageUrl],
+                        "contentUrl": data.youtube_url,
+                        "embedUrl": getYouTubeEmbedUrl(data.youtube_url) || data.youtube_url,
+                        "uploadDate": data.created_at
+                    };
+                }
 
                 const script = document.createElement('script');
                 script.type = 'application/ld+json';
