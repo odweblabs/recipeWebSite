@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
  * @param {string} description - Meta description
  * @param {string} canonical - Optional specific canonical URL, otherwise current path is used
  */
-const SEO = ({ title, description, canonical }) => {
+const SEO = ({ title, description, keywords, canonical }) => {
     const location = useLocation();
     const baseUrl = window.location.origin;
     const cleanPath = location.pathname === '/' ? '/' : location.pathname.replace(/\/$/, '');
@@ -18,6 +18,7 @@ const SEO = ({ title, description, canonical }) => {
         <Helmet>
             {title && <title>{title}</title>}
             {description && <meta name="description" content={description} />}
+            {keywords && <meta name="keywords" content={keywords} />}
             <link rel="canonical" href={currentCanonical} />
             
             {/* Open Graph Tags */}

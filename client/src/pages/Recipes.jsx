@@ -86,6 +86,7 @@ const Recipes = () => {
                 <SEO 
                     title={searchQuery ? t('recipes.seo_title_search', { query: searchQuery }) : t('recipes.seo_title_default')} 
                     description={t('recipes.seo_description_default')} 
+                    keywords={searchQuery ? `${searchQuery}, yemek tarifi, tarif` : "yemek tarifleri, nefis yemek tarifleri, pratik yemek tarifleri, kolay tarifler, tarifo"}
                 />
                 <motion.div
                     initial={{ opacity: 0 }}

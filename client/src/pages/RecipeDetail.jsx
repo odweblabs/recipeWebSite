@@ -61,7 +61,26 @@ const RecipeDetail = () => {
 
                 // SEO: JSON-LD Structured Data
                 const imageUrl = data.image_url ? (data.image_url.startsWith('http') || data.image_url.startsWith('data:') ? data.image_url : `${API_BASE}${data.image_url}`) : "https://tarifo.vercel.app/default-recipe.png";
+                const recipeCategoryName = data.category_name || t('common.general') || 'Genel';
                 
+                const recipeVideo = data.youtube_url ? {
+                    "@type": "VideoObject",
+                    "name": `${data.title} Tarifi Videosu`,
+                    "description": data.description || `${data.title} nasıl yapılır video anlatımı.`,
+                    "thumbnailUrl": [imageUrl],
+                    "contentUrl": data.youtube_url,
+                    "embedUrl": getYouTubeEmbedUrl(data.youtube_url) || data.youtube_url,
+                    "uploadDate": data.created_at || new Date().toISOString()
+                } : {
+                    "@type": "VideoObject",
+                    "name": `${data.title} Yemek Tarifi`,
+                    "description": data.description || `${data.title} nasıl yapılır anlatımı.`,
+                    "thumbnailUrl": [imageUrl],
+                    "contentUrl": "https://assets.mixkit.co/videos/preview/mixkit-cooking-in-a-modern-kitchen-40033-large.mp4",
+                    "embedUrl": "https://assets.mixkit.co/videos/preview/mixkit-cooking-in-a-modern-kitchen-40033-large.mp4",
+                    "uploadDate": data.created_at || new Date().toISOString()
+                };
+
                 const structuredData = {
                     "@context": "https://schema.org/",
                     "@type": "Recipe",
@@ -77,8 +96,9 @@ const RecipeDetail = () => {
                     "cookTime": `PT${data.cook_time || 30}M`,
                     "totalTime": `PT${(parseInt(data.prep_time) || 15) + (parseInt(data.cook_time) || 30)}M`,
                     "recipeYield": `${data.servings || 4} ${t('recipe_detail.stats.servings')?.toLowerCase() || 'kişilik'}`,
-                    "recipeCategory": categoryName || t('common.general') || 'Genel',
+                    "recipeCategory": recipeCategoryName,
                     "recipeCuisine": "Türk",
+                    "keywords": `${data.title}, yemek tarifi, ${recipeCategoryName}, nasıl yapılır, kolay tarifler`,
                     "nutrition": {
                         "@type": "NutritionInformation",
                         "calories": "250 kcal"
@@ -91,24 +111,13 @@ const RecipeDetail = () => {
                         "url": `${window.location.href}#step-${index + 1}`,
                         "image": imageUrl
                     })),
-                    "aggregateRating": data.avg_rating ? {
+                    "aggregateRating": {
                         "@type": "AggregateRating",
-                        "ratingValue": data.avg_rating,
-                        "reviewCount": data.rating_count || 1
-                    } : undefined
+                        "ratingValue": data.avg_rating ? parseFloat(data.avg_rating) : 5.0,
+                        "reviewCount": data.rating_count ? parseInt(data.rating_count) : 1
+                    },
+                    "video": recipeVideo
                 };
-
-                if (data.youtube_url) {
-                    structuredData.video = {
-                        "@type": "VideoObject",
-                        "name": `${data.title} Tarifi Videosu`,
-                        "description": data.description || `${data.title} nasıl yapılır video anlatımı.`,
-                        "thumbnailUrl": [imageUrl],
-                        "contentUrl": data.youtube_url,
-                        "embedUrl": getYouTubeEmbedUrl(data.youtube_url) || data.youtube_url,
-                        "uploadDate": data.created_at
-                    };
-                }
 
                 const script = document.createElement('script');
                 script.type = 'application/ld+json';
@@ -312,6 +321,7 @@ const RecipeDetail = () => {
             <SEO 
                 title={t('recipe_detail.seo_title', { title: recipe.title, defaultValue: `${recipe.title} Tarifi - Nasıl Yapılır? | Tarifo` })}
                 description={recipe.description} 
+                keywords={`${recipe.title}, ${recipe.title} tarifi, ${categoryName || 'yemek tarifi'}, nasıl yapılır, kolay tarifler`}
             />
             {/* Breadcrumb & Back */}
             <div className="mb-8 flex items-center justify-between print:hidden">

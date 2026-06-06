@@ -204,7 +204,11 @@ const Home = () => {
                 </div>
             </header>
 
-            <SEO title={t('home.seo_title')} description={t('home.seo_description')} />
+            <SEO 
+                title={t('home.seo_title')} 
+                description={t('home.seo_description')} 
+                keywords="yemek tarifi, yemek tarifleri, nefis yemek tarifleri, pratik tarifler, kolay yemek tarifleri, tarifo, tarif"
+            />
 
             {/* Hero Section */}
             <section className="relative rounded-[3rem] p-10 md:p-16 overflow-hidden bg-chefie-dark min-h-[450px] flex items-center shadow-2xl shadow-gray-200/50 dark:shadow-none">
