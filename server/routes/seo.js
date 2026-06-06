@@ -8,7 +8,16 @@ const generateSitemapXml = (recipes, baseUrl) => {
         { loc: baseUrl, changefreq: 'daily', priority: '1.0' },
         { loc: `${baseUrl}/recipes`, changefreq: 'daily', priority: '0.8' },
         { loc: `${baseUrl}/blog`, changefreq: 'weekly', priority: '0.7' },
-        { loc: `${baseUrl}/categories`, changefreq: 'monthly', priority: '0.6' }
+        { loc: `${baseUrl}/categories`, changefreq: 'monthly', priority: '0.6' },
+        { loc: `${baseUrl}/about`, changefreq: 'monthly', priority: '0.5' },
+        { loc: `${baseUrl}/menus`, changefreq: 'daily', priority: '0.7' },
+        { loc: `${baseUrl}/trend`, changefreq: 'daily', priority: '0.7' },
+        { loc: `${baseUrl}/what-to-cook`, changefreq: 'daily', priority: '0.7' },
+        { loc: `${baseUrl}/calories`, changefreq: 'weekly', priority: '0.6' },
+        { loc: `${baseUrl}/lists`, changefreq: 'weekly', priority: '0.6' },
+        { loc: `${baseUrl}/faq`, changefreq: 'monthly', priority: '0.5' },
+        { loc: `${baseUrl}/terms`, changefreq: 'monthly', priority: '0.3' },
+        { loc: `${baseUrl}/policy`, changefreq: 'monthly', priority: '0.3' }
     ];
 
     recipes.forEach(recipe => {
